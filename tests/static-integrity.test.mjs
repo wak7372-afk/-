@@ -1,0 +1,107 @@
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+
+const root = path.resolve(import.meta.dirname, '..');
+const publicRoot = path.join(root, 'public');
+
+function walk(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const fullPath = path.join(directory, entry.name);
+    return entry.isDirectory() ? walk(fullPath) : [fullPath];
+  });
+}
+
+test('all local JavaScript files pass syntax checking', () => {
+  const failures = [];
+  const scripts = walk(path.join(publicRoot, 'js')).filter(file => file.endsWith('.js'));
+  for (const script of scripts) {
+    const result = spawnSync(process.execPath, ['--check', script], { encoding: 'utf8' });
+    if (result.status !== 0) failures.push(`${path.relative(root, script)}: ${result.stderr.trim()}`);
+  }
+  assert.deepEqual(failures, []);
+});
+
+test('HTML documents do not contain duplicate ids', () => {
+  const failures = [];
+  const pages = walk(publicRoot).filter(file => file.endsWith('.html'));
+  for (const page of pages) {
+    const html = fs.readFileSync(page, 'utf8');
+    const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
+    const duplicates = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+    if (duplicates.length) failures.push(`${path.relative(root, page)}: ${duplicates.join(', ')}`);
+  }
+  assert.deepEqual(failures, []);
+});
+
+test('admin dashboard JavaScript references existing elements', () => {
+  const html = fs.readFileSync(path.join(publicRoot, 'admin/dashboard.html'), 'utf8');
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/admin-dashboard.js'), 'utf8');
+  const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]));
+  const references = [...script.matchAll(/getElementById\('([^']+)'\)/g)].map(match => match[1]);
+  const missing = [...new Set(references.filter(id => !ids.has(id)))];
+  assert.deepEqual(missing, []);
+});
+
+test('classroom workflow JavaScript references existing elements', () => {
+  const pairs = [
+    ['teacher/classroom-detail.html', 'js/pages/teacher-classroom-detail.js'],
+    ['student/classroom.html', 'js/pages/student-classroom.js'],
+    ['teacher/grading.html', 'js/pages/teacher-grading.js'],
+  ];
+  const failures = [];
+
+  for (const [htmlPath, scriptPath] of pairs) {
+    const html = fs.readFileSync(path.join(publicRoot, htmlPath), 'utf8');
+    const script = fs.readFileSync(path.join(publicRoot, scriptPath), 'utf8');
+    const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]));
+    const references = [...script.matchAll(/getElementById\('([^']+)'\)/g)].map(match => match[1]);
+    const missing = [...new Set(references.filter(id => !ids.has(id)))];
+    if (missing.length) failures.push(`${scriptPath}: ${missing.join(', ')}`);
+  }
+
+  assert.deepEqual(failures, []);
+});
+
+test('service worker cache entries point to real public files', () => {
+  const worker = fs.readFileSync(path.join(publicRoot, 'service-worker.js'), 'utf8');
+  const assetBlock = worker.match(/const ASSETS = \[([\s\S]*?)\];/)?.[1] || '';
+  const assets = [...assetBlock.matchAll(/'([^']+)'/g)].map(match => match[1]);
+  const missing = assets
+    .filter(asset => asset !== '/')
+    .filter(asset => !fs.existsSync(path.join(publicRoot, asset.replace(/^\//, ''))));
+  assert.deepEqual(missing, []);
+});
+
+test('required role entry pages exist', () => {
+  const required = [
+    'admin/dashboard.html',
+    'teacher/halaqat.html',
+    'student/dashboard.html',
+    'parent/dashboard.html',
+  ];
+  const missing = required.filter(file => !fs.existsSync(path.join(publicRoot, file)));
+  assert.deepEqual(missing, []);
+});
+
+test('HTML local script, stylesheet, manifest, and module links resolve', () => {
+  const failures = [];
+  const pages = walk(publicRoot).filter(file => file.endsWith('.html'));
+  const assetPattern = /(?:src|href)="([^"]+)"/g;
+
+  for (const page of pages) {
+    const html = fs.readFileSync(page, 'utf8');
+    for (const match of html.matchAll(assetPattern)) {
+      const asset = match[1].split('#')[0].split('?')[0];
+      if (!asset || asset === '#' || asset.startsWith('javascript:') || asset.startsWith('http://') || asset.startsWith('https://')) continue;
+      const resolved = asset.startsWith('/')
+        ? path.join(publicRoot, asset.slice(1))
+        : path.resolve(path.dirname(page), asset);
+      if (!fs.existsSync(resolved)) failures.push(`${path.relative(root, page)} -> ${asset}`);
+    }
+  }
+
+  assert.deepEqual(failures, []);
+});

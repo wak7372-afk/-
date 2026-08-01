@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة ذات خيل | أداء الاختبار</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <a href="javascript:history.back()" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-xs transition">➔ رجوع</a>
+        <div>
+          <h1 id="quiz-title" class="font-amiri text-2xl font-bold tracking-wide text-amber-300">اختبار...</h1>
+        </div>
+      </div>
+      <button id="logout-btn" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-2 rounded-xl font-bold">خروج</button>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8 flex-grow w-full">
+    
+    <!-- Quiz Result View (Hidden initially) -->
+    <div id="quiz-result-container" class="hidden glass-card rounded-2xl p-8 text-center border border-amber-400/40 shadow-xl space-y-4">
+      <div class="w-20 h-20 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto text-3xl font-extrabold shadow-inner">
+        ✓
+      </div>
+      <h2 class="font-amiri text-3xl font-bold text-emerald-950">نتيجة الاختبار الخاص بك</h2>
+      <p class="text-gray-600 text-sm">تم تصحيح الإجابات فزرياً وعرض الدرجة النهائية:</p>
+      <div class="text-5xl font-extrabold text-amber-600 py-4 font-amiri" id="result-score">--</div>
+      <a href="/student/dashboard.html" class="btn-emerald inline-block px-8 py-3 rounded-xl font-bold text-sm">الرجوع للوحة التحكم</a>
+    </div>
+
+    <!-- Quiz Form Container -->
+    <div id="quiz-form-container" class="glass-card rounded-2xl p-8 border border-amber-400/30 shadow-xl space-y-6">
+      <div class="border-b pb-3">
+        <h3 class="font-amiri text-2xl font-bold text-emerald-950">أسئلة الاختبار</h3>
+        <p class="text-xs text-gray-500">اختر إجابة واحدة لكل سؤال ثم انقر على تسليم الاختبار</p>
+      </div>
+
+      <form id="quiz-form" class="space-y-6">
+        <div id="questions-container" class="space-y-6">
+          <!-- Loaded dynamically -->
+        </div>
+
+        <button type="submit" id="submit-quiz-btn" class="w-full btn-emerald py-3.5 rounded-xl font-bold text-base shadow">
+          إرسال الإجابات والتصحيح
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+  <script type="module" src="/js/pages/student-quiz.js"></script>
+</body>
+</html>

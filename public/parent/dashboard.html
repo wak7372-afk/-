@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>منصة ذات خيل | لوحة ولي الأمر</title>
+  <link rel="manifest" href="../manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="bg-emerald-gold-gradient sticky top-0 z-40 px-4 py-4 text-white shadow-lg sm:px-6">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4">
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-amber-300 bg-amber-400 font-amiri text-xl font-bold text-emerald-950">ذ</div>
+        <div class="min-w-0">
+          <h1 class="truncate font-amiri text-xl font-bold text-amber-300 sm:text-2xl">لوحة متابعة ولي الأمر</h1>
+          <p class="truncate text-[11px] text-emerald-100">مرحباً، <span id="parent-name">...</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="refresh-btn" type="button" class="rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-[11px] font-bold transition hover:bg-white/20">تحديث</button>
+        <a href="../account-settings.html" class="rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-[11px] font-bold transition hover:bg-white/20">حسابي</a>
+        <button id="logout-btn" type="button" class="rounded-xl bg-red-600/90 px-4 py-2 text-[11px] font-bold text-white transition hover:bg-red-700" data-i18n="logout">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-7xl space-y-7 px-4 py-7 sm:px-6 lg:py-9">
+    <section class="rounded-3xl border border-emerald-900/10 bg-gradient-to-l from-emerald-950 to-emerald-800 p-6 text-white shadow-lg sm:p-8" aria-labelledby="overview-title">
+      <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+        <div>
+          <p class="text-xs font-bold text-amber-300">متابعة الأسرة</p>
+          <h2 id="overview-title" class="mt-2 font-amiri text-3xl font-bold">ملخص تقدم الأبناء</h2>
+          <p class="mt-2 max-w-2xl text-xs leading-6 text-emerald-100">اطّلع على الحضور، الورد القرآني، الواجبات والاختبارات من مكان واحد.</p>
+        </div>
+        <p id="last-updated" class="text-[10px] text-emerald-200"></p>
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-4"><p class="text-[10px] text-emerald-100">الأبناء المرتبطون</p><p id="stat-children" class="mt-1 text-2xl font-extrabold text-amber-300">0</p></div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-4"><p class="text-[10px] text-emerald-100">نسبة الحضور</p><p id="stat-attendance" class="mt-1 text-2xl font-extrabold text-amber-300">—</p></div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-4"><p class="text-[10px] text-emerald-100">متوسط الاختبارات</p><p id="stat-quizzes" class="mt-1 text-2xl font-extrabold text-amber-300">—</p></div>
+        <div class="rounded-2xl border border-white/10 bg-white/10 p-4"><p class="text-[10px] text-emerald-100">أوراد مكتملة</p><p id="stat-completed" class="mt-1 text-2xl font-extrabold text-amber-300">0</p></div>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-amber-300/50 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="link-child-title">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-2xl">
+          <h2 id="link-child-title" class="font-amiri text-2xl font-bold text-emerald-950">ربط حساب ابن أو ابنة</h2>
+          <p class="mt-1 text-xs leading-6 text-slate-500">أدخل رمز الربط الخاص الظاهر في لوحة الطالب. لا تعرض المنصة أسماء الطلاب الآخرين حفاظاً على الخصوصية.</p>
+        </div>
+        <form id="link-child-form" class="flex w-full flex-col gap-3 sm:flex-row lg:max-w-xl" novalidate>
+          <label for="child-link-code" class="sr-only">رمز ربط الطالب</label>
+          <input id="child-link-code" type="text" inputmode="text" autocomplete="off" maxlength="16" required pattern="[A-Za-z0-9-]{6,16}" placeholder="مثال: A19F20BC45" class="figma-input min-w-0 flex-1 rounded-xl px-4 py-3 text-center text-sm font-bold uppercase tracking-widest" dir="ltr">
+          <button id="link-child-btn" type="submit" class="btn-figma-gold whitespace-nowrap rounded-xl px-7 py-3 text-xs font-bold">ربط الحساب</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="space-y-4" aria-labelledby="children-title">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div>
+          <h2 id="children-title" class="font-amiri text-2xl font-bold text-emerald-950">تفاصيل الأبناء</h2>
+          <p class="mt-1 text-[11px] text-slate-500">آخر البيانات المسجلة لكل طالب مرتبط.</p>
+        </div>
+      </div>
+      <div id="children-dashboard-grid" class="grid grid-cols-1 gap-5 lg:grid-cols-2" aria-live="polite">
+        <div class="col-span-full rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">جاري تحميل بيانات الأبناء...</div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../js/pages/parent-dashboard.js"></script>
+</body>
+</html>

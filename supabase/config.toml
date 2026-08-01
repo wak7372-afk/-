@@ -1,0 +1,5 @@
+[functions.login-with-username]
+verify_jwt = false
+
+[functions.account-recovery]
+verify_jwt = false

@@ -1,0 +1,13 @@
+{
+  "name": "zat-khail",
+  "version": "1.0.0",
+  "description": "نظام ذات خيل الذكي لإدارة مركز تعليم القرآن الكريم وعلومه",
+  "scripts": {
+    "build": "node -e \"console.log('Static site ready in public/')\"",
+    "dev": "npx -y serve public -p 3000",
+    "test": "node --test",
+    "test:security": "node --test tests/security.test.mjs",
+    "test:static": "node --test tests/static-integrity.test.mjs"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="منصة ذات خيل لإدارة حلقات القرآن الكريم والفصول الشرعية ومتابعة الطلاب.">
+  <meta name="theme-color" content="#061421">
+  <title>منصة ذات خيل | تسجيل الدخول</title>
+  <script>
+    if (['localhost', '127.0.0.1'].includes(window.location.hostname)
+      && new URLSearchParams(window.location.search).get('preview') === '1') {
+      window.location.replace('./admin/dashboard.html?preview=1');
+    }
+  </script>
+  <link rel="manifest" href="./manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+    <section class="figma-green-pattern-bg relative flex min-h-[34vh] flex-col justify-between overflow-hidden p-7 text-white md:p-12 lg:min-h-screen lg:p-16" aria-labelledby="brand-title">
+      <div class="relative z-10 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-amber-300 bg-white/10 font-amiri text-2xl text-amber-300">ذ</div>
+          <div>
+            <p class="font-amiri text-xl font-bold text-amber-300">منصة ذات خيل</p>
+            <p class="text-[11px] text-emerald-100">للقرآن الكريم والعلوم الشرعية</p>
+          </div>
+        </div>
+        <button id="language-toggle" type="button" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20" aria-label="تغيير اللغة">EN</button>
+      </div>
+
+      <div class="relative z-10 my-10 max-w-xl lg:my-auto">
+        <p class="mb-3 text-xs font-bold tracking-[0.28em] text-amber-300">تعليم متقن، متابعة مستمرة</p>
+        <h1 id="brand-title" class="font-amiri text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl" data-i18n="app_name">منصة ذات خيل</h1>
+        <p class="mt-5 max-w-lg text-sm leading-8 text-emerald-50 md:text-base" data-i18n="app_tagline">نظام ذكي متكامل لإدارة مركز تعليم القرآن الكريم وعلومه</p>
+
+        <div class="mt-8 grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
+          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+            <p class="text-sm font-bold text-amber-200">حلقات التحفيظ</p>
+            <p class="mt-1 text-[11px] leading-5 text-emerald-100">متابعة الحفظ والمراجعة اليومية</p>
+          </div>
+          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+            <p class="text-sm font-bold text-amber-200">الفصول الشرعية</p>
+            <p class="mt-1 text-[11px] leading-5 text-emerald-100">دروس واختبارات وواجبات</p>
+          </div>
+          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+            <p class="text-sm font-bold text-amber-200">متابعة الأسرة</p>
+            <p class="mt-1 text-[11px] leading-5 text-emerald-100">حضور ودرجات وإنجاز الأبناء</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="relative z-10 border-t border-amber-300/20 pt-4 text-[11px] text-emerald-100/80">© 1448 هـ — مركز ذات الخيل لتعليم القرآن الكريم وعلومه</p>
+    </section>
+
+    <section class="flex items-center justify-center p-5 sm:p-8 lg:p-12" aria-labelledby="login-title">
+      <div class="w-full max-w-md">
+        <div class="mb-6 text-center lg:text-right">
+          <p class="text-xs font-bold text-amber-700">بوابة المركز الإلكترونية</p>
+          <h2 id="login-title" class="mt-2 font-amiri text-4xl font-bold text-emerald-950" data-i18n="login">تسجيل الدخول</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-500">أدخل بيانات حسابك للوصول إلى لوحتك حسب الصلاحية المعتمدة.</p>
+        </div>
+
+        <div class="auth-panel rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-950/5 sm:p-8">
+          <div id="auth-status" class="mb-5 hidden rounded-xl border px-4 py-3 text-xs leading-6" role="status" aria-live="polite"></div>
+
+          <form id="login-form" class="space-y-5" novalidate>
+            <div>
+              <label for="login-username" class="mb-2 block text-xs font-bold text-slate-700">اسم المستخدم</label>
+              <input id="login-username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="ahmed.ali" dir="ltr">
+            </div>
+
+            <div>
+              <div class="mb-2 flex items-center justify-between">
+                <label for="login-password" class="text-xs font-bold text-slate-700" data-i18n="password">كلمة المرور</label>
+                <a href="./reset-password.html" class="text-[11px] font-bold text-emerald-700 hover:text-emerald-900">نسيت كلمة المرور؟</a>
+              </div>
+              <div class="relative">
+                <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" required class="figma-input w-full rounded-xl px-4 py-3 pl-16 text-sm" placeholder="••••••••" dir="ltr">
+                <button id="toggle-password" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-100">إظهار</button>
+              </div>
+            </div>
+
+            <button id="login-submit" type="submit" class="btn-figma-gold w-full rounded-xl py-3.5 text-sm" data-i18n="login">تسجيل الدخول</button>
+          </form>
+
+          <p class="mt-6 border-t border-slate-100 pt-5 text-center text-xs leading-6 text-slate-500">الحسابات تُنشأ وتُسلَّم من إدارة المركز فقط.</p>
+        </div>
+
+        <p class="mt-5 text-center text-[11px] leading-5 text-slate-400">الدخول مخصص للحسابات المفعلة من إدارة المركز. تُحفظ بياناتك وفق صلاحيات النظام.</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/login.js"></script>
+</body>
+</html>

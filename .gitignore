@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+
+supabase/functions/.env
+supabase/functions/.env.*
+!supabase/functions/.env.example
+
+node_modules/
+.agent/
+.opencode/
+scratch/
+.vercel/
+.DS_Store
+Thumbs.db

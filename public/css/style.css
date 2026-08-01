@@ -1,0 +1,531 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --font-amiri: 'Amiri', serif;
+  --font-cairo: 'Cairo', sans-serif;
+  --color-ink: #05090d;
+  --color-navy-950: #061421;
+  --color-navy-900: #081d30;
+  --color-navy-800: #0b2b47;
+  --color-forest-900: #073325;
+  --color-forest-800: #084a33;
+  --color-emerald: #0b6a47;
+  --color-gold: #d4ad43;
+  --color-gold-light: #efd58d;
+  --color-gold-dark: #a87c19;
+  --color-paper: #f4f6f5;
+  --color-surface: #ffffff;
+  --color-border: #d8dde1;
+  --color-muted: #647080;
+  --color-figma-green: var(--color-forest-800);
+  --color-figma-green-dark: var(--color-forest-900);
+  --color-figma-gold: var(--color-gold);
+  --color-figma-gold-btn: var(--color-gold);
+  --color-figma-gold-btn-hover: #e0bd5a;
+  --shadow-soft: 0 12px 30px rgba(5, 20, 33, 0.08);
+  --shadow-raised: 0 16px 42px rgba(5, 20, 33, 0.14);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  letter-spacing: 0 !important;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--color-paper) !important;
+  background-image:
+    linear-gradient(rgba(8, 29, 48, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 29, 48, 0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: #263343;
+  font-family: var(--font-cairo);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-gold-light);
+  color: var(--color-navy-950);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(212, 173, 67, 0.5);
+  outline-offset: 3px;
+}
+
+.font-amiri {
+  font-family: var(--font-amiri);
+}
+
+/* A restrained geometric lattice shared by entry screens and dark feature bands. */
+.figma-green-pattern-bg,
+.bg-emerald-gold-gradient,
+.glass-dark,
+.bg-gradient-to-l.from-emerald-950 {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-navy-950) !important;
+  background-image:
+    linear-gradient(45deg, transparent 46%, rgba(212, 173, 67, 0.09) 47%, rgba(212, 173, 67, 0.09) 49%, transparent 50%),
+    linear-gradient(-45deg, transparent 46%, rgba(212, 173, 67, 0.09) 47%, rgba(212, 173, 67, 0.09) 49%, transparent 50%),
+    linear-gradient(90deg, transparent 46%, rgba(11, 106, 71, 0.15) 47%, rgba(11, 106, 71, 0.15) 49%, transparent 50%) !important;
+  background-position: 0 0, 0 0, 24px 0 !important;
+  background-size: 48px 48px !important;
+}
+
+.figma-green-pattern-bg::after,
+.glass-dark::after,
+.bg-gradient-to-l.from-emerald-950::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, rgba(5, 9, 13, 0.12), rgba(7, 51, 37, 0.42));
+  content: '';
+  pointer-events: none;
+}
+
+/* Application chrome */
+header.bg-emerald-gold-gradient {
+  border-bottom: 1px solid rgba(212, 173, 67, 0.65);
+  box-shadow: 0 9px 30px rgba(5, 9, 13, 0.24) !important;
+}
+
+header.bg-emerald-gold-gradient::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), var(--color-emerald), var(--color-gold), transparent);
+  content: '';
+}
+
+header.bg-emerald-gold-gradient > div {
+  position: relative;
+  z-index: 1;
+}
+
+header.bg-emerald-gold-gradient .rounded-full.bg-amber-400 {
+  border-color: var(--color-gold-light) !important;
+  border-radius: 8px !important;
+  background: var(--color-gold) !important;
+  box-shadow: 0 0 0 4px rgba(212, 173, 67, 0.11), 0 7px 18px rgba(0, 0, 0, 0.24) !important;
+  color: var(--color-navy-950) !important;
+}
+
+header.bg-emerald-gold-gradient h1,
+header.bg-emerald-gold-gradient .text-amber-300 {
+  color: var(--color-gold-light) !important;
+}
+
+header.bg-emerald-gold-gradient p,
+header.bg-emerald-gold-gradient .text-emerald-100 {
+  color: #d9e8e2 !important;
+}
+
+header.bg-emerald-gold-gradient a,
+header.bg-emerald-gold-gradient button {
+  border-radius: 7px !important;
+}
+
+header.bg-emerald-gold-gradient a:not([class*='bg-red']),
+header.bg-emerald-gold-gradient button:not([class*='bg-red']) {
+  border-color: rgba(239, 213, 141, 0.34) !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  color: #f7f3e8 !important;
+}
+
+header.bg-emerald-gold-gradient a:not([class*='bg-red']):hover,
+header.bg-emerald-gold-gradient button:not([class*='bg-red']):hover {
+  border-color: rgba(239, 213, 141, 0.7) !important;
+  background-color: rgba(212, 173, 67, 0.13) !important;
+}
+
+main {
+  position: relative;
+}
+
+main h2,
+main h3,
+main h4 {
+  color: var(--color-navy-950) !important;
+}
+
+main h2.font-amiri,
+main h3.font-amiri {
+  line-height: 1.5;
+}
+
+main h2.border-b,
+main h3.border-b,
+.glass-card > h2.border-b,
+.glass-card > h3.border-b {
+  border-color: rgba(212, 173, 67, 0.5) !important;
+}
+
+/* Surfaces */
+.glass-card {
+  border: 1px solid rgba(8, 29, 48, 0.12) !important;
+  border-top: 2px solid rgba(212, 173, 67, 0.75) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: var(--shadow-soft) !important;
+  backdrop-filter: blur(12px);
+}
+
+.glass-card:hover {
+  border-color: rgba(11, 74, 51, 0.3) !important;
+  box-shadow: var(--shadow-raised) !important;
+}
+
+main section.bg-white,
+main > section.bg-white {
+  border-color: rgba(8, 29, 48, 0.14) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.auth-panel,
+.settings-panel,
+[data-child-id] {
+  border: 1px solid rgba(8, 29, 48, 0.14) !important;
+  border-top: 2px solid rgba(212, 173, 67, 0.75) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: var(--shadow-raised) !important;
+}
+
+.glass-dark,
+.bg-gradient-to-l.from-emerald-950 {
+  border: 1px solid rgba(212, 173, 67, 0.55) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 18px 42px rgba(5, 9, 13, 0.22) !important;
+}
+
+.glass-dark h2,
+.glass-dark h3,
+.bg-gradient-to-l.from-emerald-950 h2,
+.bg-gradient-to-l.from-emerald-950 h3 {
+  color: var(--color-gold-light) !important;
+}
+
+.glass-dark p,
+.bg-gradient-to-l.from-emerald-950 p {
+  color: #dbe9e4 !important;
+}
+
+/* Buttons */
+.btn-emerald,
+.btn-gold,
+.btn-figma-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 7px !important;
+  font-weight: 800;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.btn-emerald {
+  border-color: rgba(239, 213, 141, 0.28) !important;
+  background: var(--color-forest-800) !important;
+  box-shadow: 0 7px 16px rgba(7, 51, 37, 0.17) !important;
+  color: #ffffff !important;
+}
+
+.btn-emerald:hover {
+  border-color: rgba(239, 213, 141, 0.62) !important;
+  background: var(--color-forest-900) !important;
+  box-shadow: 0 10px 22px rgba(7, 51, 37, 0.23) !important;
+  transform: translateY(-1px);
+}
+
+.btn-gold,
+.btn-figma-gold {
+  border-color: var(--color-gold-dark) !important;
+  background: var(--color-gold) !important;
+  box-shadow: 0 7px 16px rgba(168, 124, 25, 0.2) !important;
+  color: var(--color-navy-950) !important;
+}
+
+.btn-gold:hover,
+.btn-figma-gold:hover {
+  background: var(--color-gold-light) !important;
+  box-shadow: 0 10px 22px rgba(168, 124, 25, 0.28) !important;
+  transform: translateY(-1px);
+}
+
+.btn-emerald:active,
+.btn-gold:active,
+.btn-figma-gold:active {
+  box-shadow: none !important;
+  transform: translateY(0);
+}
+
+/* Forms */
+.figma-input,
+.figma-select,
+input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+select,
+textarea {
+  min-height: 44px;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 7px !important;
+  background: #fbfcfc !important;
+  color: var(--color-navy-950) !important;
+  box-shadow: inset 0 1px 2px rgba(5, 20, 33, 0.035);
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.figma-input:hover,
+.figma-select:hover,
+input:not([type='checkbox']):not([type='radio']):not([type='hidden']):hover,
+select:hover,
+textarea:hover {
+  border-color: #a9b6be !important;
+}
+
+.figma-input:focus,
+.figma-select:focus,
+input:not([type='checkbox']):not([type='radio']):not([type='hidden']):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-gold-dark) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(212, 173, 67, 0.2), inset 3px 0 0 var(--color-forest-800) !important;
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8c96a1 !important;
+  opacity: 1;
+}
+
+label {
+  color: #344152 !important;
+}
+
+/* Data-heavy views */
+.overflow-x-auto {
+  scrollbar-color: var(--color-gold) #e7ebed;
+  scrollbar-width: thin;
+}
+
+table {
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+table thead tr {
+  border-color: var(--color-navy-800) !important;
+  background: var(--color-navy-900) !important;
+  color: #f7f3e8 !important;
+}
+
+table thead th {
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+  color: #f7f3e8 !important;
+  white-space: nowrap;
+}
+
+table tbody tr {
+  border-color: #e4e8ea !important;
+  transition: background-color 140ms ease;
+}
+
+table tbody tr:nth-child(even) {
+  background: #f7f9f8;
+}
+
+table tbody tr:hover {
+  background: rgba(212, 173, 67, 0.09);
+}
+
+table tbody td {
+  color: #334052;
+}
+
+/* Dashboard metrics */
+main > .grid:first-of-type > .glass-card {
+  position: relative;
+  overflow: hidden;
+  padding-inline-start: 24px !important;
+}
+
+main > .grid:first-of-type > .glass-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-gold);
+  content: '';
+}
+
+main > .grid:first-of-type > .glass-card:nth-child(2)::before {
+  background: var(--color-emerald);
+}
+
+main > .grid:first-of-type > .glass-card:nth-child(3)::before {
+  background: var(--color-navy-800);
+}
+
+main > .grid:first-of-type > .glass-card:nth-child(4)::before {
+  background: var(--color-gold-dark);
+}
+
+main > .grid:first-of-type > .glass-card h3 {
+  color: var(--color-navy-950) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-figma-gold,
+main .text-amber-300,
+main .text-amber-600,
+main .text-amber-700 {
+  color: var(--color-gold-dark) !important;
+}
+
+main .text-emerald-950,
+main .text-emerald-900,
+main .text-emerald-800 {
+  color: var(--color-navy-950) !important;
+}
+
+main .bg-amber-50,
+main .bg-amber-100 {
+  background-color: #fbf5e4 !important;
+}
+
+main code {
+  border-color: rgba(212, 173, 67, 0.48) !important;
+  border-radius: 7px !important;
+  background: #fbf5e4 !important;
+  color: var(--color-navy-950) !important;
+}
+
+/* Status and toast treatments */
+[role='alert'],
+.toast,
+#toast-container > div {
+  border-radius: 7px !important;
+  box-shadow: var(--shadow-raised) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 767px) {
+  header.bg-emerald-gold-gradient {
+    position: sticky;
+    padding: 12px 14px !important;
+  }
+
+  header.bg-emerald-gold-gradient > div {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  header.bg-emerald-gold-gradient h1 {
+    max-width: 68vw;
+    font-size: 1.2rem !important;
+    line-height: 1.45;
+    white-space: normal;
+  }
+
+  header.bg-emerald-gold-gradient > div > .flex:last-child {
+    width: 100%;
+    gap: 6px !important;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  header.bg-emerald-gold-gradient a,
+  header.bg-emerald-gold-gradient button {
+    min-height: 38px;
+    flex: 0 0 auto;
+    padding-inline: 12px !important;
+  }
+
+  main {
+    padding: 22px 14px 34px !important;
+  }
+
+  .glass-card,
+  main section.bg-white,
+  .glass-dark,
+  .bg-gradient-to-l.from-emerald-950 {
+    padding: 20px !important;
+  }
+
+  .glass-card h2,
+  .glass-card h3,
+  main section h2,
+  main section h3 {
+    font-size: 1.28rem !important;
+  }
+
+  table {
+    min-width: 640px;
+  }
+}
+
+@media (max-width: 420px) {
+  header.bg-emerald-gold-gradient h1 {
+    max-width: 62vw;
+    font-size: 1.08rem !important;
+  }
+
+  header.bg-emerald-gold-gradient .rounded-full.bg-amber-400 {
+    width: 38px !important;
+    height: 38px !important;
+  }
+}

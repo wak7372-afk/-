@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة ذات خيل | الفصل الافتراضي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <a href="/student/dashboard.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-xs transition">➔ الرجوع للوحة التحكم</a>
+        <div>
+          <h1 id="classroom-title" class="font-amiri text-2xl font-bold tracking-wide text-amber-300">...</h1>
+          <p class="text-xs text-emerald-100 font-light">المعلم: <span id="teacher-name">...</span></p>
+        </div>
+      </div>
+
+      <button id="logout-btn" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold">خروج</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Lessons List (2 Cols) -->
+      <div class="lg:col-span-2 space-y-6">
+        <h3 class="font-amiri text-2xl font-bold text-emerald-950 border-b pb-2">دروس الفصل والجلسات المباشرة</h3>
+        <div id="lessons-list" class="space-y-4">
+          <!-- Loaded dynamically -->
+        </div>
+
+        <section class="pt-4">
+          <div class="flex items-center justify-between gap-3 border-b pb-2 mb-4">
+            <h3 class="font-amiri text-2xl font-bold text-emerald-950">الواجبات المطلوبة</h3>
+            <span id="assignments-count" class="text-xs font-bold text-amber-800">0 واجب</span>
+          </div>
+          <div id="assignments-list" class="space-y-4"></div>
+        </section>
+      </div>
+
+      <!-- Quizzes List (1 Col) -->
+      <div class="space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-amber-400/30 shadow-md">
+          <h3 class="font-amiri text-xl font-bold text-emerald-950 mb-4 border-b pb-2">الاختبارات والتطبيقات</h3>
+          <div id="quizzes-list">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script type="module" src="/js/pages/student-classroom.js"></script>
+</body>
+</html>

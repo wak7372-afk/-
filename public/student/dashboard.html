@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة ذات خيل | لوحة الطالب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center font-bold text-emerald-950 text-xl border-2 border-amber-300 shadow">
+          ذ
+        </div>
+        <div>
+          <h1 class="font-amiri text-2xl font-bold tracking-wide text-amber-300">لوحة الطالب اليومية</h1>
+          <p class="text-xs text-emerald-100 font-light">أهلاً بك، <span id="student-name">...</span></p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <a href="./chat.html" class="bg-emerald-800 hover:bg-emerald-700 text-amber-300 text-xs px-3 py-2 rounded-xl transition font-bold border border-amber-400/40">الدردشة مع المعلم</a>
+        <a href="../account-settings.html" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-2 rounded-xl transition font-bold border border-white/30">حسابي</a>
+        <button id="logout-btn" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-2 rounded-xl font-bold shadow">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+    
+    <!-- Quranic Verse Header Banner -->
+    <div class="glass-dark text-white rounded-lg p-8 shadow-xl text-center relative overflow-hidden">
+      <h2 class="font-amiri text-3xl font-bold text-amber-300 mb-2">﴿ وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا ﴾</h2>
+      <p class="text-emerald-100 text-sm">تابع وردك اليومي واحفظ كتاب الله بتوفيق منه عز وجل</p>
+    </div>
+
+    <section class="rounded-2xl border border-amber-300/50 bg-white p-5 shadow-sm" aria-labelledby="family-link-title">
+      <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h3 id="family-link-title" class="font-amiri text-xl font-bold text-emerald-950">ربط حساب ولي الأمر</h3>
+          <p class="mt-1 text-[11px] leading-5 text-slate-500">شارك هذا الرمز مع ولي أمرك فقط. يمكنه إدخاله في لوحة المتابعة لربط الحساب بأمان.</p>
+        </div>
+        <div class="flex w-full items-center gap-2 sm:w-auto">
+          <code id="family-link-code" class="min-w-0 flex-1 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-center text-sm font-extrabold tracking-[0.22em] text-emerald-950 sm:min-w-44" dir="ltr">جاري التحميل</code>
+          <button id="copy-family-code" type="button" class="rounded-xl border border-emerald-700 px-4 py-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-50">نسخ</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Right: Today's Wird List (2 Cols) -->
+      <div class="lg:col-span-2 space-y-6">
+        <h3 class="font-amiri text-2xl font-bold text-emerald-950 border-b pb-2">ورد اليوم المطلـوب</h3>
+        <div id="today-wird-list" class="space-y-4">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Left: Joined Virtual Classrooms (1 Col) -->
+      <div class="space-y-6">
+        <h3 class="font-amiri text-2xl font-bold text-emerald-950 border-b pb-2">الفصول الافتراضية</h3>
+        <div id="joined-classrooms-list" class="space-y-4">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script type="module" src="../js/pages/student-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>منصة ذات خيل | إعدادات الحساب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <main class="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-8">
+    <section class="settings-panel w-full rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-950/5 sm:p-8">
+      <p class="text-xs font-bold text-amber-700">الحساب المحلي</p>
+      <h1 class="mt-2 font-amiri text-3xl font-bold text-emerald-950">إعدادات الحساب</h1>
+      <p id="account-summary" class="mt-2 text-xs leading-6 text-slate-500"></p>
+      <div id="account-status" class="mt-5 hidden rounded-xl border px-4 py-3 text-xs leading-6" role="status" aria-live="polite"></div>
+
+      <form id="password-form" class="mt-6 space-y-4" novalidate>
+        <div>
+          <label for="new-password" class="mb-2 block text-xs font-bold text-slate-700">كلمة المرور الجديدة</label>
+          <input id="new-password" type="password" autocomplete="new-password" minlength="8" required class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="8 أحرف على الأقل" dir="ltr">
+        </div>
+        <div>
+          <label for="confirm-password" class="mb-2 block text-xs font-bold text-slate-700">تأكيد كلمة المرور</label>
+          <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="أعد كتابة كلمة المرور" dir="ltr">
+        </div>
+        <button id="save-password-btn" type="submit" class="btn-figma-gold w-full rounded-xl py-3 text-sm">حفظ كلمة المرور</button>
+      </form>
+
+      <section class="mt-8 border-t border-slate-100 pt-6">
+        <h2 class="font-amiri text-2xl font-bold text-emerald-950">ربط حساب Google</h2>
+        <p id="google-status" class="mt-2 text-xs leading-6 text-slate-500">يمكنك ربط حساب Google لاستخدامه في استعادة كلمة المرور. سيطلب Google التحقق من الحساب داخل نافذته الآمنة.</p>
+        <button id="link-google-btn" type="button" class="mt-4 w-full rounded-xl border border-emerald-700 px-4 py-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-50">ربط حساب Google</button>
+      </section>
+
+      <button id="back-btn" type="button" class="mt-6 w-full text-xs font-bold text-slate-500 hover:text-emerald-800">العودة إلى اللوحة</button>
+    </section>
+  </main>
+  <script type="module" src="./js/pages/account-settings.js"></script>
+</body>
+</html>
