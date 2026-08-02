@@ -49,7 +49,13 @@ export function isLocalPreviewMode() {
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   if (!isLocalHost) return false;
 
-  const requested = new URLSearchParams(window.location.search).get('preview') === '1';
+  const previewParam = new URLSearchParams(window.location.search).get('preview');
+  if (previewParam === '0') {
+    sessionStorage.removeItem(PREVIEW_SESSION_KEY);
+    return false;
+  }
+
+  const requested = previewParam === '1';
   if (requested) sessionStorage.setItem(PREVIEW_SESSION_KEY, '1');
   return requested || sessionStorage.getItem(PREVIEW_SESSION_KEY) === '1';
 }
@@ -63,6 +69,40 @@ function getBasePath() {
 function redirectTo(targetPath) {
   const cleanTarget = targetPath.replace(/^\.\//, '').replace(/^\//, '');
   window.location.replace(getBasePath() + cleanTarget);
+}
+
+export function exitPreviewMode() {
+  sessionStorage.removeItem(PREVIEW_SESSION_KEY);
+  redirectTo('./index.html?preview=0');
+}
+
+function installPreviewBanner(role) {
+  if (document.getElementById('preview-mode-banner')) return;
+
+  const banner = document.createElement('aside');
+  banner.id = 'preview-mode-banner';
+  banner.className = 'preview-mode-banner';
+  banner.setAttribute('role', 'status');
+
+  const copy = document.createElement('div');
+  copy.className = 'preview-mode-banner-copy';
+
+  const title = document.createElement('strong');
+  title.textContent = 'وضع المعاينة';
+
+  const description = document.createElement('span');
+  description.textContent = `أنت تشاهد لوحة ${role === 'admin' ? 'المدير' : role === 'teacher' ? 'المعلم' : role === 'student' ? 'الطالب' : 'ولي الأمر'} ببيانات تجريبية، ولن تُرسل التغييرات إلى قاعدة البيانات.`;
+
+  const exitButton = document.createElement('button');
+  exitButton.type = 'button';
+  exitButton.className = 'preview-mode-exit';
+  exitButton.textContent = 'الدخول للعمل الفعلي';
+  exitButton.addEventListener('click', exitPreviewMode);
+
+  copy.append(title, description);
+  banner.append(copy, exitButton);
+  document.body.prepend(banner);
+  document.body.classList.add('preview-mode-active');
 }
 
 function getAuthErrorMessage(error) {
@@ -93,6 +133,8 @@ export async function loginUser(username, password) {
   const cleanUsername = String(username || '').trim().toLowerCase();
   if (!cleanUsername) throw new Error('يرجى إدخال اسم المستخدم.');
   if (!password) throw new Error('يرجى إدخال كلمة المرور.');
+
+  sessionStorage.removeItem(PREVIEW_SESSION_KEY);
 
   const { data, error } = await supabase.functions.invoke('login-with-username', {
     body: { username: cleanUsername, password },
@@ -137,59 +179,63 @@ export function redirectUserByRole(role) {
 }
 
 export async function routeExistingSession() {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (!error && session?.user) {
+    const profile = await getUserProfile(session.user.id);
+    if (!profile) return false;
+    routeAuthenticatedProfile(profile);
+    return true;
+  }
+
   if (isLocalPreviewMode()) {
     redirectUserByRole('admin');
     return true;
   }
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error || !session?.user) return false;
-  const profile = await getUserProfile(session.user.id);
-  if (!profile) return false;
-  routeAuthenticatedProfile(profile);
-  return true;
+  return false;
 }
 
 export async function logoutUser() {
-  if (isLocalPreviewMode()) {
-    redirectUserByRole('admin');
-    return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    await supabase.auth.signOut();
   }
-  await supabase.auth.signOut();
-  redirectTo('./index.html');
+  sessionStorage.removeItem(PREVIEW_SESSION_KEY);
+  redirectTo('./index.html?preview=0');
 }
 
 export async function requireAuth(allowedRoles = []) {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (!error && session?.user) {
+    try {
+      const profile = await getUserProfile(session.user.id);
+      if (!profile) {
+        await supabase.auth.signOut();
+        redirectTo('./index.html?error=profile-missing');
+        return null;
+      }
+      if (!profile.is_active) {
+        redirectTo('./pending-approval.html');
+        return null;
+      }
+      if (allowedRoles.length > 0 && !allowedRoles.includes(profile.role)) {
+        redirectUserByRole(profile.role);
+        return null;
+      }
+      return { session, profile, preview: false };
+    } catch (profileError) {
+      console.error(profileError);
+      redirectTo('./index.html?error=profile-load');
+      return null;
+    }
+  }
+
   if (isLocalPreviewMode()) {
     const previewRole = allowedRoles[0] || 'admin';
     const profile = PREVIEW_PROFILES[previewRole] || PREVIEW_PROFILES.admin;
+    installPreviewBanner(profile.role);
     return { session: null, profile, preview: true };
   }
 
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error || !session?.user) {
-    redirectTo('./index.html?reason=login-required');
-    return null;
-  }
-
-  try {
-    const profile = await getUserProfile(session.user.id);
-    if (!profile) {
-      await supabase.auth.signOut();
-      redirectTo('./index.html?error=profile-missing');
-      return null;
-    }
-    if (!profile.is_active) {
-      redirectTo('./pending-approval.html');
-      return null;
-    }
-    if (allowedRoles.length > 0 && !allowedRoles.includes(profile.role)) {
-      redirectUserByRole(profile.role);
-      return null;
-    }
-    return { session, profile };
-  } catch (profileError) {
-    console.error(profileError);
-    redirectTo('./index.html?error=profile-load');
-    return null;
-  }
+  redirectTo('./index.html?reason=login-required');
+  return null;
 }

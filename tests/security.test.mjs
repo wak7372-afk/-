@@ -61,10 +61,38 @@ test('local preview bypass is restricted to loopback hostnames', () => {
   const login = fs.readFileSync(path.join(root, 'public/index.html'), 'utf8');
   assert.match(auth, /localhost/);
   assert.match(auth, /127\.0\.0\.1/);
-  assert.match(auth, /get\('preview'\) === '1'/);
+  assert.match(auth, /previewParam === '1'/);
+  assert.match(auth, /previewParam === '0'[\s\S]*removeItem\(PREVIEW_SESSION_KEY\)/);
   assert.match(login, /get\('preview'\) === '1'/);
   assert.match(login, /admin\/dashboard\.html\?preview=1/);
   assert.doesNotMatch(auth, /isLocalPreviewMode\(\)\s*{\s*return\s+true/);
+
+  const requireAuthSource = auth.slice(auth.indexOf('export async function requireAuth'));
+  assert.ok(
+    requireAuthSource.indexOf('supabase.auth.getSession()') < requireAuthSource.indexOf('if (isLocalPreviewMode())'),
+    'a real Supabase session must take precedence over preview mode',
+  );
+  assert.match(auth, /loginUser[\s\S]*removeItem\(PREVIEW_SESSION_KEY\)[\s\S]*login-with-username/);
+  assert.match(auth, /installPreviewBanner/);
+});
+
+test('preview classroom and halaqa creation stays outside Supabase', () => {
+  const halaqat = fs.readFileSync(path.join(root, 'public/js/pages/teacher-halaqat.js'), 'utf8');
+  const classrooms = fs.readFileSync(path.join(root, 'public/js/pages/teacher-classrooms.js'), 'utf8');
+  const previewStore = fs.readFileSync(path.join(root, 'public/js/lib/preview-store.js'), 'utf8');
+
+  for (const page of [halaqat, classrooms]) {
+    assert.match(page, /authData\.preview === true/);
+    assert.match(page, /if \(isPreview\)[\s\S]*addPreviewRecord/);
+    const createHandler = page.slice(page.indexOf('async function handleCreate'));
+    assert.ok(
+      createHandler.indexOf('if (isPreview)') < createHandler.indexOf('.insert('),
+      'preview branch must be evaluated before Supabase writes',
+    );
+  }
+
+  assert.match(previewStore, /sessionStorage/);
+  assert.doesNotMatch(previewStore, /supabase/);
 });
 
 test('password recovery is server-side and rate-limited', () => {
