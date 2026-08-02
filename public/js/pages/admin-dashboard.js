@@ -51,9 +51,12 @@ async function initializeAdminDashboard() {
 }
 
 function setupProfile() {
-  const fullName = state.profile.full_name || 'مدير النظام';
   const username = state.profile.username || PRIMARY_ADMIN_USERNAME;
-  document.getElementById('admin-name').textContent = fullName;
+  const rawFullName = String(state.profile.full_name || '').trim();
+  const fullName = rawFullName && !/^\?+$/.test(rawFullName.replace(/\s/g, ''))
+    ? rawFullName
+    : 'مدير المركز';
+  document.getElementById('admin-name').textContent = username;
   document.getElementById('sidebar-admin-name').textContent = fullName;
   document.getElementById('sidebar-admin-username').textContent = `@${username}`;
 }

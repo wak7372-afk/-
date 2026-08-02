@@ -58,6 +58,7 @@ async function loadHalaqaInfo() {
 
   currentHalaqa = data;
   document.getElementById('halaqa-title').textContent = data.name;
+  document.getElementById('open-task-center').href = `/teacher/tasks.html?halaqa=${encodeURIComponent(halaqaId)}`;
 }
 
 async function loadStudents() {
@@ -151,50 +152,41 @@ async function handleCreateAssignment(e) {
   e.preventDefault();
   const assignTarget = document.getElementById('assign-target').value;
   const type = document.getElementById('assignment-type').value;
+  const title = document.getElementById('assignment-title').value.trim();
   const content = document.getElementById('assignment-content').value.trim();
   const date = document.getElementById('assignment-date').value;
+  const studentId = assignTarget === 'individual' ? document.getElementById('target-student-id').value : '';
+
+  if (!halaqaStudents.length) {
+    showToast('أضف طالباً إلى الحلقة قبل نشر المهمة.', 'error');
+    return;
+  }
+  if (!title || !content || !date || (assignTarget === 'individual' && !studentId)) {
+    showToast('أكمل بيانات المهمة والطالب المستهدف.', 'error');
+    return;
+  }
 
   try {
-    let assignmentPayload = {
-      teacher_id: currentTeacher.id,
-      type,
-      content,
-      assignment_date: date,
-    };
+    const { data, error } = await supabase.rpc('publish_task_batch', {
+      p_halaqa_id: halaqaId,
+      p_assignments: [{
+        student_id: studentId,
+        type,
+        title,
+        content,
+        date,
+        period: 'flexible',
+        estimated_minutes: 30,
+        priority: 2,
+      }],
+      p_source: 'manual',
+      p_file_name: null,
+      p_metadata: { entry: 'halaqa_detail', target: assignTarget },
+    });
+    if (error) throw error;
 
-    if (assignTarget === 'collective') {
-      assignmentPayload.halaqa_id = halaqaId;
-    } else {
-      assignmentPayload.student_id = document.getElementById('target-student-id').value;
-    }
-
-    const { data: assignment, error: assignErr } = await supabase
-      .from('daily_assignments')
-      .insert(assignmentPayload)
-      .select()
-      .single();
-
-    if (assignErr) throw assignErr;
-
-    // Create submissions records
-    if (assignTarget === 'collective') {
-      const submissions = halaqaStudents.map(s => ({
-        assignment_id: assignment.id,
-        student_id: s.id,
-        status: 'pending'
-      }));
-      if (submissions.length > 0) {
-        await supabase.from('assignment_submissions').insert(submissions);
-      }
-    } else {
-      await supabase.from('assignment_submissions').insert({
-        assignment_id: assignment.id,
-        student_id: assignmentPayload.student_id,
-        status: 'pending'
-      });
-    }
-
-    showToast('تم تعيين المقرر بنجاح', 'success');
+    showToast(`نُشرت المهمة إلى ${data?.recipients_count || 1} طالب.`, 'success');
+    document.getElementById('assignment-title').value = '';
     document.getElementById('assignment-content').value = '';
     await loadRecentAssignments();
   } catch (err) {

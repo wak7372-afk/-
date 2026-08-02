@@ -3,97 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة ذات خيل | المساعد الذكي Gemini</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <meta name="theme-color" content="#061421">
+  <title>منصة ذات خيل | استيراد جدول المهام</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tasks.css">
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
-
-  <!-- Navbar -->
-  <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <a href="/teacher/halaqat.html" class="bg-white/10 hover:bg-white/20 p-2 rounded-xl text-xs transition">➔ الرجوع للحلقات</a>
-        <div>
-          <h1 class="font-amiri text-2xl font-bold tracking-wide text-amber-300">المساعد الذكي لإدارة وتحليل الجداول (Gemini AI)</h1>
-          <p class="text-xs text-emerald-100 font-light">رفع جداول Excel/CSV وتوزيع المقررات تلقائياً على الطلاب</p>
-        </div>
+<body class="task-app-shell">
+  <header class="task-topbar islamic-pattern-band">
+    <div class="task-topbar-inner">
+      <div class="task-brand-block">
+        <a class="task-icon-link" href="/teacher/tasks.html" aria-label="العودة إلى مركز المهام" title="العودة إلى مركز المهام"><i data-lucide="arrow-right"></i></a>
+        <div class="task-brand-mark" aria-hidden="true">ذ</div>
+        <div><p class="task-eyebrow">أتمتة الجداول</p><h1 class="font-amiri">استيراد مهام Excel</h1></div>
       </div>
-      <button id="logout-btn" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-xl font-bold">خروج</button>
+      <nav class="task-top-actions" aria-label="أدوات المعلم">
+        <a href="/teacher/tasks.html" class="task-button task-button-gold"><i data-lucide="list-plus"></i><span>مهمة يدوية</span></a>
+        <button id="logout-btn" type="button" class="task-icon-link" aria-label="تسجيل الخروج" title="تسجيل الخروج"><i data-lucide="log-out"></i></button>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
-
-    <!-- Upload Card -->
-    <div class="glass-card rounded-2xl p-8 border border-amber-400/30 shadow-xl space-y-6">
-      <div class="text-center max-w-xl mx-auto space-y-2">
-        <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-2xl font-extrabold shadow-inner border border-amber-300">
-          ✦
-        </div>
-        <h2 class="font-amiri text-3xl font-bold text-emerald-950">رفع جدول التحفيظ الخاطف (Excel / CSV)</h2>
-        <p class="text-xs text-gray-600">اقرأ جدول الحفظ بأي تنسيق تقريباً ليقوم المساعد الذكي بفهمه وتوليد التوصيات وتوزيع المقررات على طلابك.</p>
+  <main class="task-workspace">
+    <section class="task-intro import-intro" aria-labelledby="import-title">
+      <div>
+        <p class="task-kicker">من الملف إلى لوحة الطالب</p>
+        <h2 id="import-title" class="font-amiri">راجع كل صف، ثم انشر الدفعة بثقة</h2>
+        <p>يدعم أسماء الطلاب وأسماء المستخدمين، والتاريخ والفترة ووقت التسليم.</p>
       </div>
+      <div class="task-intro-stat"><span>صفوف جاهزة</span><strong id="ready-count">0</strong></div>
+    </section>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto pt-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">اختر الحلقة المستهدفة</label>
-          <select id="halaqa-select" required class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm outline-none bg-white">
-            <!-- Loaded dynamically -->
-          </select>
+    <div class="import-layout">
+      <section class="task-editor import-uploader" aria-labelledby="upload-heading">
+        <div class="task-section-heading">
+          <div><p class="task-kicker">المرحلة الأولى</p><h2 id="upload-heading" class="font-amiri">اختيار الجدول</h2></div>
+          <span id="analysis-badge" class="task-draft-badge"><i data-lucide="shield-check"></i> لم يبدأ التحليل</span>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">اختر ملف Excel أو CSV</label>
-          <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv"
-            class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs outline-none bg-white file:mr-4 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800">
+        <div class="task-form-grid task-form-grid-2">
+          <label class="task-field">
+            <span>الحلقة المستهدفة</span>
+            <select id="halaqa-select" required><option value="">جاري تحميل الحلقات...</option></select>
+          </label>
+          <div class="task-field">
+            <span>القالب القياسي</span>
+            <button id="download-template" type="button" class="task-button task-button-dark import-template-button"><i data-lucide="file-down"></i><span>تنزيل قالب Excel</span></button>
+          </div>
         </div>
-      </div>
+
+        <label class="import-dropzone" for="excel-file-input">
+          <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv">
+          <span class="import-drop-icon"><i data-lucide="file-spreadsheet"></i></span>
+          <strong>اختر ملف Excel أو CSV</strong>
+          <small id="selected-file-name">الحد الأقصى 5 ميجابايت</small>
+          <span class="task-button task-button-gold"><i data-lucide="folder-open"></i> اختيار ملف</span>
+        </label>
+      </section>
+
+      <aside class="task-preview-panel import-guide" aria-labelledby="columns-heading">
+        <div class="task-section-heading task-section-heading-compact">
+          <div><p class="task-kicker">أعمدة مفهومة</p><h2 id="columns-heading" class="font-amiri">بنية الجدول</h2></div>
+          <i data-lucide="table-properties"></i>
+        </div>
+        <dl class="import-columns">
+          <div><dt>اسم المستخدم</dt><dd>أو اسم الطالب</dd></div>
+          <div><dt>المحتوى</dt><dd>المقرر المطلوب</dd></div>
+          <div><dt>التاريخ</dt><dd>YYYY-MM-DD</dd></div>
+          <div><dt>النوع</dt><dd>حفظ أو مراجعة</dd></div>
+          <div><dt>الفترة</dt><dd>صباحي أو مسائي</dd></div>
+          <div><dt>وقت التسليم</dt><dd>18:00</dd></div>
+        </dl>
+        <div class="import-safety-note"><i data-lucide="badge-check"></i><p>لن يُحفظ أي صف قبل المراجعة والاعتماد النهائي.</p></div>
+      </aside>
     </div>
 
-    <!-- Results Section (Hidden Initially) -->
-    <div id="results-section" class="hidden space-y-6 animate-fade-in">
-      
-      <!-- Summary Box -->
-      <div class="glass-card rounded-2xl p-6 border border-amber-400/30 shadow-md">
-        <h3 class="font-amiri text-2xl font-bold text-emerald-950 mb-2">الملخص والتوصيات الذكية (Gemini Insights)</h3>
-        <p id="ai-summary-text" class="text-sm text-gray-700 leading-relaxed mb-4 font-semibold"></p>
-        <ul id="ai-recommendations-list" class="space-y-1 font-semibold">
-          <!-- Loaded dynamically -->
-        </ul>
+    <section id="results-section" class="import-results" hidden aria-labelledby="results-heading">
+      <div class="import-summary-bar">
+        <div>
+          <span id="analysis-mode-label" class="import-mode">تحليل منظم</span>
+          <h2 id="results-heading" class="font-amiri">معاينة دفعة المهام</h2>
+          <p id="ai-summary-text"></p>
+        </div>
+        <button id="approve-assignments-btn" type="button" class="task-button task-button-gold" disabled><i data-lucide="send"></i><span>نشر الدفعة</span></button>
       </div>
 
-      <!-- Proposed Assignments Table -->
-      <div class="glass-card rounded-2xl p-6 border border-amber-400/30 shadow-md">
-        <div class="flex items-center justify-between border-b pb-3 mb-4">
-          <h3 class="font-amiri text-2xl font-bold text-emerald-950">جدول المقررات المقترحة للتوزيع</h3>
-          <button id="approve-assignments-btn" class="btn-gold px-6 py-2.5 rounded-xl text-xs font-bold shadow">
-            ✓ اعتماد وحفظ المقررات في النظام
-          </button>
-        </div>
+      <div id="analysis-issues" class="import-issues" hidden></div>
+      <div id="ai-recommendations-list" class="import-recommendations"></div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-right border-collapse">
-            <thead>
-              <tr class="bg-emerald-900/5 text-emerald-900 text-xs font-bold border-b">
-                <th class="py-3 px-4">اسم الطالب</th>
-                <th class="py-3 px-4">نوع المقرر</th>
-                <th class="py-3 px-4">المحتوى المستهدف</th>
-                <th class="py-3 px-4">تاريخ التعيين</th>
-              </tr>
-            </thead>
-            <tbody id="proposed-assignments-body" class="text-sm">
-              <!-- Loaded dynamically -->
-            </tbody>
-          </table>
-        </div>
+      <div class="import-table-wrap">
+        <table class="import-table">
+          <thead><tr><th>الطالب</th><th>النوع</th><th>العنوان والمحتوى</th><th>التاريخ</th><th>الفترة</th><th>التسليم</th><th>المدة</th></tr></thead>
+          <tbody id="proposed-assignments-body"></tbody>
+        </table>
       </div>
-
-    </div>
-
+    </section>
   </main>
 
-  <script type="module" src="/js/pages/teacher-ai-assistant.js"></script>
+  <script type="module" src="/js/pages/teacher-ai-assistant.js?v=3"></script>
 </body>
 </html>

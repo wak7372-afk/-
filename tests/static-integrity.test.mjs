@@ -50,6 +50,10 @@ test('classroom workflow JavaScript references existing elements', () => {
     ['teacher/classroom-detail.html', 'js/pages/teacher-classroom-detail.js'],
     ['student/classroom.html', 'js/pages/student-classroom.js'],
     ['teacher/grading.html', 'js/pages/teacher-grading.js'],
+    ['teacher/tasks.html', 'js/pages/teacher-tasks.js'],
+    ['teacher/ai-assistant.html', 'js/pages/teacher-ai-assistant.js'],
+    ['teacher/halaqa-detail.html', 'js/pages/teacher-halaqa-detail.js'],
+    ['student/dashboard.html', 'js/pages/student-dashboard.js'],
   ];
   const failures = [];
 
@@ -79,6 +83,8 @@ test('required role entry pages exist', () => {
   const required = [
     'admin/dashboard.html',
     'teacher/halaqat.html',
+    'teacher/tasks.html',
+    'teacher/ai-assistant.html',
     'student/dashboard.html',
     'parent/dashboard.html',
   ];

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>منصة ذات خيل | مركز المهام</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/tasks.css">
+</head>
+<body class="task-app-shell">
+  <header class="task-topbar islamic-pattern-band">
+    <div class="task-topbar-inner">
+      <div class="task-brand-block">
+        <a class="task-icon-link" href="/teacher/halaqat.html" aria-label="العودة إلى الحلقات" title="العودة إلى الحلقات">
+          <i data-lucide="arrow-right"></i>
+        </a>
+        <div class="task-brand-mark" aria-hidden="true">ذ</div>
+        <div>
+          <p class="task-eyebrow">العملية التعليمية</p>
+          <h1 class="font-amiri">مركز مهام الطلاب</h1>
+        </div>
+      </div>
+      <nav class="task-top-actions" aria-label="أدوات المعلم">
+        <a href="/teacher/ai-assistant.html" class="task-button task-button-gold">
+          <i data-lucide="file-spreadsheet"></i><span>استيراد Excel</span>
+        </a>
+        <a href="/teacher/halaqat.html" class="task-button task-button-quiet">
+          <i data-lucide="users"></i><span>الحلقات</span>
+        </a>
+        <button id="logout-btn" type="button" class="task-icon-link" aria-label="تسجيل الخروج" title="تسجيل الخروج">
+          <i data-lucide="log-out"></i>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="task-workspace">
+    <section class="task-intro" aria-labelledby="tasks-heading">
+      <div>
+        <p class="task-kicker">تخطيط يومي منضبط</p>
+        <h2 id="tasks-heading" class="font-amiri">أنشئ المهمة مرة، ودع الجدول يوصلها في وقتها</h2>
+        <p>وزّع مهام الحفظ والمراجعة على طالب أو حلقة كاملة، وراجع كل موعد قبل النشر.</p>
+      </div>
+      <div class="task-intro-stat">
+        <span>مهام منشورة</span>
+        <strong id="published-count">0</strong>
+      </div>
+    </section>
+
+    <div class="task-layout">
+      <section class="task-editor" aria-labelledby="editor-heading">
+        <div class="task-section-heading">
+          <div>
+            <p class="task-kicker">مهمة جديدة</p>
+            <h2 id="editor-heading" class="font-amiri">تفاصيل الإسناد</h2>
+          </div>
+          <span class="task-draft-badge"><i data-lucide="shield-check"></i> تُراجع قبل النشر</span>
+        </div>
+
+        <form id="task-form" class="task-form">
+          <div class="task-form-grid task-form-grid-2">
+            <label class="task-field">
+              <span>الحلقة</span>
+              <select id="task-halaqa" required></select>
+            </label>
+            <label class="task-field">
+              <span>المستهدف</span>
+              <select id="task-target">
+                <option value="collective">كل طلاب الحلقة</option>
+                <option value="individual">طالب محدد</option>
+              </select>
+            </label>
+          </div>
+
+          <label id="task-student-field" class="task-field" hidden>
+            <span>الطالب</span>
+            <select id="task-student"></select>
+          </label>
+
+          <div class="task-form-grid task-form-grid-2">
+            <label class="task-field">
+              <span>نوع المهمة</span>
+              <select id="task-type">
+                <option value="hifz">حفظ جديد</option>
+                <option value="murajaa">مراجعة</option>
+              </select>
+            </label>
+            <label class="task-field">
+              <span>عنوان واضح</span>
+              <input id="task-title" type="text" maxlength="160" required placeholder="مثال: حفظ سورة النبأ">
+            </label>
+          </div>
+
+          <label class="task-field">
+            <span>المحتوى والتوجيهات</span>
+            <textarea id="task-content" rows="4" maxlength="2000" required placeholder="الآيات أو الصفحات المطلوبة، وملاحظات الأداء والتجويد"></textarea>
+          </label>
+
+          <div class="task-form-grid task-form-grid-3">
+            <label class="task-field">
+              <span>التاريخ</span>
+              <input id="task-date" type="date" required>
+            </label>
+            <label class="task-field">
+              <span>الفترة</span>
+              <select id="task-period">
+                <option value="morning">صباحي</option>
+                <option value="evening">مسائي</option>
+                <option value="flexible">مرن</option>
+              </select>
+            </label>
+            <label class="task-field">
+              <span>المدة المتوقعة</span>
+              <select id="task-duration">
+                <option value="15">15 دقيقة</option>
+                <option value="30" selected>30 دقيقة</option>
+                <option value="45">45 دقيقة</option>
+                <option value="60">60 دقيقة</option>
+                <option value="90">90 دقيقة</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="task-form-grid task-form-grid-3">
+            <label class="task-field">
+              <span>وقت الظهور</span>
+              <input id="task-start-time" type="time" value="06:00">
+            </label>
+            <label class="task-field">
+              <span>موعد التسليم</span>
+              <input id="task-due-time" type="time" value="18:00">
+            </label>
+            <label class="task-field">
+              <span>الأولوية</span>
+              <select id="task-priority">
+                <option value="1">عادية</option>
+                <option value="2" selected>مهمة</option>
+                <option value="3">عاجلة</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset class="task-repeat-box">
+            <legend>التكرار</legend>
+            <div class="task-repeat-toolbar">
+              <label class="task-check-label"><input id="task-repeat" type="checkbox"> تكرار أسبوعي</label>
+              <label id="repeat-until-field" class="task-field task-inline-field" hidden>
+                <span>حتى تاريخ</span><input id="repeat-until" type="date">
+              </label>
+            </div>
+            <div id="repeat-days" class="task-weekdays" hidden>
+              <label><input type="checkbox" value="6"><span>السبت</span></label>
+              <label><input type="checkbox" value="0"><span>الأحد</span></label>
+              <label><input type="checkbox" value="1"><span>الاثنين</span></label>
+              <label><input type="checkbox" value="2"><span>الثلاثاء</span></label>
+              <label><input type="checkbox" value="3"><span>الأربعاء</span></label>
+              <label><input type="checkbox" value="4"><span>الخميس</span></label>
+              <label><input type="checkbox" value="5"><span>الجمعة</span></label>
+            </div>
+          </fieldset>
+
+          <div class="task-form-actions">
+            <button id="preview-task" type="button" class="task-button task-button-dark">
+              <i data-lucide="scan-eye"></i><span>معاينة الجدول</span>
+            </button>
+            <button id="publish-task" type="submit" class="task-button task-button-gold" disabled>
+              <i data-lucide="send"></i><span>نشر المهام</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="task-side-column">
+        <section class="task-preview-panel" aria-labelledby="preview-heading">
+          <div class="task-section-heading task-section-heading-compact">
+            <div><p class="task-kicker">قبل الاعتماد</p><h2 id="preview-heading" class="font-amiri">المعاينة</h2></div>
+            <span id="preview-count" class="task-count-badge">0</span>
+          </div>
+          <div id="task-preview-list" class="task-preview-list">
+            <div class="task-empty-state"><i data-lucide="calendar-clock"></i><p>أدخل التفاصيل ثم اضغط معاينة الجدول.</p></div>
+          </div>
+        </section>
+
+        <section class="task-recent-panel" aria-labelledby="recent-heading">
+          <div class="task-section-heading task-section-heading-compact">
+            <div><p class="task-kicker">آخر النشاط</p><h2 id="recent-heading" class="font-amiri">المهام الأخيرة</h2></div>
+          </div>
+          <div id="recent-task-list" class="task-recent-list"></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="/js/pages/teacher-tasks.js"></script>
+</body>
+</html>

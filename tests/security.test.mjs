@@ -142,3 +142,22 @@ test('classroom assignments enforce enrolled submissions and private files', () 
   assert.match(studentPage, /createSignedUrl/);
   assert.match(gradingPage, /createSignedUrl/);
 });
+
+test('task publishing is atomic and student feeds stay scoped to the caller', () => {
+  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0010_unified_student_tasks.sql'), 'utf8');
+  const teacherTasks = fs.readFileSync(path.join(root, 'public/js/pages/teacher-tasks.js'), 'utf8');
+  const excelImport = fs.readFileSync(path.join(root, 'public/js/pages/teacher-ai-assistant.js'), 'utf8');
+  const studentDashboard = fs.readFileSync(path.join(root, 'public/js/pages/student-dashboard.js'), 'utf8');
+
+  assert.match(migration, /create or replace function public\.publish_task_batch/);
+  assert.match(migration, /security definer/);
+  assert.match(migration, /caller_role not in \('teacher', 'admin'\)/);
+  assert.match(migration, /target_student_id.*halaqa_students/is);
+  assert.match(migration, /insert into public\.assignment_submissions/);
+  assert.match(migration, /s\.student_id = auth\.uid\(\)/);
+  assert.match(migration, /join public\.classroom_students.*auth\.uid\(\)/is);
+  assert.match(teacherTasks, /rpc\('publish_task_batch'/);
+  assert.match(excelImport, /rpc\('publish_task_batch'/);
+  assert.doesNotMatch(excelImport, /from\('daily_assignments'\)\.insert/);
+  assert.match(studentDashboard, /rpc\('get_student_task_feed'/);
+});

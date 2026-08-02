@@ -1,12 +1,17 @@
-const CACHE_NAME = 'zat-khail-v2';
+const CACHE_NAME = 'zat-khail-v3';
 const ASSETS = [
   '/',
   '/index.html',
   '/register.html',
   '/pending-approval.html',
   '/admin/dashboard.html',
+  '/teacher/tasks.html',
+  '/teacher/ai-assistant.html',
+  '/student/dashboard.html',
   '/css/style.css',
   '/css/admin.css',
+  '/css/tasks.css',
+  '/css/student-dashboard.css',
   '/locales/ar.json',
   '/locales/en.json'
 ];

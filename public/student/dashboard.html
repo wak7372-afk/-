@@ -3,77 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة ذات خيل | لوحة الطالب</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#071827">
+  <title>منصة ذات خيل | يوم الطالب</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="manifest" href="../manifest.json">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/student-dashboard.css?v=3">
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="student-shell">
+  <header class="student-topbar">
+    <div class="student-topbar-pattern" aria-hidden="true"></div>
+    <div class="student-topbar-inner">
+      <a class="student-brand" href="./dashboard.html" aria-label="الرئيسية">
+        <span class="student-brand-mark">ذ</span>
+        <span>
+          <strong>ذات خيل</strong>
+          <small>مركز التعليم القرآني</small>
+        </span>
+      </a>
 
-  <!-- Navbar -->
-  <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <div class="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center font-bold text-emerald-950 text-xl border-2 border-amber-300 shadow">
-          ذ
-        </div>
-        <div>
-          <h1 class="font-amiri text-2xl font-bold tracking-wide text-amber-300">لوحة الطالب اليومية</h1>
-          <p class="text-xs text-emerald-100 font-light">أهلاً بك، <span id="student-name">...</span></p>
-        </div>
+      <div class="student-welcome">
+        <span>يوم مبارك</span>
+        <h1>أهلاً، <strong id="student-name">...</strong></h1>
       </div>
 
-      <div class="flex items-center space-x-3 space-x-reverse">
-        <a href="./chat.html" class="bg-emerald-800 hover:bg-emerald-700 text-amber-300 text-xs px-3 py-2 rounded-xl transition font-bold border border-amber-400/40">الدردشة مع المعلم</a>
-        <a href="../account-settings.html" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-2 rounded-xl transition font-bold border border-white/30">حسابي</a>
-        <button id="logout-btn" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-2 rounded-xl font-bold shadow">خروج</button>
-      </div>
+      <nav class="student-actions" aria-label="إجراءات الحساب">
+        <button id="notifications-toggle" type="button" class="icon-command has-badge" title="الإشعارات" aria-label="الإشعارات" aria-expanded="false">
+          <i data-lucide="bell"></i><span id="notification-count" hidden>0</span>
+        </button>
+        <a href="./chat.html" class="icon-command" title="الرسائل" aria-label="الرسائل">
+          <i data-lucide="messages-square"></i>
+        </a>
+        <a href="../account-settings.html" class="icon-command" title="إعدادات الحساب" aria-label="إعدادات الحساب">
+          <i data-lucide="user-round-cog"></i>
+        </a>
+        <button id="logout-btn" type="button" class="icon-command danger" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+          <i data-lucide="log-out"></i>
+        </button>
+      </nav>
     </div>
+    <section id="notification-popover" class="notification-popover" hidden aria-label="آخر الإشعارات">
+      <div class="notification-heading"><strong>الإشعارات</strong><button id="read-all-notifications" type="button">تعليم الكل كمقروء</button></div>
+      <div id="notification-list" class="notification-list"></div>
+    </section>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
-    
-    <!-- Quranic Verse Header Banner -->
-    <div class="glass-dark text-white rounded-lg p-8 shadow-xl text-center relative overflow-hidden">
-      <h2 class="font-amiri text-3xl font-bold text-amber-300 mb-2">﴿ وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا ﴾</h2>
-      <p class="text-emerald-100 text-sm">تابع وردك اليومي واحفظ كتاب الله بتوفيق منه عز وجل</p>
-    </div>
-
-    <section class="rounded-2xl border border-amber-300/50 bg-white p-5 shadow-sm" aria-labelledby="family-link-title">
-      <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h3 id="family-link-title" class="font-amiri text-xl font-bold text-emerald-950">ربط حساب ولي الأمر</h3>
-          <p class="mt-1 text-[11px] leading-5 text-slate-500">شارك هذا الرمز مع ولي أمرك فقط. يمكنه إدخاله في لوحة المتابعة لربط الحساب بأمان.</p>
+  <main class="student-main">
+    <section class="day-command" aria-labelledby="day-command-title">
+      <div class="day-command-copy">
+        <span class="section-kicker">المسار اليومي</span>
+        <h2 id="day-command-title">خطوتك التالية واضحة</h2>
+        <p id="daily-message">ابدأ بما تيسر، واستمر بثبات.</p>
+      </div>
+      <div class="day-command-progress" aria-label="نسبة إنجاز اليوم">
+        <div class="progress-ring" id="progress-ring" style="--progress: 0">
+          <span id="hero-progress">0%</span>
         </div>
-        <div class="flex w-full items-center gap-2 sm:w-auto">
-          <code id="family-link-code" class="min-w-0 flex-1 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-center text-sm font-extrabold tracking-[0.22em] text-emerald-950 sm:min-w-44" dir="ltr">جاري التحميل</code>
-          <button id="copy-family-code" type="button" class="rounded-xl border border-emerald-700 px-4 py-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-50">نسخ</button>
+        <div>
+          <strong id="hero-done-count">0 من 0</strong>
+          <span>مهام مكتملة</span>
         </div>
       </div>
     </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
-      <!-- Right: Today's Wird List (2 Cols) -->
-      <div class="lg:col-span-2 space-y-6">
-        <h3 class="font-amiri text-2xl font-bold text-emerald-950 border-b pb-2">ورد اليوم المطلـوب</h3>
-        <div id="today-wird-list" class="space-y-4">
-          <!-- Loaded dynamically -->
+    <section class="week-panel" aria-label="أيام الأسبوع">
+      <div class="week-heading">
+        <button id="previous-week" type="button" class="week-arrow" title="الأسبوع السابق" aria-label="الأسبوع السابق"><i data-lucide="chevron-right"></i></button>
+        <div>
+          <strong id="week-title">هذا الأسبوع</strong>
+          <span id="week-range"></span>
         </div>
+        <button id="next-week" type="button" class="week-arrow" title="الأسبوع التالي" aria-label="الأسبوع التالي"><i data-lucide="chevron-left"></i></button>
       </div>
+      <div id="week-days" class="week-days"></div>
+    </section>
 
-      <!-- Left: Joined Virtual Classrooms (1 Col) -->
-      <div class="space-y-6">
-        <h3 class="font-amiri text-2xl font-bold text-emerald-950 border-b pb-2">الفصول الافتراضية</h3>
-        <div id="joined-classrooms-list" class="space-y-4">
-          <!-- Loaded dynamically -->
+    <section class="student-metrics" aria-label="ملخص التقدم">
+      <article class="student-metric is-green">
+        <span class="metric-icon"><i data-lucide="circle-check-big"></i></span>
+        <div><strong id="metric-progress">0%</strong><span>إنجاز اليوم</span></div>
+      </article>
+      <article class="student-metric is-gold">
+        <span class="metric-icon"><i data-lucide="sparkles"></i></span>
+        <div><strong id="metric-points">0</strong><span>نقاط الأسبوع</span></div>
+      </article>
+      <article class="student-metric is-blue">
+        <span class="metric-icon"><i data-lucide="timer"></i></span>
+        <div><strong id="metric-minutes">0 د</strong><span>وقت متبقٍ</span></div>
+      </article>
+      <article class="student-metric is-red">
+        <span class="metric-icon"><i data-lucide="triangle-alert"></i></span>
+        <div><strong id="metric-overdue">0</strong><span>تحتاج انتباهك</span></div>
+      </article>
+    </section>
+
+    <div class="student-workspace">
+      <section class="student-task-section" aria-labelledby="tasks-heading">
+        <div class="task-section-heading">
+          <div>
+            <span class="section-kicker" id="selected-day-label">مهام اليوم</span>
+            <h2 id="tasks-heading">المهام المطلوبة</h2>
+          </div>
+          <div class="period-tabs" role="tablist" aria-label="فترة المهام">
+            <button type="button" data-period="all" class="active" role="tab" aria-selected="true">الكل <span id="all-count">0</span></button>
+            <button type="button" data-period="morning" role="tab" aria-selected="false">صباحي <span id="morning-count">0</span></button>
+            <button type="button" data-period="evening" role="tab" aria-selected="false">مسائي <span id="evening-count">0</span></button>
+          </div>
         </div>
-      </div>
+        <div id="student-task-list" class="student-task-list" aria-live="polite">
+          <div class="student-loading"><span></span><p>جاري ترتيب مهامك...</p></div>
+        </div>
+      </section>
 
+      <aside class="student-side">
+        <section class="side-section" aria-labelledby="classrooms-title">
+          <div class="side-heading">
+            <div><span class="section-kicker">التعلّم المباشر</span><h2 id="classrooms-title">فصولي</h2></div>
+            <i data-lucide="school"></i>
+          </div>
+          <div id="joined-classrooms-list" class="student-classrooms"></div>
+        </section>
+
+        <details class="side-section family-section">
+          <summary>
+            <span class="summary-icon"><i data-lucide="shield-check"></i></span>
+            <span><strong>ربط ولي الأمر</strong><small>رمز مشاركة آمن</small></span>
+            <i data-lucide="chevron-down" class="summary-arrow"></i>
+          </summary>
+          <div class="family-code-row">
+            <code id="family-link-code" dir="ltr">جاري التحميل</code>
+            <button id="copy-family-code" type="button" title="نسخ الرمز" aria-label="نسخ الرمز"><i data-lucide="copy"></i></button>
+          </div>
+        </details>
+      </aside>
     </div>
-
   </main>
 
-  <script type="module" src="../js/pages/student-dashboard.js"></script>
+  <nav class="student-mobile-nav" aria-label="التنقل الرئيسي">
+    <a href="./dashboard.html" class="active"><i data-lucide="layout-dashboard"></i><span>الرئيسية</span></a>
+    <button id="mobile-week" type="button"><i data-lucide="calendar-days"></i><span>الأسبوع</span></button>
+    <a href="./chat.html"><i data-lucide="messages-square"></i><span>الرسائل</span></a>
+    <a href="../account-settings.html"><i data-lucide="circle-user-round"></i><span>حسابي</span></a>
+  </nav>
+
+  <script type="module" src="../js/pages/student-dashboard.js?v=3"></script>
 </body>
 </html>

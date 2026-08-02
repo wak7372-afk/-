@@ -1,195 +1,267 @@
 import { supabase } from '../lib/supabase-client.js';
-import { isLocalPreviewMode, requireAuth, logoutUser } from '../lib/auth.js';
-import { initI18n } from '../lib/i18n.js';
+import { requireAuth, logoutUser } from '../lib/auth.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
 
-let currentTeacher = null;
-let parsedAssignments = [];
-let aiSummary = '';
-let selectedHalaqaId = null;
+const state = {
+  teacher: null,
+  preview: false,
+  halaqaId: '',
+  fileName: '',
+  assignments: [],
+  summary: '',
+  mode: 'structured',
+  issues: [],
+};
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', initializeImportPage);
+
+async function initializeImportPage() {
   const authData = await requireAuth(['teacher']);
   if (!authData) return;
-
-  currentTeacher = authData.profile;
-  await initI18n();
-
+  state.teacher = authData.profile;
+  state.preview = Boolean(authData.preview);
   document.getElementById('logout-btn').addEventListener('click', logoutUser);
-
-  await loadTeacherHalaqat();
-
   document.getElementById('excel-file-input').addEventListener('change', handleFileUpload);
-  document.getElementById('approve-assignments-btn').addEventListener('click', handleApproveAssignments);
-});
+  document.getElementById('approve-assignments-btn').addEventListener('click', publishAssignments);
+  document.getElementById('download-template').addEventListener('click', downloadTemplate);
+  document.getElementById('proposed-assignments-body').addEventListener('input', updateAssignmentFromTable);
+  document.getElementById('proposed-assignments-body').addEventListener('change', updateAssignmentFromTable);
+  const templateButton = document.getElementById('download-template');
+  const spreadsheetReady = Boolean(window.XLSX);
+  templateButton.dataset.libraryReady = String(spreadsheetReady);
+  templateButton.disabled = !spreadsheetReady;
+  if (!spreadsheetReady) setAnalysisStatus('error', 'قارئ Excel غير متاح');
+  await loadTeacherHalaqat();
+  refreshIcons();
+}
 
 async function loadTeacherHalaqat() {
   const select = document.getElementById('halaqa-select');
-  const { data: halaqat } = await supabase.from('halaqat').select('id, name').eq('teacher_id', currentTeacher.id);
-
-  if (!halaqat || halaqat.length === 0) {
-    select.innerHTML = '<option value="">لا توجد حلقات قرآنية مضافة</option>';
+  if (state.preview) {
+    select.innerHTML = '<option value="preview-halaqa">حلقة الإتقان - معاينة</option>';
     return;
   }
-
-  select.innerHTML = halaqat.map(h => `<option value="${escapeHtml(h.id)}">${escapeHtml(h.name || 'حلقة قرآنية')}</option>`).join('');
+  const { data, error } = await supabase.from('halaqat').select('id, name').eq('teacher_id', state.teacher.id).order('name');
+  if (error || !data?.length) {
+    select.innerHTML = '<option value="">لا توجد حلقات متاحة</option>';
+    return;
+  }
+  select.innerHTML = data.map(halaqa => `<option value="${escapeHtml(halaqa.id)}">${escapeHtml(halaqa.name)}</option>`).join('');
 }
 
-async function handleFileUpload(e) {
-  const file = e.target.files[0];
-  selectedHalaqaId = document.getElementById('halaqa-select').value;
-
+async function handleFileUpload(event) {
+  const file = event.target.files?.[0];
+  state.halaqaId = document.getElementById('halaqa-select').value;
   if (!file) return;
-  if (!selectedHalaqaId) {
-    showToast('يرجى اختيار الحلقة أولاً', 'error');
+  if (!state.halaqaId) {
+    showToast('اختر الحلقة المستهدفة أولاً.', 'error');
+    event.target.value = '';
     return;
   }
-
-  showToast('جاري قراءة ملف Excel وتحليله بالذكاء الاصطناعي...', 'info');
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('حجم الملف يتجاوز 5 ميجابايت.', 'error');
+    event.target.value = '';
+    return;
+  }
+  state.fileName = file.name;
+  document.getElementById('selected-file-name').textContent = `${file.name} · ${formatFileSize(file.size)}`;
+  setAnalysisStatus('loading', 'جاري التحليل');
 
   try {
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const jsonSchedule = XLSX.utils.sheet_to_json(worksheet);
-
-    if (!jsonSchedule || jsonSchedule.length === 0) {
-      throw new Error('الملف فارغ أو غير صالح');
-    }
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token && !isLocalPreviewMode()) {
-      throw new Error('انتهت جلسة المعلم. سجّل الدخول مرة أخرى.');
-    }
-
-    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/analyze-schedule`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
-      },
-      body: JSON.stringify({
-        halaqaId: selectedHalaqaId,
-        tableData: jsonSchedule
-      })
-    });
-
-    let resData;
-    if (response.ok) {
-      resData = await response.json();
-    } else if (isLocalPreviewMode()) {
-      resData = generateLocalGeminiAnalysis(jsonSchedule, []);
-    } else {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'تعذر الوصول إلى خدمة التحليل الذكي.');
-    }
-
-    parsedAssignments = resData.assignments || [];
-    aiSummary = resData.summary || 'تم قراءة الجدول بنجاح وتوزيع المقررات على طلاب الحلقة.';
-
-    displayResults(resData);
-    showToast('تم تحليل الجدول بواسطة الذكاء الاصطناعي Gemini بنجاح', 'success');
-  } catch (err) {
-    console.error(err);
-    showToast(err.message || 'حدث خطأ أثناء تحليل ملف الجداول', 'error');
+    const tableData = await readSpreadsheet(file);
+    if (!tableData.length) throw new Error('الملف فارغ أو لا يحتوي صفوف بيانات.');
+    const result = state.preview ? buildPreviewAnalysis(tableData) : await requestScheduleAnalysis(tableData);
+    state.assignments = (result.assignments || []).map(normalizeAssignment);
+    state.summary = result.summary || 'تم تجهيز الجدول للمراجعة.';
+    state.mode = result.analysis_mode === 'ai' ? 'ai' : 'structured';
+    state.issues = result.issues || [];
+    if (!state.assignments.length) throw new Error('لم نجد مهام صالحة في الملف.');
+    renderAnalysis(result);
+    setAnalysisStatus('success', state.mode === 'ai' ? 'تحليل Gemini' : 'تحليل منظم');
+    showToast(`تم تجهيز ${state.assignments.length} مهمة للمراجعة.`, 'success');
+  } catch (error) {
+    console.error(error);
+    state.assignments = [];
+    setAnalysisStatus('error', 'تعذر التحليل');
+    showToast(error.message || 'تعذر تحليل ملف الجدول.', 'error');
   }
 }
 
-function generateLocalGeminiAnalysis(tableData, students) {
-  // Smart fallback algorithm to extract date, type, content and map to students
-  const assignments = [];
-  const today = new Date();
+async function readSpreadsheet(file) {
+  if (!window.XLSX) throw new Error('تعذر تحميل أداة قراءة Excel. تحقق من الاتصال ثم حدّث الصفحة.');
+  const data = await file.arrayBuffer();
+  const workbook = window.XLSX.read(data, { type: 'array', cellDates: true });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  return window.XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: '' }).slice(0, 500);
+}
 
-  tableData.forEach((row, idx) => {
-    const student = students[idx % (students.length || 1)] || { id: null, full_name: 'طالب عام' };
-    const dateStr = new Date(today.getTime() + idx * 86400000).toISOString().split('T')[0];
-
-    const contentStr = row['المقرر'] || row['الحفظ'] || row['المحتوى'] || Object.values(row).join(' ');
-
-    assignments.push({
-      student_id: student.id,
-      student_name: student.full_name,
-      date: dateStr,
-      type: idx % 2 === 0 ? 'hifz' : 'murajaa',
-      content: contentStr || `سورة البقرة - الصفحة ${idx + 1}`
-    });
+async function requestScheduleAnalysis(tableData) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('انتهت جلسة المعلم. سجّل الدخول مرة أخرى.');
+  const response = await fetch(`${supabase.supabaseUrl}/functions/v1/analyze-schedule`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ halaqaId: state.halaqaId, tableData }),
   });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || 'تعذر الوصول إلى خدمة تحليل الجداول.');
+  return payload;
+}
 
+function normalizeAssignment(assignment) {
   return {
-    assignments,
-    summary: `تم تحليل عدد ${tableData.length} صف من ملف Excel بنجاح وتوزيع المقررات تلقائياً على التواريخ القادمة.`,
-    recommendations: [
-      'ينصح بمتابعة إنجاز طلاب الحلقة يومياً عبر الشاشة الرئيسية.',
-      'نسبة توزيع الحفظ والمراجعة متوازنة ومناسبة لسرعة الحلقة.'
-    ]
+    student_id: String(assignment.student_id || ''),
+    student_name: String(assignment.student_name || 'كل طلاب الحلقة'),
+    type: assignment.type === 'murajaa' ? 'murajaa' : 'hifz',
+    title: String(assignment.title || (assignment.type === 'murajaa' ? 'مراجعة المحفوظ' : 'الحفظ الجديد')).slice(0, 160),
+    content: String(assignment.content || '').slice(0, 2000),
+    date: String(assignment.date || toDateKey(new Date())),
+    period: ['morning', 'evening', 'flexible'].includes(assignment.period) ? assignment.period : 'flexible',
+    due_time: /^([01]\d|2[0-3]):[0-5]\d$/.test(String(assignment.due_time || '')) ? assignment.due_time : '',
+    estimated_minutes: Math.min(480, Math.max(5, Number(assignment.estimated_minutes) || 30)),
+    priority: Math.min(3, Math.max(1, Number(assignment.priority) || 2)),
   };
 }
 
-function displayResults(resData) {
-  document.getElementById('results-section').classList.remove('hidden');
-  document.getElementById('ai-summary-text').textContent = resData.summary;
+function renderAnalysis(result) {
+  document.getElementById('results-section').hidden = false;
+  document.getElementById('ready-count').textContent = String(state.assignments.length);
+  document.getElementById('ai-summary-text').textContent = state.summary;
+  document.getElementById('analysis-mode-label').textContent = state.mode === 'ai' ? 'تحليل Gemini' : 'تحليل منظم';
+  document.getElementById('approve-assignments-btn').disabled = false;
 
-  const recContainer = document.getElementById('ai-recommendations-list');
-  recContainer.innerHTML = (resData.recommendations || []).map(r => `<li class="text-xs text-amber-900">• ${escapeHtml(r)}</li>`).join('');
-
-  const tableBody = document.getElementById('proposed-assignments-body');
-  tableBody.innerHTML = resData.assignments.map(a => `
-    <tr class="border-b">
-      <td class="py-3 px-4 font-bold text-gray-800">${escapeHtml(a.student_name || 'طالب')}</td>
-      <td class="py-3 px-4">
-        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${a.type === 'hifz' ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'}">
-          ${a.type === 'hifz' ? 'حفظ' : 'مراجعة'}
-        </span>
-      </td>
-      <td class="py-3 px-4 font-semibold text-emerald-950">${escapeHtml(a.content)}</td>
-      <td class="py-3 px-4 text-xs text-gray-500">${escapeHtml(a.date)}</td>
-    </tr>
-  `).join('');
+  const issues = document.getElementById('analysis-issues');
+  issues.hidden = !state.issues.length;
+  issues.innerHTML = state.issues.length
+    ? `<div><i data-lucide="triangle-alert"></i><strong>${state.issues.length} صفوف تحتاج مراجعة</strong></div><ul>${state.issues.map(issue => `<li>${escapeHtml(issue)}</li>`).join('')}</ul>`
+    : '';
+  document.getElementById('ai-recommendations-list').innerHTML = (result.recommendations || [])
+    .map(item => `<span><i data-lucide="circle-check"></i>${escapeHtml(item)}</span>`).join('');
+  renderAssignmentRows();
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  refreshIcons();
 }
 
-async function handleApproveAssignments() {
-  if (parsedAssignments.length === 0) return;
+function renderAssignmentRows() {
+  document.getElementById('proposed-assignments-body').innerHTML = state.assignments.map((assignment, index) => `
+    <tr>
+      <td><strong class="import-student-name">${escapeHtml(assignment.student_name)}</strong><small>${assignment.student_id ? 'مهمة فردية' : 'كل الحلقة'}</small></td>
+      <td><select data-index="${index}" data-field="type"><option value="hifz" ${assignment.type === 'hifz' ? 'selected' : ''}>حفظ</option><option value="murajaa" ${assignment.type === 'murajaa' ? 'selected' : ''}>مراجعة</option></select></td>
+      <td class="import-content-cell"><input data-index="${index}" data-field="title" maxlength="160" value="${escapeHtml(assignment.title)}" aria-label="عنوان المهمة"><textarea data-index="${index}" data-field="content" maxlength="2000" rows="2" aria-label="محتوى المهمة">${escapeHtml(assignment.content)}</textarea></td>
+      <td><input data-index="${index}" data-field="date" type="date" value="${escapeHtml(assignment.date)}" aria-label="تاريخ المهمة"></td>
+      <td><select data-index="${index}" data-field="period"><option value="morning" ${assignment.period === 'morning' ? 'selected' : ''}>صباحي</option><option value="evening" ${assignment.period === 'evening' ? 'selected' : ''}>مسائي</option><option value="flexible" ${assignment.period === 'flexible' ? 'selected' : ''}>مرن</option></select></td>
+      <td><input data-index="${index}" data-field="due_time" type="time" value="${escapeHtml(assignment.due_time)}" aria-label="وقت التسليم"></td>
+      <td><input data-index="${index}" data-field="estimated_minutes" type="number" min="5" max="480" step="5" value="${assignment.estimated_minutes}" aria-label="المدة بالدقائق"></td>
+    </tr>`).join('');
+}
 
+function updateAssignmentFromTable(event) {
+  const field = event.target.dataset.field;
+  const index = Number(event.target.dataset.index);
+  if (!field || !Number.isInteger(index) || !state.assignments[index]) return;
+  state.assignments[index][field] = field === 'estimated_minutes' ? Number(event.target.value) : event.target.value;
+}
+
+async function publishAssignments() {
+  if (!state.assignments.length || !state.halaqaId) return;
+  const invalid = state.assignments.find(item => !item.title.trim() || !item.content.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(item.date));
+  if (invalid) {
+    showToast('يوجد صف ناقص. راجع العنوان والمحتوى والتاريخ.', 'error');
+    return;
+  }
+  const button = document.getElementById('approve-assignments-btn');
+  button.disabled = true;
+  const original = button.innerHTML;
+  button.textContent = 'جاري نشر الدفعة...';
   try {
-    for (const a of parsedAssignments) {
-      if (!a.student_id) continue;
-
-      const { data: assignment, error: aErr } = await supabase
-        .from('daily_assignments')
-        .insert({
-          halaqa_id: selectedHalaqaId,
-          student_id: a.student_id,
-          teacher_id: currentTeacher.id,
-          type: a.type,
-          content: a.content,
-          assignment_date: a.date
-        })
-        .select()
-        .single();
-
-      if (aErr) continue;
-
-      await supabase.from('assignment_submissions').insert({
-        assignment_id: assignment.id,
-        student_id: a.student_id,
-        status: 'pending'
-      });
-    }
-
-    // Save AI Report Record
-    await supabase.from('ai_reports').insert({
-      teacher_id: currentTeacher.id,
-      halaqa_id: selectedHalaqaId,
-      report_text: aiSummary,
-      raw_data: { count: parsedAssignments.length }
+    const payload = state.assignments.map(item => ({
+      student_id: item.student_id,
+      type: item.type,
+      title: item.title.trim(),
+      content: item.content.trim(),
+      date: item.date,
+      period: item.period,
+      scheduled_at: item.period === 'morning' ? localIso(item.date, '06:00') : item.period === 'evening' ? localIso(item.date, '15:00') : '',
+      due_at: item.due_time ? localIso(item.date, item.due_time) : '',
+      estimated_minutes: Math.min(480, Math.max(5, Number(item.estimated_minutes) || 30)),
+      priority: item.priority,
+    }));
+    const { data, error } = await supabase.rpc('publish_task_batch', {
+      p_halaqa_id: state.halaqaId,
+      p_assignments: payload,
+      p_source: state.mode === 'ai' ? 'ai' : 'excel',
+      p_file_name: state.fileName,
+      p_metadata: { analysis_mode: state.mode, issues_count: state.issues.length },
     });
+    if (error) throw error;
 
-    showToast('تم اعتماد وحفظ كافة المقررات بنجاح في قاعدة البيانات', 'success');
-    setTimeout(() => {
-      window.location.href = `/teacher/halaqa-detail.html?id=${selectedHalaqaId}`;
-    }, 1500);
-  } catch (err) {
-    showToast('حدث خطأ أثناء اعتماد المقررات', 'error');
+    await supabase.from('ai_reports').insert({
+      teacher_id: state.teacher.id,
+      halaqa_id: state.halaqaId,
+      report_text: state.summary,
+      raw_data: { batch_id: data?.batch_id, rows: state.assignments.length, mode: state.mode },
+    }).then(({ error: reportError }) => {
+      if (reportError) console.warn('Task batch published without optional report record.', reportError);
+    });
+    showToast(`نُشرت ${data?.assignments_count || state.assignments.length} مهمة إلى ${data?.recipients_count || 0} طالب.`, 'success');
+    setTimeout(() => { window.location.href = `/teacher/tasks.html?halaqa=${encodeURIComponent(state.halaqaId)}`; }, 1200);
+  } catch (error) {
+    console.error(error);
+    button.disabled = false;
+    showToast(error.message || 'تعذر نشر دفعة المهام.', 'error');
+  } finally {
+    button.innerHTML = original;
+    refreshIcons();
   }
 }
+
+function downloadTemplate() {
+  if (!window.XLSX) {
+    showToast('تعذر تحميل أداة Excel. حدّث الصفحة ثم حاول مرة أخرى.', 'error');
+    return;
+  }
+  const rows = [
+    { 'اسم المستخدم': 'student.01', 'النوع': 'حفظ', 'عنوان المهمة': 'الحفظ الجديد', 'المحتوى': 'سورة الملك من الآية 1 إلى 8', 'التاريخ': toDateKey(new Date()), 'الفترة': 'صباحي', 'وقت التسليم': '18:00', 'المدة بالدقائق': 30, 'الأولوية': 2 },
+    { 'اسم المستخدم': '', 'النوع': 'مراجعة', 'عنوان المهمة': 'مراجعة جماعية', 'المحتوى': 'سورة القلم كاملة', 'التاريخ': toDateKey(addDays(new Date(), 1)), 'الفترة': 'مسائي', 'وقت التسليم': '20:00', 'المدة بالدقائق': 25, 'الأولوية': 2 },
+  ];
+  const worksheet = window.XLSX.utils.json_to_sheet(rows);
+  worksheet['!cols'] = [{ wch: 18 }, { wch: 12 }, { wch: 24 }, { wch: 42 }, { wch: 14 }, { wch: 12 }, { wch: 16 }, { wch: 16 }, { wch: 10 }];
+  const workbook = window.XLSX.utils.book_new();
+  window.XLSX.utils.book_append_sheet(workbook, worksheet, 'المهام');
+  window.XLSX.writeFile(workbook, 'قالب-مهام-ذات-خيل.xlsx');
+}
+
+function buildPreviewAnalysis(rows) {
+  const today = toDateKey(new Date());
+  return {
+    analysis_mode: 'structured',
+    summary: `تمت قراءة ${rows.length} صف وتجهيز نموذج معاينة قابل للتعديل.`,
+    recommendations: ['راجع التواريخ وأوقات التسليم قبل النشر.', 'يمكن ترك اسم الطالب فارغاً لإسناد المهمة إلى الحلقة كاملة.'],
+    issues: [],
+    assignments: rows.slice(0, 6).map((row, index) => ({
+      student_id: index % 2 ? '00000000-0000-4000-8000-000000000003' : '',
+      student_name: index % 2 ? 'طالب تجريبي' : 'كل طلاب الحلقة',
+      type: index % 2 ? 'murajaa' : 'hifz',
+      title: row['عنوان المهمة'] || (index % 2 ? 'مراجعة المحفوظ' : 'الحفظ الجديد'),
+      content: row['المحتوى'] || row['المقرر'] || `سورة الملك - المقطع ${index + 1}`,
+      date: row['التاريخ'] || today,
+      period: index % 2 ? 'evening' : 'morning',
+      due_time: index % 2 ? '20:00' : '11:30',
+      estimated_minutes: 30,
+      priority: 2,
+    })),
+  };
+}
+
+function setAnalysisStatus(status, label) {
+  const badge = document.getElementById('analysis-badge');
+  badge.className = `task-draft-badge import-status-${status}`;
+  badge.innerHTML = `<i data-lucide="${status === 'loading' ? 'loader-circle' : status === 'success' ? 'badge-check' : status === 'error' ? 'circle-x' : 'shield-check'}"></i> ${escapeHtml(label)}`;
+  refreshIcons();
+}
+
+function localIso(date, time) { return new Date(`${date}T${time}:00`).toISOString(); }
+function toDateKey(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
+function addDays(date, days) { const result = new Date(date); result.setDate(result.getDate() + days); return result; }
+function formatFileSize(bytes) { return bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} كيلوبايت` : `${(bytes / 1024 / 1024).toFixed(1)} ميجابايت`; }
+function refreshIcons() { if (window.lucide) window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } }); }
