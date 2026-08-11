@@ -29,7 +29,6 @@ async function initializeStudentDashboard() {
   document.getElementById('week-days').addEventListener('click', selectDay);
   document.querySelector('.period-tabs').addEventListener('click', selectPeriod);
   document.getElementById('student-task-list').addEventListener('click', handleTaskAction);
-  document.getElementById('mobile-week').addEventListener('click', () => document.querySelector('.week-panel').scrollIntoView({ behavior: 'smooth' }));
   document.getElementById('notifications-toggle').addEventListener('click', toggleNotifications);
   document.getElementById('read-all-notifications').addEventListener('click', markAllNotificationsRead);
   document.getElementById('notification-list').addEventListener('click', markNotificationRead);

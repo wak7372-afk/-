@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, requireAuth, logoutUser } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
+import { createAdminCirclesController } from './admin-circles.js';
 
 const PREVIEW_ACCOUNTS_KEY = 'zat_khail_preview_accounts';
 const ADMIN_ACTIVITY_KEY = 'zat_khail_admin_activity';
@@ -22,9 +23,12 @@ const state = {
     classrooms: 0,
     pendingWork: 0,
     absentToday: 0,
+    pendingTransfers: 0,
   },
   auditActivities: [],
 };
+
+let circleController;
 
 document.addEventListener('DOMContentLoaded', initializeAdminDashboard);
 
@@ -40,6 +44,19 @@ async function initializeAdminDashboard() {
   setupDialogs();
   setupAccountControls();
   setupMobileSidebar();
+  circleController = createAdminCirclesController({
+    supabase,
+    isLocalPreviewMode,
+    escapeHtml,
+    showToast,
+    getAccounts: () => state.accounts,
+    onMetricsChange: metrics => {
+      state.academic.halaqat = metrics.quran;
+      state.academic.classrooms = metrics.educational;
+      state.academic.pendingTransfers = metrics.pendingTransfers;
+    },
+  });
+  circleController.setup();
 
   document.getElementById('logout-btn').addEventListener('click', logoutUser);
   document.getElementById('preview-notice').hidden = !isLocalPreviewMode();
@@ -47,7 +64,7 @@ async function initializeAdminDashboard() {
   await refreshDashboardData();
 
   const requestedView = window.location.hash.replace('#', '');
-  switchView(requestedView === 'accounts' ? 'accounts' : 'overview', false);
+  switchView(['accounts', 'circles'].includes(requestedView) ? requestedView : 'overview', false);
 }
 
 function setupProfile() {
@@ -98,7 +115,7 @@ function setupNavigation() {
 }
 
 function switchView(viewName, updateHash = true) {
-  const safeView = viewName === 'accounts' ? 'accounts' : 'overview';
+  const safeView = ['overview', 'accounts', 'circles'].includes(viewName) ? viewName : 'overview';
   document.querySelectorAll('[data-view-panel]').forEach(panel => {
     const active = panel.dataset.viewPanel === safeView;
     panel.hidden = !active;
@@ -112,11 +129,14 @@ function switchView(viewName, updateHash = true) {
     else button.removeAttribute('aria-current');
   });
 
-  document.getElementById('view-title').textContent = safeView === 'accounts'
-    ? 'الحسابات والصلاحيات'
-    : 'الرئيسية';
+  const viewTitles = {
+    overview: 'الرئيسية',
+    accounts: 'الحسابات والصلاحيات',
+    circles: 'إدارة الحلقات',
+  };
+  document.getElementById('view-title').textContent = viewTitles[safeView];
 
-  if (updateHash) history.replaceState(null, '', safeView === 'overview' ? '#overview' : '#accounts');
+  if (updateHash) history.replaceState(null, '', `#${safeView}`);
   closeMobileSidebar();
 }
 
@@ -191,7 +211,8 @@ function openCreateAccountDialog() {
 }
 
 async function refreshDashboardData() {
-  await Promise.all([loadAccounts(), loadAcademicMetrics(), loadAuditActivities()]);
+  await loadAccounts();
+  await Promise.all([loadAcademicMetrics(), loadAuditActivities(), circleController.refresh()]);
   renderDashboard();
   renderAccountsTable();
 }
@@ -238,24 +259,19 @@ async function loadAccounts() {
 
 async function loadAcademicMetrics() {
   if (isLocalPreviewMode()) {
-    state.academic = { halaqat: 0, classrooms: 0, pendingWork: 0, absentToday: 0 };
+    state.academic.pendingWork = 0;
+    state.academic.absentToday = 0;
     return;
   }
 
   const today = getLocalDateValue(new Date());
   const results = await Promise.all([
-    supabase.from('halaqat').select('*', { count: 'exact', head: true }),
-    supabase.from('classrooms').select('*', { count: 'exact', head: true }),
     supabase.from('assignment_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('attendance').select('*', { count: 'exact', head: true }).eq('attendance_date', today).eq('status', 'absent'),
   ]);
 
-  state.academic = {
-    halaqat: results[0].count || 0,
-    classrooms: results[1].count || 0,
-    pendingWork: results[2].count || 0,
-    absentToday: results[3].count || 0,
-  };
+  state.academic.pendingWork = results[0].count || 0;
+  state.academic.absentToday = results[1].count || 0;
 }
 
 function getPreviewAdminAccount() {
@@ -355,6 +371,10 @@ function buildAdministrativeAlerts() {
   if (state.academic.absentToday) alerts.push({
     title: `${state.academic.absentToday} حالة غياب اليوم`,
     body: 'راجع سجل الحضور وحدد الحالات التي تحتاج متابعة.',
+  });
+  if (state.academic.pendingTransfers) alerts.push({
+    title: `${state.academic.pendingTransfers} طلب نقل قرآني`,
+    body: 'راجع طلبات النقل وحدد الحلقة القرآنية المعتمدة لكل طالب.',
   });
   return alerts;
 }
@@ -596,6 +616,7 @@ async function handleCreateAccount(event) {
     document.getElementById('create-account-dialog').close();
     renderDashboard();
     renderAccountsTable();
+    circleController.render();
     showToast('تم إنشاء الحساب بنجاح.', 'success');
   } catch (error) {
     console.error('Account creation failed:', error);
@@ -650,6 +671,7 @@ async function handleEditAccount(event) {
     document.getElementById('edit-account-dialog').close();
     renderDashboard();
     renderAccountsTable();
+    circleController.render();
     showToast('تم حفظ تعديلات الحساب.', 'success');
   } catch (error) {
     console.error('Account update failed:', error);
@@ -679,6 +701,7 @@ async function toggleAccountStatus(account) {
     logAdminActivity(`${actionLabel} حساب: ${account.full_name}`);
     renderDashboard();
     renderAccountsTable();
+    circleController.render();
     showToast(`تم ${actionLabel} الحساب.`, 'success');
   } catch (error) {
     console.error('Account status update failed:', error);

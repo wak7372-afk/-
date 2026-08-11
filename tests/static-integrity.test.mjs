@@ -38,11 +38,99 @@ test('HTML documents do not contain duplicate ids', () => {
 
 test('admin dashboard JavaScript references existing elements', () => {
   const html = fs.readFileSync(path.join(publicRoot, 'admin/dashboard.html'), 'utf8');
-  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/admin-dashboard.js'), 'utf8');
+  const script = [
+    'js/pages/admin-dashboard.js',
+    'js/pages/admin-circles.js',
+  ].map(file => fs.readFileSync(path.join(publicRoot, file), 'utf8')).join('\n');
   const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]));
   const references = [...script.matchAll(/getElementById\('([^']+)'\)/g)].map(match => match[1]);
   const missing = [...new Set(references.filter(id => !ids.has(id)))];
   assert.deepEqual(missing, []);
+});
+
+test('admin learning-circle interface calls deployed server contracts', () => {
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/admin-circles.js'), 'utf8');
+  const migrations = [
+    '0012_learning_circles_security.sql',
+    '0013_learning_circle_admin_operations.sql',
+  ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
+  const rpcNames = [...script.matchAll(/supabase\.rpc\('([^']+)'/g)].map(match => match[1]);
+  const missing = [...new Set(rpcNames.filter(name => !migrations.includes(`function public.${name}`)))];
+  assert.ok(rpcNames.length >= 8, 'circle administration should use the protected RPC surface');
+  assert.deepEqual(missing, []);
+});
+
+test('circle workspace pages reference existing elements and protected RPCs', () => {
+  const pairs = [
+    ['circles.html', 'js/pages/circles.js'],
+    ['circle.html', 'js/pages/circle-workspace.js'],
+  ];
+  const scripts = [];
+  const failures = [];
+
+  for (const [htmlPath, scriptPath] of pairs) {
+    const html = fs.readFileSync(path.join(publicRoot, htmlPath), 'utf8');
+    const script = fs.readFileSync(path.join(publicRoot, scriptPath), 'utf8');
+    scripts.push(script);
+    const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]));
+    const references = [...script.matchAll(/getElementById\('([^']+)'\)/g)].map(match => match[1]);
+    const missing = [...new Set(references.filter(id => !ids.has(id)))];
+    if (missing.length) failures.push(`${scriptPath}: ${missing.join(', ')}`);
+  }
+
+  assert.deepEqual(failures, []);
+  const migrations = [
+    '0012_learning_circles_security.sql',
+    '0014_learning_circle_workspace.sql',
+  ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
+  const rpcNames = [...scripts.join('\n').matchAll(/supabase\.rpc\('([^']+)'/g)].map(match => match[1]);
+  const missingRpcs = [...new Set(rpcNames.filter(name => !migrations.includes(`function public.${name}`)))];
+  assert.ok(rpcNames.length >= 9, 'workspace pages should use the protected RPC surface');
+  assert.deepEqual(missingRpcs, []);
+});
+
+test('Quran Excel importer uses the protected import contract and private bucket', () => {
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/quran-report-importer.js'), 'utf8');
+  const migrations = [
+    '0015_quran_reports_core.sql',
+    '0016_quran_reports_security.sql',
+  ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
+  const requiredRpcs = [
+    'stage_quran_report_import',
+    'get_quran_report_import_preview',
+    'approve_quran_report_import',
+    'cancel_quran_report_import',
+  ];
+
+  for (const rpc of requiredRpcs) {
+    assert.match(script, new RegExp(`supabase\\.rpc\\('${rpc}'`));
+    assert.ok(migrations.includes(`function public.${rpc}`), `${rpc} must be deployed by a migration`);
+  }
+  assert.match(script, /storage\.from\('quran-report-imports'\)/);
+  assert.match(migrations, /quran-report-imports/);
+});
+
+test('Quran student reports and teacher console use protected report operations', () => {
+  const scripts = [
+    'js/pages/student-reports.js',
+    'js/pages/quran-report-manager.js',
+  ].map(file => fs.readFileSync(path.join(publicRoot, file), 'utf8')).join('\n');
+  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0017_quran_report_operations.sql'), 'utf8');
+  const requiredRpcs = [
+    'get_my_quran_reports',
+    'complete_quran_report_assignment',
+    'request_quran_report_extension',
+    'get_quran_teacher_console',
+    'get_quran_student_history',
+    'get_quran_extension_queue',
+    'decide_quran_report_extension',
+    'exempt_quran_report_assignment',
+  ];
+
+  for (const rpc of requiredRpcs) {
+    assert.match(scripts, new RegExp(`rpc\\('${rpc}'`));
+    assert.ok(migration.includes(`function public.${rpc}`), `${rpc} must be deployed by migration 0017`);
+  }
 });
 
 test('classroom workflow JavaScript references existing elements', () => {
@@ -81,11 +169,14 @@ test('service worker cache entries point to real public files', () => {
 
 test('required role entry pages exist', () => {
   const required = [
+    'circles.html',
+    'circle.html',
     'admin/dashboard.html',
     'teacher/halaqat.html',
     'teacher/tasks.html',
     'teacher/ai-assistant.html',
     'student/dashboard.html',
+    'student/reports.html',
     'parent/dashboard.html',
   ];
   const missing = required.filter(file => !fs.existsSync(path.join(publicRoot, file)));

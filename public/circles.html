@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | حلقاتي</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/circles.css?v=1">
+</head>
+<body class="circle-portal-shell">
+  <header class="circle-topbar">
+    <div class="circle-topbar-pattern" aria-hidden="true"></div>
+    <div class="circle-topbar-inner">
+      <a class="circle-brand" href="./circles.html" aria-label="حلقاتي">
+        <span class="circle-brand-mark">ذ</span>
+        <span><strong>مركز ذات خيل</strong><small>لتعليم القرآن الكريم وعلومه</small></span>
+      </a>
+      <div class="circle-page-title">
+        <span id="role-context">مساحتك التعليمية</span>
+        <h1>حلقاتي</h1>
+      </div>
+      <nav class="circle-account-actions" aria-label="إجراءات الحساب">
+        <a id="role-home-link" class="circle-icon-command" href="./index.html" title="الرئيسية" aria-label="الرئيسية"><i data-lucide="layout-dashboard"></i></a>
+        <a class="circle-icon-command" href="./account-settings.html" title="إعدادات الحساب" aria-label="إعدادات الحساب"><i data-lucide="user-round-cog"></i></a>
+        <button id="logout-btn" type="button" class="circle-icon-command is-danger" title="تسجيل الخروج" aria-label="تسجيل الخروج"><i data-lucide="log-out"></i></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="circle-portal-main">
+    <section class="circle-portal-command" aria-labelledby="circle-command-title">
+      <div>
+        <span class="circle-kicker">المساحات النشطة</span>
+        <h2 id="circle-command-title">مرحباً، <strong id="profile-name">...</strong></h2>
+        <p id="circle-command-copy">جاري ترتيب الحلقات المرتبطة بحسابك.</p>
+      </div>
+      <div class="circle-command-stats" aria-label="ملخص الحلقات">
+        <div><strong id="all-circles-count">0</strong><span>إجمالي</span></div>
+        <div><strong id="quran-circles-count">0</strong><span>قرآنية</span></div>
+        <div><strong id="educational-circles-count">0</strong><span>تعليمية</span></div>
+      </div>
+    </section>
+
+    <section class="circle-list-toolbar" aria-label="تصفية الحلقات">
+      <label class="circle-search-field" for="circle-search">
+        <i data-lucide="search"></i>
+        <input id="circle-search" type="search" placeholder="ابحث باسم الحلقة أو المادة أو المعلم...">
+      </label>
+      <div class="circle-segmented" role="group" aria-label="نوع الحلقة">
+        <button type="button" class="is-active" data-circle-filter="all" aria-pressed="true">الكل</button>
+        <button type="button" data-circle-filter="quran" aria-pressed="false">القرآنية</button>
+        <button type="button" data-circle-filter="educational" aria-pressed="false">التعليمية</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="circle-grid-heading">
+      <div class="circle-section-heading">
+        <div><span class="circle-kicker">العضويات</span><h2 id="circle-grid-heading">الحلقات المرتبطة بك</h2></div>
+        <span id="visible-circles-count" class="circle-result-count">0 حلقة</span>
+      </div>
+      <div id="circles-grid" class="circles-grid" aria-live="polite">
+        <div class="circle-loading"><span></span><p>جاري تحميل الحلقات...</p></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/pages/circles.js?v=1"></script>
+</body>
+</html>

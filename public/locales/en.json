@@ -1,5 +1,5 @@
 {
-  "app_name": "Zat Khail Platform",
+  "app_name": "Zat Khail Center for Teaching the Holy Quran and Its Sciences",
   "app_tagline": "Smart System for Quran & Islamic Studies Center Management",
   "login": "Sign In",
   "register": "Register Account",
@@ -13,7 +13,7 @@
   "teacher": "Teacher",
   "admin": "Administrator",
   "pending_approval": "Account Pending Admin Approval",
-  "pending_approval_msg": "Thank you for registering at Zat Khail Platform. Your account is currently under review and will be activated upon admin approval.",
+  "pending_approval_msg": "Thank you for registering at Zat Khail Center for Teaching the Holy Quran and Its Sciences. Your account is currently under review and will be activated upon admin approval.",
   "back_to_login": "Back to Sign In",
   "submit": "Submit Request",
   "welcome": "Welcome",

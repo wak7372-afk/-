@@ -74,7 +74,7 @@ async function sendOtpEmail(email: string, code: string) {
     body: JSON.stringify({
       from: resendFromEmail,
       to: [email],
-      subject: 'رمز استعادة حساب منصة ذات خيل',
+      subject: 'رمز استعادة حساب مركز ذات خيل لتعليم القرآن الكريم وعلومه',
       html: `<div dir="rtl" style="font-family:Arial,sans-serif;line-height:1.8"><h2>رمز التحقق</h2><p>رمز استعادة حسابك هو:</p><p style="font-size:28px;font-weight:700;letter-spacing:8px">${code}</p><p>تنتهي صلاحية الرمز خلال 10 دقائق. إذا لم تطلب الاستعادة فتجاهل هذه الرسالة.</p></div>`,
     }),
   });

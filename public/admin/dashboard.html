@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061421">
-  <title>منصة ذات خيل | مركز قيادة المدير</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | مركز قيادة المدير</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
@@ -16,8 +15,8 @@
     <div class="admin-brand">
       <div class="admin-brand-mark" aria-hidden="true">ذ</div>
       <div class="admin-brand-copy">
-        <strong class="font-amiri">منصة ذات خيل</strong>
-        <span>إدارة المركز</span>
+        <strong class="font-amiri">مركز ذات خيل</strong>
+        <span>لتعليم القرآن الكريم وعلومه</span>
       </div>
       <button id="close-sidebar" class="admin-icon-button admin-mobile-only" type="button" aria-label="إغلاق القائمة">×</button>
     </div>
@@ -35,18 +34,15 @@
       </button>
 
       <p class="admin-nav-label">العملية التعليمية</p>
-      <a class="admin-nav-item" href="/teacher/halaqat.html">
+      <button class="admin-nav-item" type="button" data-admin-view="circles">
         <span class="admin-nav-symbol" aria-hidden="true">03</span>
-        <span>الحلقات القرآنية</span>
-      </a>
-      <a class="admin-nav-item" href="/teacher/classrooms.html">
-        <span class="admin-nav-symbol" aria-hidden="true">04</span>
-        <span>الفصول الافتراضية</span>
-      </a>
+        <span>إدارة الحلقات</span>
+        <span id="nav-circles-count" class="admin-nav-count">0</span>
+      </button>
 
       <p class="admin-nav-label">الإدارة</p>
       <a class="admin-nav-item" href="/account-settings.html">
-        <span class="admin-nav-symbol" aria-hidden="true">05</span>
+        <span class="admin-nav-symbol" aria-hidden="true">04</span>
         <span>إعدادات حسابي</span>
       </a>
     </nav>
@@ -93,7 +89,7 @@
     <main class="admin-main">
       <div id="preview-notice" class="admin-preview-notice" hidden>
         <strong>وضع المعاينة المحلية</strong>
-        <span>تُحفظ الحسابات على هذا الجهاز حالياً، بينما تسجيل الدخول السحابي مؤجل.</span>
+        <span>البيانات التي تنشئها هنا تجريبية ومحفوظة في هذا المتصفح فقط، ولن تظهر في الموقع المنشور.</span>
       </div>
 
       <section id="overview-view" class="admin-view is-active" data-view-panel="overview" aria-labelledby="overview-heading">
@@ -143,20 +139,20 @@
             </div>
 
             <div class="admin-operation-list">
-              <a href="/teacher/halaqat.html" class="admin-operation-row">
+              <button type="button" class="admin-operation-row" data-go-view="circles" data-circle-filter-target="quran">
                 <div>
                   <strong>الحلقات القرآنية</strong>
                   <span>إدارة الحلقات والمقررات والطلاب</span>
                 </div>
                 <b id="stat-halaqat">0</b>
-              </a>
-              <a href="/teacher/classrooms.html" class="admin-operation-row">
+              </button>
+              <button type="button" class="admin-operation-row" data-go-view="circles" data-circle-filter-target="educational">
                 <div>
                   <strong>الفصول الافتراضية</strong>
                   <span>إدارة المواد والدروس والاختبارات</span>
                 </div>
                 <b id="stat-classrooms">0</b>
-              </a>
+              </button>
               <div class="admin-operation-row is-static">
                 <div>
                   <strong>مقررات تحتاج متابعة</strong>
@@ -284,6 +280,91 @@
           </div>
         </div>
       </section>
+
+      <section id="circles-view" class="admin-view" data-view-panel="circles" aria-labelledby="circles-heading" hidden>
+        <div class="admin-page-heading">
+          <div>
+            <p class="admin-section-kicker">العملية التعليمية</p>
+            <h2 id="circles-heading" class="font-amiri">إدارة الحلقات</h2>
+            <p>أنشئ حلقات القرآن والحلقات التعليمية، وعيّن الفريق والطلاب من مركز واحد.</p>
+          </div>
+          <button id="open-create-circle" type="button" class="admin-primary-button">إنشاء حلقة جديدة</button>
+        </div>
+
+        <div class="admin-metrics-grid admin-circle-metrics" aria-label="مؤشرات الحلقات">
+          <article class="admin-metric admin-metric-gold">
+            <span>الحلقات النشطة</span>
+            <strong id="circle-stat-active">0</strong>
+            <small>قرآنية وتعليمية</small>
+          </article>
+          <article class="admin-metric admin-metric-green">
+            <span>حلقات القرآن</span>
+            <strong id="circle-stat-quran">0</strong>
+            <small>حلقة نشطة</small>
+          </article>
+          <article class="admin-metric admin-metric-blue">
+            <span>الحلقات التعليمية</span>
+            <strong id="circle-stat-educational">0</strong>
+            <small>قد تضم عدة مواد</small>
+          </article>
+          <article class="admin-metric admin-metric-muted">
+            <span>طلبات النقل</span>
+            <strong id="circle-stat-transfers">0</strong>
+            <small>بانتظار قرار الإدارة</small>
+          </article>
+        </div>
+
+        <div class="admin-panel admin-filter-panel admin-circle-filter-panel">
+          <div class="admin-filters admin-circle-filters">
+            <div class="admin-search-field">
+              <label for="circle-search">البحث</label>
+              <input id="circle-search" type="search" placeholder="اسم الحلقة أو المعلم" autocomplete="off">
+            </div>
+            <div>
+              <label for="circle-type-filter">نوع الحلقة</label>
+              <select id="circle-type-filter">
+                <option value="all">جميع الأنواع</option>
+                <option value="quran">قرآنية</option>
+                <option value="educational">تعليمية</option>
+              </select>
+            </div>
+            <div>
+              <label for="circle-status-filter">الحالة</label>
+              <select id="circle-status-filter">
+                <option value="active">النشطة</option>
+                <option value="archived">المؤرشفة</option>
+                <option value="all">جميع الحالات</option>
+              </select>
+            </div>
+            <button id="clear-circle-filters" type="button" class="admin-secondary-button">مسح التصفية</button>
+          </div>
+          <div class="admin-filter-summary">
+            <span>النتائج</span>
+            <strong id="filtered-circles-count">0</strong>
+          </div>
+        </div>
+
+        <div class="admin-circles-layout">
+          <div>
+            <div id="circles-list" class="admin-circles-grid" aria-live="polite"></div>
+            <div id="circles-empty-state" class="admin-panel admin-empty-state" hidden>
+              <strong>لا توجد حلقات مطابقة</strong>
+              <span>غيّر التصفية أو أنشئ أول حلقة في المركز.</span>
+            </div>
+          </div>
+
+          <aside class="admin-panel admin-transfer-panel" aria-labelledby="transfer-panel-heading">
+            <div class="admin-panel-heading">
+              <div>
+                <p class="admin-section-kicker">حلقة قرآن واحدة</p>
+                <h3 id="transfer-panel-heading" class="font-amiri">طلبات النقل</h3>
+              </div>
+              <span id="pending-transfer-count" class="admin-status-badge">0</span>
+            </div>
+            <div id="transfer-requests-list" class="admin-transfer-list"></div>
+          </aside>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -373,6 +454,212 @@
       <div class="admin-dialog-footer">
         <button type="button" class="admin-secondary-button" data-close-dialog="edit-account-dialog">إلغاء</button>
         <button id="edit-account-submit" type="submit" class="admin-primary-button">حفظ التعديلات</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="create-circle-dialog" class="admin-dialog" aria-labelledby="create-circle-title">
+    <form id="create-circle-form" class="admin-dialog-card">
+      <div class="admin-dialog-header">
+        <div>
+          <p class="admin-section-kicker">حلقة جديدة</p>
+          <h2 id="create-circle-title" class="font-amiri">إنشاء حلقة تعليمية</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="create-circle-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-dialog-body">
+        <fieldset class="admin-segmented-field">
+          <legend>نوع الحلقة</legend>
+          <div class="admin-segmented-control">
+            <label><input type="radio" name="circleType" value="quran" checked><span>حلقة قرآنية</span></label>
+            <label><input type="radio" name="circleType" value="educational"><span>حلقة تعليمية</span></label>
+          </div>
+        </fieldset>
+        <div class="admin-form-grid">
+          <div class="admin-field admin-field-wide">
+            <label for="circle-name">اسم الحلقة</label>
+            <input id="circle-name" type="text" required minlength="2" maxlength="160" placeholder="مثال: براعم الفجر">
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="circle-lead-teacher">المعلم المسؤول</label>
+            <select id="circle-lead-teacher" required></select>
+            <small>يمكن تغيير المسؤول وإضافة معلمين مساعدين لاحقاً.</small>
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="circle-description">وصف مختصر <span>اختياري</span></label>
+            <textarea id="circle-description" maxlength="5000" rows="3" placeholder="هدف الحلقة أو مستواها أو ملاحظات الإدارة"></textarea>
+          </div>
+          <fieldset id="create-circle-subjects-field" class="admin-field admin-field-wide admin-subject-field" hidden>
+            <legend>مواد الحلقة التعليمية</legend>
+            <div id="create-circle-subjects" class="admin-checkbox-grid"></div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="admin-dialog-footer">
+        <button type="button" class="admin-secondary-button" data-close-dialog="create-circle-dialog">إلغاء</button>
+        <button id="create-circle-submit" type="submit" class="admin-primary-button">إنشاء الحلقة</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="manage-circle-dialog" class="admin-dialog admin-circle-dialog" aria-labelledby="manage-circle-title">
+    <div class="admin-dialog-card">
+      <div class="admin-dialog-header admin-circle-dialog-header">
+        <div>
+          <div class="admin-circle-title-row">
+            <p id="manage-circle-type" class="admin-section-kicker">حلقة</p>
+            <span id="manage-circle-status" class="admin-account-status is-active">نشطة</span>
+          </div>
+          <h2 id="manage-circle-title" class="font-amiri">إدارة الحلقة</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="manage-circle-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-circle-tabs" role="tablist" aria-label="أقسام إدارة الحلقة">
+        <button type="button" class="is-active" data-circle-tab="details" role="tab">البيانات</button>
+        <button type="button" data-circle-tab="team" role="tab">فريق التعليم</button>
+        <button type="button" data-circle-tab="students" role="tab">الطلاب</button>
+        <button type="button" data-circle-tab="activity" role="tab">سجل العمليات</button>
+      </div>
+      <div class="admin-dialog-body admin-circle-dialog-body">
+        <section data-circle-tab-panel="details">
+          <form id="edit-circle-form" class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>بيانات الحلقة</h3>
+                <p>الاسم والوصف والمواد المرتبطة بالحلقات التعليمية.</p>
+              </div>
+              <button id="save-circle-details" type="submit" class="admin-primary-button">حفظ البيانات</button>
+            </div>
+            <div class="admin-form-grid">
+              <div class="admin-field admin-field-wide">
+                <label for="edit-circle-name">اسم الحلقة</label>
+                <input id="edit-circle-name" type="text" required minlength="2" maxlength="160">
+              </div>
+              <div class="admin-field admin-field-wide">
+                <label for="edit-circle-description">الوصف</label>
+                <textarea id="edit-circle-description" maxlength="5000" rows="3"></textarea>
+              </div>
+              <fieldset id="edit-circle-subjects-field" class="admin-field admin-field-wide admin-subject-field">
+                <legend>المواد</legend>
+                <div id="edit-circle-subjects" class="admin-checkbox-grid"></div>
+              </fieldset>
+            </div>
+          </form>
+
+          <form id="circle-meet-form" class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>رابط اللقاء المباشر</h3>
+                <p>ألصق رابط Google Meet ليظهر زر الانضمام للمشاركين.</p>
+              </div>
+              <button id="save-circle-meet" type="submit" class="admin-secondary-button">حفظ الرابط</button>
+            </div>
+            <div class="admin-field">
+              <label for="circle-meet-link">رابط Google Meet</label>
+              <input id="circle-meet-link" type="url" inputmode="url" dir="ltr" placeholder="https://meet.google.com/abc-defg-hij">
+            </div>
+          </form>
+
+          <div class="admin-circle-danger-zone">
+            <div>
+              <strong>أرشفة الحلقة</strong>
+              <span>تنهي العضويات وتكليفات الفريق وتلغي طلبات النقل المعلقة.</span>
+            </div>
+            <button id="archive-circle" type="button" class="admin-danger-button">أرشفة الحلقة</button>
+          </div>
+        </section>
+
+        <section data-circle-tab-panel="team" hidden>
+          <div class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>المعلم المسؤول</h3>
+                <p>للحلقة مسؤول نشط واحد، وله كامل صلاحيات إدارتها.</p>
+              </div>
+            </div>
+            <div class="admin-inline-action">
+              <div class="admin-field">
+                <label for="manage-circle-lead">اختيار المسؤول</label>
+                <select id="manage-circle-lead"></select>
+              </div>
+              <button id="save-circle-lead" type="button" class="admin-primary-button">تعيين المسؤول</button>
+            </div>
+          </div>
+
+          <div class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>المعلمون المساعدون</h3>
+                <p>أضف المساعد ثم حدّد صلاحياته بدقة.</p>
+              </div>
+            </div>
+            <div class="admin-inline-action">
+              <div class="admin-field">
+                <label for="add-circle-assistant">إضافة معلم مساعد</label>
+                <select id="add-circle-assistant"></select>
+              </div>
+              <button id="add-circle-assistant-button" type="button" class="admin-secondary-button">إضافة مساعد</button>
+            </div>
+            <div id="circle-assistants-list" class="admin-assistant-list"></div>
+          </div>
+        </section>
+
+        <section data-circle-tab-panel="students" hidden>
+          <div class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>طلاب الحلقة</h3>
+                <p id="circle-student-rule">أضف الطلاب المسجلين في المنصة إلى هذه الحلقة.</p>
+              </div>
+              <span id="circle-members-count" class="admin-status-badge">0</span>
+            </div>
+            <div class="admin-inline-action">
+              <div class="admin-field">
+                <label for="add-circle-student">اختيار الطالب</label>
+                <select id="add-circle-student"></select>
+              </div>
+              <button id="add-circle-student-button" type="button" class="admin-primary-button">إضافة الطالب</button>
+            </div>
+            <div id="circle-students-list" class="admin-member-list"></div>
+          </div>
+        </section>
+
+        <section data-circle-tab-panel="activity" hidden>
+          <div class="admin-circle-form-section">
+            <div class="admin-section-heading-row">
+              <div>
+                <h3>سجل عمليات الحلقة</h3>
+                <p>أثر زمني غير قابل للتعديل للعمليات الحساسة.</p>
+              </div>
+            </div>
+            <div id="circle-activity-list" class="admin-circle-activity-list"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="transfer-decision-dialog" class="admin-dialog admin-compact-dialog" aria-labelledby="transfer-decision-title">
+    <form id="transfer-decision-form" class="admin-dialog-card">
+      <input id="transfer-request-id" type="hidden">
+      <input id="transfer-decision-value" type="hidden">
+      <div class="admin-dialog-header">
+        <div>
+          <p class="admin-section-kicker">طلب نقل قرآني</p>
+          <h2 id="transfer-decision-title" class="font-amiri">مراجعة الطلب</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="transfer-decision-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-dialog-body">
+        <p id="transfer-decision-summary" class="admin-transfer-summary"></p>
+        <div class="admin-field">
+          <label for="transfer-admin-notes">ملاحظات القرار <span>اختياري</span></label>
+          <textarea id="transfer-admin-notes" maxlength="2000" rows="4" placeholder="سبب الاعتماد أو الرفض"></textarea>
+        </div>
+      </div>
+      <div class="admin-dialog-footer">
+        <button type="button" class="admin-secondary-button" data-close-dialog="transfer-decision-dialog">إلغاء</button>
+        <button id="transfer-decision-submit" type="submit" class="admin-primary-button">اعتماد القرار</button>
       </div>
     </form>
   </dialog>

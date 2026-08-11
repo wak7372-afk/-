@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | داخل الحلقة</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/circles.css?v=2">
+</head>
+<body class="circle-workspace-shell">
+  <header class="circle-topbar circle-workspace-topbar">
+    <div class="circle-topbar-pattern" aria-hidden="true"></div>
+    <div class="circle-topbar-inner">
+      <a id="back-to-circles" class="circle-back-command" href="./circles.html"><i data-lucide="arrow-right"></i><span>حلقاتي</span></a>
+      <div class="circle-page-title">
+        <span id="workspace-role-label">مساحة الحلقة</span>
+        <h1 id="workspace-title">جاري التحميل...</h1>
+      </div>
+      <nav class="circle-account-actions" aria-label="إجراءات الحلقة">
+        <a id="top-meet-link" class="circle-meet-command" href="#" target="_blank" rel="noopener noreferrer" hidden><i data-lucide="video"></i><span>دخول اللقاء</span></a>
+        <a class="circle-icon-command" href="./account-settings.html" title="إعدادات الحساب" aria-label="إعدادات الحساب"><i data-lucide="user-round-cog"></i></a>
+        <button id="logout-btn" type="button" class="circle-icon-command is-danger" title="تسجيل الخروج" aria-label="تسجيل الخروج"><i data-lucide="log-out"></i></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="circle-workspace-main">
+    <section class="circle-workspace-hero" aria-labelledby="workspace-hero-title">
+      <div class="workspace-hero-copy">
+        <div class="workspace-hero-meta">
+          <span id="workspace-type" class="circle-type-badge">...</span>
+          <span id="workspace-participant-role" class="circle-role-badge">...</span>
+        </div>
+        <h2 id="workspace-hero-title">...</h2>
+        <p id="workspace-description"></p>
+        <div id="workspace-subjects" class="workspace-subjects"></div>
+      </div>
+      <div class="workspace-hero-status">
+        <span class="workspace-status-icon"><i data-lucide="users-round"></i></span>
+        <strong id="workspace-students-count">0</strong>
+        <span>طالباً في الحلقة</span>
+      </div>
+    </section>
+
+    <nav class="workspace-tabs" role="tablist" aria-label="أقسام الحلقة">
+      <button type="button" class="is-active" role="tab" aria-selected="true" data-workspace-tab="stream"><i data-lucide="panels-top-left"></i><span>الساحة</span></button>
+      <button type="button" role="tab" aria-selected="false" data-workspace-tab="work"><i data-lucide="clipboard-check"></i><span id="work-tab-label">التقارير</span></button>
+      <button type="button" role="tab" aria-selected="false" data-workspace-tab="people"><i data-lucide="users"></i><span>الأشخاص</span></button>
+      <button type="button" role="tab" aria-selected="false" data-workspace-tab="files"><i data-lucide="folder-open"></i><span>الملفات</span></button>
+      <button type="button" role="tab" aria-selected="false" data-workspace-tab="performance"><i data-lucide="chart-no-axes-combined"></i><span>الأداء</span></button>
+      <button type="button" role="tab" aria-selected="false" data-workspace-tab="settings"><i data-lucide="settings-2"></i><span>الإعدادات</span></button>
+    </nav>
+
+    <section id="stream-panel" class="workspace-panel is-active" data-workspace-panel="stream" aria-labelledby="stream-heading">
+      <div class="workspace-panel-heading">
+        <div><span class="circle-kicker">آخر المستجدات</span><h2 id="stream-heading">ساحة الحلقة</h2></div>
+        <span id="posts-count" class="circle-result-count">0 منشور</span>
+      </div>
+
+      <form id="post-composer" class="workspace-composer" hidden>
+        <div class="composer-heading">
+          <span class="composer-icon"><i data-lucide="square-pen"></i></span>
+          <div><strong>منشور جديد</strong><small id="composer-permission-label">ضمن صلاحياتك في الحلقة</small></div>
+        </div>
+        <div id="post-type-control" class="composer-types" role="group" aria-label="نوع المنشور"></div>
+        <label class="workspace-field"><span>العنوان</span><input id="post-title" type="text" maxlength="200" required></label>
+        <label class="workspace-field"><span>المحتوى</span><textarea id="post-body" rows="4" maxlength="10000"></textarea></label>
+        <label id="post-url-field" class="workspace-field" hidden><span>الرابط</span><input id="post-external-url" type="url" placeholder="https://meet.google.com/..."></label>
+        <label id="post-replies-field" class="workspace-toggle" hidden><input id="post-replies-enabled" type="checkbox"><span><b>السماح بالردود</b><small>يمكن إغلاقها لاحقاً من المنشور.</small></span></label>
+        <div class="composer-actions"><button id="publish-post" type="submit" class="circle-primary-command"><i data-lucide="send"></i><span>نشر</span></button></div>
+      </form>
+
+      <div id="workspace-feed" class="workspace-feed" aria-live="polite">
+        <div class="circle-loading"><span></span><p>جاري تحميل الساحة...</p></div>
+      </div>
+    </section>
+
+    <section id="work-panel" class="workspace-panel" data-workspace-panel="work" aria-labelledby="work-heading" hidden>
+      <div class="workspace-panel-heading"><div><span class="circle-kicker">العمل المطلوب</span><h2 id="work-heading">التقارير</h2></div></div>
+      <div id="workspace-work-content" class="workspace-empty-state"></div>
+    </section>
+
+    <section id="people-panel" class="workspace-panel" data-workspace-panel="people" aria-labelledby="people-heading" hidden>
+      <div class="workspace-panel-heading"><div><span class="circle-kicker">أعضاء الحلقة</span><h2 id="people-heading">الأشخاص</h2></div></div>
+      <div class="people-layout">
+        <section aria-labelledby="staff-heading"><div class="people-section-heading"><h3 id="staff-heading">فريق التعليم</h3><span id="staff-count">0</span></div><div id="staff-list" class="people-list"></div></section>
+        <section aria-labelledby="students-heading"><div class="people-section-heading"><h3 id="students-heading">الطلاب</h3><span id="people-students-count">0</span></div><div id="students-list" class="people-list"></div></section>
+      </div>
+    </section>
+
+    <section id="files-panel" class="workspace-panel" data-workspace-panel="files" aria-labelledby="files-heading" hidden>
+      <div class="workspace-panel-heading"><div><span class="circle-kicker">موارد الحلقة</span><h2 id="files-heading">الملفات</h2></div><span id="files-count" class="circle-result-count">0 ملف</span></div>
+      <form id="file-upload-form" class="workspace-file-uploader" hidden>
+        <label class="workspace-field"><span>اسم المورد</span><input id="file-title" type="text" maxlength="200" required></label>
+        <label class="workspace-field"><span>وصف مختصر</span><input id="file-description" type="text" maxlength="3000"></label>
+        <label class="file-picker" for="circle-file"><i data-lucide="upload-cloud"></i><span><b id="file-picker-title">اختيار ملف</b><small>PDF وOffice والصور والصوت، حتى 20 MB</small></span><input id="circle-file" type="file" required></label>
+        <button id="upload-file" type="submit" class="circle-primary-command"><i data-lucide="cloud-upload"></i><span>رفع ونشر</span></button>
+      </form>
+      <div id="workspace-files-list" class="workspace-files-list"></div>
+    </section>
+
+    <section id="performance-panel" class="workspace-panel" data-workspace-panel="performance" aria-labelledby="performance-heading" hidden>
+      <div class="workspace-panel-heading"><div><span class="circle-kicker">المتابعة</span><h2 id="performance-heading">الأداء</h2></div></div>
+      <div id="workspace-performance" class="workspace-performance"></div>
+    </section>
+
+    <section id="settings-panel" class="workspace-panel" data-workspace-panel="settings" aria-labelledby="settings-heading" hidden>
+      <div class="workspace-panel-heading"><div><span class="circle-kicker">ضبط الحلقة</span><h2 id="settings-heading">الإعدادات</h2></div></div>
+      <div class="settings-layout">
+        <form id="meet-settings-form" class="workspace-settings-block">
+          <div class="settings-block-heading"><i data-lucide="video"></i><div><h3>اللقاء المباشر</h3><span id="meet-settings-status">لا يوجد رابط محفوظ</span></div></div>
+          <label class="workspace-field"><span>رابط Google Meet</span><input id="settings-meet-link" type="url" placeholder="https://meet.google.com/..."></label>
+          <button id="save-meet-settings" type="submit" class="circle-secondary-command"><i data-lucide="save"></i><span>حفظ الرابط</span></button>
+        </form>
+        <form id="discussion-settings-form" class="workspace-settings-block">
+          <div class="settings-block-heading"><i data-lucide="messages-square"></i><div><h3>النقاشات</h3><span>صلاحيات الطلاب داخل الساحة</span></div></div>
+          <label class="workspace-toggle"><input id="students-create-topics" type="checkbox"><span><b>إنشاء موضوعات جديدة</b><small>يطبق على الحلقات التعليمية فقط.</small></span></label>
+          <label class="workspace-toggle"><input id="students-reply" type="checkbox"><span><b>الرد على الموضوعات</b><small>يبقى للمعلم حق إغلاق أي موضوع.</small></span></label>
+          <button id="save-discussion-settings" type="submit" class="circle-secondary-command"><i data-lucide="save"></i><span>حفظ الإعدادات</span></button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="./js/vendor/xlsx.full.min.js"></script>
+  <script type="module" src="./js/pages/circle-workspace.js?v=3"></script>
+</body>
+</html>

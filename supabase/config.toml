@@ -1,3 +1,5 @@
+project_id = "zat-khail-local"
+
 [functions.login-with-username]
 verify_jwt = false
 

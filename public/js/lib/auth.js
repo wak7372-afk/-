@@ -2,7 +2,7 @@ import { supabase } from './supabase-client.js';
 
 const ROLE_HOME = {
   admin: 'admin/dashboard.html',
-  teacher: 'teacher/halaqat.html',
+  teacher: 'circles.html',
   student: 'student/dashboard.html',
   parent: 'parent/dashboard.html',
 };

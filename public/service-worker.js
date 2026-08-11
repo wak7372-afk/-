@@ -1,17 +1,27 @@
-const CACHE_NAME = 'zat-khail-v4';
+const CACHE_NAME = 'zat-khail-v9';
 const ASSETS = [
   '/',
   '/index.html',
   '/register.html',
   '/pending-approval.html',
+  '/circles.html',
+  '/circle.html',
   '/admin/dashboard.html',
   '/teacher/tasks.html',
   '/teacher/ai-assistant.html',
   '/student/dashboard.html',
+  '/student/reports.html',
   '/css/style.css',
   '/css/admin.css',
   '/css/tasks.css',
   '/css/student-dashboard.css',
+  '/css/circles.css',
+  '/css/quran-reports.css',
+  '/js/lib/quran-report-excel.js',
+  '/js/pages/quran-report-manager.js',
+  '/js/pages/quran-report-importer.js',
+  '/js/pages/student-reports.js',
+  '/js/vendor/xlsx.full.min.js',
   '/locales/ar.json',
   '/locales/en.json'
 ];
@@ -52,7 +62,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'إشعار جديد', body: 'لديك إشعار جديد في منصة ذات خيل' };
+  const data = event.data ? event.data.json() : { title: 'إشعار جديد', body: 'لديك إشعار جديد في مركز ذات خيل لتعليم القرآن الكريم وعلومه' };
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
