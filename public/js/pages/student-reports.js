@@ -17,6 +17,7 @@ const state = {
   overdueCount: 0,
   earnedPoints: 0,
   selectedForExtension: new Set(),
+  confirmingReportId: null,
   busy: false,
 };
 
@@ -35,6 +36,8 @@ async function initialize() {
   document.getElementById('quran-plan-notice').addEventListener('click', selectDate);
   document.getElementById('quran-student-report-list').addEventListener('click', handleReportAction);
   document.getElementById('quran-extension-form').addEventListener('submit', submitExtensionRequest);
+  document.getElementById('quran-complete-form').addEventListener('submit', submitConfirmedReport);
+  document.getElementById('cancel-quran-complete').addEventListener('click', closeCompleteDialog);
   const requestedDate = new URL(window.location.href).searchParams.get('date');
   if (isDateKey(requestedDate)) state.selectedDate = requestedDate;
   await loadOverview();
@@ -169,9 +172,25 @@ function renderMetrics() {
 
 function renderReports() {
   const container = document.getElementById('quran-student-report-list');
+  const extensionSide = document.querySelector('.quran-extension-side');
+  const layout = document.querySelector('.quran-reports-layout');
   const reports = reportsForSelectedDate();
   if (!reports.length) {
+    extensionSide.hidden = false;
+    layout.classList.remove('is-day-complete');
     container.innerHTML = '<div class="quran-reports-empty"><i data-lucide="calendar-check-2"></i><h3>لا توجد تقارير في هذا اليوم</h3><p>اختر يوماً آخر من الشريط العلوي.</p></div>';
+    return;
+  }
+  const allCompleted = reports.every(report => report.status === 'completed');
+  extensionSide.hidden = allCompleted;
+  layout.classList.toggle('is-day-complete', allCompleted);
+  if (allCompleted) {
+    const points = reports.reduce((sum, report) => sum + Number(report.awarded_points || 0), 0);
+    container.innerHTML = `<section class="quran-day-complete">
+      <span><i data-lucide="badge-check"></i></span>
+      <div><small>اكتمل ورد اليوم</small><h3>لقد قمت بإنجاز جميع تقارير اليوم</h3><p>اللهم اجعله حافظاً متقناً لكتابك</p></div>
+      <strong><i data-lucide="star"></i>${points.toFixed(2)} نقطة</strong>
+    </section>`;
     return;
   }
   container.innerHTML = reports.map(reportCard).join('');
@@ -186,9 +205,9 @@ function reportCard(report) {
   const canRequest = report.status === 'pending' && report.extension_status !== 'pending';
   return `<article class="quran-student-report-card type-${meta.tone} status-${status.tone}">
     <div class="quran-report-state">
-      <button type="button" data-complete-report="${escapeHtml(report.id)}" ${canComplete ? '' : 'disabled'} title="${escapeHtml(status.commandHint)}" aria-label="${escapeHtml(status.commandHint)}">
+      <span class="quran-report-status-mark" aria-hidden="true">
         <i data-lucide="${report.status === 'completed' ? 'check' : report.status === 'exempted' ? 'minus' : 'circle'}"></i>
-      </button>
+      </span>
       <span>${escapeHtml(status.label)}</span>
     </div>
     <div class="quran-report-copy">
@@ -205,8 +224,17 @@ function reportCard(report) {
       ${report.blocked_by_overdue ? '<div class="quran-blocked-note"><i data-lucide="lock-keyhole"></i>أكمل التقرير المتأخر السابق أولاً.</div>' : ''}
       ${report.extension_status === 'pending' ? '<div class="quran-extension-note"><i data-lucide="hourglass"></i>طلب التمديد قيد المراجعة.</div>' : ''}
     </div>
-    ${canRequest ? `<label class="quran-select-extension ${state.selectedForExtension.has(report.id) ? 'is-selected' : ''}"><input type="checkbox" data-extension-report="${escapeHtml(report.id)}" ${state.selectedForExtension.has(report.id) ? 'checked' : ''}><i data-lucide="timer-reset"></i><span>طلب تمديد</span></label>` : ''}
+    ${report.status === 'pending' ? `<div class="quran-report-actions">
+      <button type="button" class="quran-complete-command" data-open-complete="${escapeHtml(report.id)}" ${canComplete ? '' : 'disabled'}><i data-lucide="${canComplete ? 'send' : 'lock-keyhole'}"></i><span>${escapeHtml(completionCommandLabel(report))}</span></button>
+      ${canRequest ? `<label class="quran-select-extension ${state.selectedForExtension.has(report.id) ? 'is-selected' : ''}"><input type="checkbox" data-extension-report="${escapeHtml(report.id)}" ${state.selectedForExtension.has(report.id) ? 'checked' : ''}><i data-lucide="timer-reset"></i><span>طلب تمديد</span></label>` : ''}
+    </div>` : ''}
   </article>`;
+}
+
+function completionCommandLabel(report) {
+  if (report.blocked_by_overdue) return 'أكمل التقرير السابق أولاً';
+  if (Date.now() < new Date(report.starts_at).getTime()) return 'لم يبدأ التقرير';
+  return 'تسليم التقرير';
 }
 
 function renderExtensionStatus() {
@@ -227,11 +255,27 @@ async function handleReportAction(event) {
     renderPage();
     return;
   }
-  const button = event.target.closest('[data-complete-report]');
+  const button = event.target.closest('[data-open-complete]');
   if (!button || button.disabled || state.busy) return;
-  const report = state.assignments.find(item => item.id === button.dataset.completeReport);
+  const report = state.assignments.find(item => item.id === button.dataset.openComplete);
   if (!report) return;
+  state.confirmingReportId = report.id;
+  document.getElementById('quran-complete-dialog').showModal();
+}
+
+function closeCompleteDialog() {
+  if (state.busy) return;
+  state.confirmingReportId = null;
+  document.getElementById('quran-complete-dialog').close();
+}
+
+async function submitConfirmedReport(event) {
+  event.preventDefault();
+  if (state.busy || !state.confirmingReportId) return;
+  const report = state.assignments.find(item => item.id === state.confirmingReportId);
+  if (!report) return closeCompleteDialog();
   state.busy = true;
+  const button = event.currentTarget.querySelector('button[type="submit"]');
   button.disabled = true;
   try {
     let result;
@@ -251,12 +295,15 @@ async function handleReportAction(event) {
     Object.assign(report, result);
     state.selectedForExtension.delete(report.id);
     showToast(`تم تسجيل الإنجاز وحصلت على ${Number(result.awarded_points || 0).toFixed(2)} نقطة.`, 'success');
+    document.getElementById('quran-complete-dialog').close();
+    state.confirmingReportId = null;
     renderPage();
   } catch (error) {
     console.error('Completing Quran report failed:', error);
     showToast(friendlyStudentError(error, 'تعذر تسجيل إنجاز التقرير.'), 'error');
   } finally {
     state.busy = false;
+    button.disabled = false;
   }
 }
 

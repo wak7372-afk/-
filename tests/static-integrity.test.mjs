@@ -140,6 +140,17 @@ test('Quran student reports and teacher console use protected report operations'
   }
 });
 
+test('student Quran reports expose an explicit confirmed submission flow and daily completion state', () => {
+  const html = fs.readFileSync(path.join(publicRoot, 'student/reports.html'), 'utf8');
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/student-reports.js'), 'utf8');
+  assert.match(html, /id="quran-complete-dialog"/);
+  assert.match(html, /id="quran-complete-form"/);
+  assert.match(script, /data-open-complete/);
+  assert.match(script, /تسليم التقرير/);
+  assert.match(script, /لقد قمت بإنجاز جميع تقارير اليوم/);
+  assert.match(script, /اللهم اجعله حافظاً متقناً لكتابك/);
+});
+
 test('classroom workflow JavaScript references existing elements', () => {
   const pairs = [
     ['teacher/classroom-detail.html', 'js/pages/teacher-classroom-detail.js'],

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zat-khail-v10';
+const CACHE_NAME = 'zat-khail-v11';
 const ASSETS = [
   '/',
   '/index.html',

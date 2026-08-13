@@ -50,6 +50,7 @@
 .quran-report-metrics strong { color: var(--report-navy); font-size: 1.15rem; }
 
 .quran-reports-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(310px, 0.5fr); gap: 18px; align-items: start; }
+.quran-reports-layout.is-day-complete { grid-template-columns: 1fr; }
 .quran-student-reports,
 .quran-extension-form,
 .quran-extension-status { border: 1px solid #ced9dd; border-radius: 8px; background: #fff; box-shadow: 0 10px 28px rgba(5,20,33,0.07); }
@@ -67,18 +68,16 @@
 .quran-student-report-card.status-late { border-color: #e3b1b4; border-right-color: var(--report-red); background: #fffafa; }
 .quran-student-report-card.status-blocked { opacity: 0.68; }
 .quran-report-state { display: grid; align-content: start; justify-items: center; gap: 7px; }
-.quran-report-state button { display: grid; width: 48px; height: 48px; place-items: center; border: 3px solid #cfd7da; border-radius: 50%; background: #fff; color: #84909a; }
-.quran-report-state button:not(:disabled):hover { border-color: var(--report-green); color: var(--report-green); }
-.quran-report-state button:disabled { cursor: not-allowed; }
-.quran-report-state button svg { width: 22px; }
-.status-early .quran-report-state button,
-.status-completed .quran-report-state button { border-color: var(--report-green); background: var(--report-green); color: #fff; }
-.status-middle .quran-report-state button { border-color: #d79728; background: #d79728; color: #fff; }
-.status-late_on_time .quran-report-state button,
-.status-late .quran-report-state button { border-color: var(--report-red); color: var(--report-red); }
-.status-late_on_time .quran-report-state button { background: #fff0f0; }
-.status-late .quran-report-state button { background: var(--report-red); color: #fff; }
-.status-exempted .quran-report-state button { border-color: #7c8892; background: #eef2f3; }
+.quran-report-status-mark { display: grid; width: 48px; height: 48px; place-items: center; border: 3px solid #cfd7da; border-radius: 50%; background: #fff; color: #84909a; }
+.quran-report-status-mark svg { width: 22px; }
+.status-early .quran-report-status-mark,
+.status-completed .quran-report-status-mark { border-color: var(--report-green); background: var(--report-green); color: #fff; }
+.status-middle .quran-report-status-mark { border-color: #d79728; background: #d79728; color: #fff; }
+.status-late_on_time .quran-report-status-mark,
+.status-late .quran-report-status-mark { border-color: var(--report-red); color: var(--report-red); }
+.status-late_on_time .quran-report-status-mark { background: #fff0f0; }
+.status-late .quran-report-status-mark { background: var(--report-red); color: #fff; }
+.status-exempted .quran-report-status-mark { border-color: #7c8892; background: #eef2f3; }
 .quran-report-state > span { color: #667482; font-size: 0.55rem; font-weight: 800; text-align: center; }
 .quran-report-copy { min-width: 0; }
 .quran-report-card-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -108,8 +107,40 @@
 .quran-select-extension svg { width: 18px; }
 .quran-select-extension span { font-size: 0.55rem; font-weight: 800; }
 .quran-select-extension.is-selected { border-color: var(--report-green); background: #edf6f2; color: var(--report-green); }
+.quran-report-actions { display: grid; min-width: 155px; align-content: center; gap: 7px; }
+.quran-complete-command { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--report-green); border-radius: 6px; background: var(--report-green); color: #fff; font-size: 0.59rem; font-weight: 900; }
+.quran-complete-command svg { width: 16px; }
+.quran-complete-command:hover:not(:disabled) { background: #084f37; }
+.quran-complete-command:disabled { border-color: #d4dde0; background: #edf1f2; color: #77858f; cursor: not-allowed; }
+.quran-report-actions .quran-select-extension { min-height: 42px; grid-template-columns: 18px auto; align-items: center; justify-content: center; }
+
+.quran-day-complete { display: grid; min-height: 330px; grid-template-columns: 76px minmax(0, 1fr) auto; place-items: center stretch; gap: 20px; padding: 34px; border: 1px solid #acd5c2; border-right: 5px solid var(--report-green); border-radius: 8px; background: #f5fbf8; text-align: right; }
+.quran-day-complete > span { display: grid; width: 66px; height: 66px; place-items: center; border-radius: 50%; background: var(--report-green); color: #fff; box-shadow: 0 0 0 8px rgba(11,106,71,0.1); }
+.quran-day-complete > span svg { width: 31px; }
+.quran-day-complete > div { display: grid; gap: 4px; }
+.quran-day-complete small { color: #987116; font-size: 0.58rem; font-weight: 900; }
+.quran-day-complete h3 { margin: 0; color: var(--report-navy); font-family: var(--font-amiri); font-size: 1.8rem; }
+.quran-day-complete p { margin: 0; color: var(--report-green); font-family: var(--font-amiri); font-size: 1.15rem; }
+.quran-day-complete > strong { display: inline-flex; min-height: 48px; align-items: center; gap: 7px; padding: 10px 13px; border: 1px solid #e5ce8b; border-radius: 6px; background: #fff9e8; color: #85620f; font-size: 0.67rem; }
+.quran-day-complete > strong svg { width: 17px; }
+
+.quran-complete-dialog { width: min(500px, calc(100% - 24px)); padding: 0; border: 1px solid #c9d5da; border-radius: 8px; background: #fff; box-shadow: 0 24px 80px rgba(4,19,31,0.36); }
+.quran-complete-dialog::backdrop { background: rgba(4,19,31,0.64); }
+.quran-complete-dialog form { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 22px; }
+.quran-confirm-icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 7px; background: #e8f5ef; color: var(--report-green); }
+.quran-confirm-icon svg { width: 22px; }
+.quran-complete-dialog form > div { display: grid; align-content: center; gap: 1px; }
+.quran-complete-dialog small { color: #987116; font-size: 0.55rem; font-weight: 900; }
+.quran-complete-dialog h2 { margin: 0; color: var(--report-navy); font-family: var(--font-amiri); font-size: 1.35rem; }
+.quran-complete-dialog p { grid-column: 1 / -1; margin: 4px 0; color: #697984; font-size: 0.61rem; line-height: 1.8; }
+.quran-complete-dialog footer { display: flex; grid-column: 1 / -1; justify-content: flex-end; gap: 7px; margin-top: 5px; }
+.quran-complete-dialog footer button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 6px; padding: 7px 13px; border: 1px solid #d1dade; border-radius: 5px; background: #fff; color: #586977; font-size: 0.58rem; font-weight: 900; }
+.quran-complete-dialog footer .confirm { border-color: var(--report-green); background: var(--report-green); color: #fff; }
+.quran-complete-dialog footer button:disabled { opacity: 0.55; }
+.quran-complete-dialog footer svg { width: 15px; }
 
 .quran-extension-side { display: grid; gap: 14px; }
+.quran-extension-side[hidden] { display: none; }
 .quran-extension-form,
 .quran-extension-status { padding: 18px; }
 .quran-extension-heading { display: flex; align-items: center; gap: 10px; }
@@ -180,12 +211,17 @@
   .quran-student-reports { padding: 14px; }
   .quran-reports-heading { align-items: flex-start; flex-direction: column; }
   .quran-student-report-card { grid-template-columns: 54px minmax(0, 1fr); gap: 10px; padding: 14px; }
-  .quran-report-state button { width: 42px; height: 42px; }
+  .quran-report-status-mark { width: 42px; height: 42px; }
+  .quran-report-actions { min-width: 0; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-select-extension { min-width: 0; grid-column: 1 / -1; grid-template-columns: 20px auto; justify-content: center; }
+  .quran-report-actions .quran-select-extension { grid-column: auto; }
   .quran-report-card-title { align-items: flex-start; flex-direction: column; }
   .quran-extension-side { grid-template-columns: 1fr; }
   .quran-plan-notice { grid-template-columns: 40px minmax(0, 1fr); }
   .quran-plan-notice button { grid-column: 1 / -1; }
+  .quran-day-complete { min-height: 290px; grid-template-columns: 58px minmax(0, 1fr); padding: 24px 18px; }
+  .quran-day-complete > span { width: 54px; height: 54px; }
+  .quran-day-complete > strong { grid-column: 1 / -1; justify-content: center; }
 }
 
 @media (max-width: 430px) {
@@ -195,4 +231,9 @@
   .quran-report-state { grid-template-columns: 44px auto; align-items: center; justify-content: start; }
   .quran-report-score-row > span { width: 100%; justify-content: center; }
   .quran-select-extension { grid-column: auto; }
+  .quran-report-actions { grid-template-columns: 1fr; }
+  .quran-day-complete { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .quran-day-complete h3 { font-size: 1.45rem; }
+  .quran-day-complete > strong { grid-column: auto; width: 100%; }
+  .quran-complete-dialog footer { display: grid; grid-template-columns: 1fr; width: 100%; }
 }
