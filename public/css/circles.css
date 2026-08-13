@@ -558,6 +558,11 @@
 .quran-review-status svg { width: 14px; }
 .quran-import-server-review.needs-attention { border-top: 4px solid #c18d20; }
 .quran-import-server-review.is-clear { border-top: 4px solid var(--circle-green); }
+.quran-import-archive-warning { display: flex; align-items: center; gap: 10px; margin: 14px 0; padding: 11px 13px; border: 1px solid #dfc36e; border-right: 4px solid #c29524; border-radius: 6px; background: #fffaf0; color: #5f4916; }
+.quran-import-archive-warning svg { width: 20px; flex: 0 0 20px; }
+.quran-import-archive-warning span { display: grid; gap: 2px; }
+.quran-import-archive-warning b { font-size: 0.74rem; }
+.quran-import-archive-warning small { color: #735f31; font-size: 0.64rem; }
 .quran-conflict-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.55fr); gap: 14px; margin-bottom: 15px; }
 .quran-conflict-list { display: grid; max-height: 380px; overflow: auto; border: 1px solid #d9e1e4; border-radius: 7px; }
 .quran-conflict-list article { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: start; gap: 9px; padding: 11px; }

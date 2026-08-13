@@ -4,14 +4,15 @@ import path from 'node:path';
 import test from 'node:test';
 
 const root = path.resolve(import.meta.dirname, '..');
-const migration = fs.readFileSync(
-  path.join(root, 'supabase/migrations/0019_quran_function_privilege_hardening.sql'),
-  'utf8',
-);
+const migration = [
+  '0019_quran_function_privilege_hardening.sql',
+  '0020_resilient_quran_report_import_archive.sql',
+].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
 
 test('Quran report functions explicitly revoke anonymous execution', () => {
   const functions = [
     'stage_quran_report_import(uuid, text, bigint, text, jsonb, text, uuid[], text, jsonb)',
+    'attach_quran_report_import_file(uuid, text)',
     'get_my_quran_reports(date, date)',
     'complete_quran_report_assignment(uuid)',
     'request_quran_report_extension(uuid[], integer, text)',

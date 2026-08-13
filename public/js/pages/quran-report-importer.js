@@ -202,6 +202,7 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
           <div><span>الفحص النهائي</span><h3>${errorCount ? 'يجب تصحيح الملف' : conflictCount ? `${conflictCount} تعارض مع خطط الطلاب` : 'الخطة جاهزة للاعتماد'}</h3></div>
           <span class="quran-review-status"><i data-lucide="${errorCount || conflictCount ? 'triangle-alert' : 'badge-check'}"></i>${errorCount || conflictCount ? 'تحتاج قراراً' : 'تم التحقق'}</span>
         </div>
+        ${state.archiveWarning ? `<div class="quran-import-archive-warning" role="status"><i data-lucide="archive-x"></i><span><b>تعذر حفظ نسخة الملف الأصلية</b><small>${escapeHtml(state.archiveWarning)} يمكنك مراجعة التعارضات واعتماد التقارير بصورة طبيعية.</small></span></div>` : ''}
         ${conflictCount ? renderConflicts(conflicts, nonReplaceable) : ''}
         <div class="quran-import-final-action">
           <button type="button" class="circle-secondary-command" data-import-action="reset"><i data-lucide="arrow-right"></i><span>العودة والتعديل</span></button>
@@ -361,8 +362,6 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
         state.batchId = 'preview-batch';
         state.serverPreview = previewServerResult(activeStudents, selectedIds);
       } else {
-        const storagePath = await uploadOriginalFile(context);
-        state.storagePath = storagePath;
         const { data: staged, error: stageError } = await supabase.rpc('stage_quran_report_import', {
           p_circle_id: context.circle.id,
           p_file_name: state.file.name,
@@ -371,7 +370,7 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
           p_rows: toServerRows(state.parsed.rows),
           p_audience_mode: state.audience,
           p_student_ids: selectedIds,
-          p_storage_path: storagePath,
+          p_storage_path: null,
           p_metadata: { parser: 'quran-daily-v1', source_sheets: state.parsed.sheets },
         });
         if (stageError) throw stageError;
@@ -379,6 +378,7 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
         const { data: preview, error: previewError } = await supabase.rpc('get_quran_report_import_preview', { p_batch_id: state.batchId });
         if (previewError) throw previewError;
         state.serverPreview = preview;
+        await archiveOriginalFile(context);
       }
       state.conflictStrategy = Number(state.serverPreview.conflict_count || 0) ? '' : 'reject';
       showToast('اكتمل فحص التقارير والمستفيدين.', 'success');
@@ -471,10 +471,31 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
     const { error } = await supabase.storage.from('quran-report-imports').upload(path, state.file, {
       cacheControl: '3600',
       upsert: false,
-      contentType: state.file.type || mimeFromName(state.file.name),
+      contentType: mimeFromName(state.file.name),
     });
     if (error) throw error;
     return path;
+  }
+
+  async function archiveOriginalFile(context) {
+    state.archiveWarning = '';
+    try {
+      const storagePath = await uploadOriginalFile(context);
+      state.storagePath = storagePath;
+      const { error } = await supabase.rpc('attach_quran_report_import_file', {
+        p_batch_id: state.batchId,
+        p_storage_path: storagePath,
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Quran report source archive failed:', error);
+      state.archiveWarning = friendlyImportError(error, 'لم تُحفظ نسخة الملف في الأرشيف السحابي.');
+      try {
+        await removeUploadedFile();
+      } catch (cleanupError) {
+        console.error('Quran report source archive cleanup failed:', cleanupError);
+      }
+    }
   }
 
   async function removeUploadedFile() {
@@ -529,6 +550,7 @@ function freshState() {
     page: 1,
     batchId: null,
     storagePath: null,
+    archiveWarning: '',
     serverPreview: null,
     conflictStrategy: '',
     published: null,
@@ -584,5 +606,9 @@ function friendlyImportError(error, fallback) {
   if (/not active members|eligible selected/i.test(message)) return 'تغيرت عضوية أحد الطلاب؛ أعد اختيار المستفيدين.';
   if (/permission|not allowed|authorized|42501/i.test(message)) return 'لا تملك صلاحية إنشاء تقارير هذه الحلقة.';
   if (/file size/i.test(message)) return 'حجم الملف غير مسموح.';
+  if (/mime|content.?type|invalid.*type/i.test(message)) return 'صيغة ملف Excel غير مقبولة في الأرشيف السحابي.';
+  if (/bucket.*not found|quran-report-imports.*not found/i.test(message)) return 'مخزن ملفات التقارير غير متاح حالياً.';
+  if (/row-level security|storage.*policy|stored Excel file/i.test(message)) return 'تعذر أرشفة الملف بسبب صلاحيات التخزين.';
+  if (/failed to fetch|network|load failed/i.test(message)) return 'تعذر الاتصال بالخدمة السحابية. تحقق من الشبكة ثم حاول مجدداً.';
   return fallback;
 }
