@@ -4,7 +4,10 @@ import path from 'node:path';
 import test from 'node:test';
 
 const root = path.resolve(import.meta.dirname, '..');
-const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0017_quran_report_operations.sql'), 'utf8');
+const migration = [
+  '0017_quran_report_operations.sql',
+  '0021_quran_report_visibility_and_review.sql',
+].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
 
 test('student completion is server-side, scored, and blocked by older overdue reports', () => {
   assert.match(migration, /function public\.complete_quran_report_assignment\(p_assignment_id uuid\)/);
@@ -54,9 +57,26 @@ test('all report operations revoke public access and grant authenticated executi
     'get_quran_extension_queue(uuid, text)',
     'decide_quran_report_extension(uuid, jsonb)',
     'exempt_quran_report_assignment(uuid, text)',
+    'get_my_quran_report_overview()',
+    'get_quran_approved_report_plan(uuid, date, date)',
   ];
   for (const signature of functions) {
-    assert.ok(migration.includes(`revoke all on function public.${signature} from public;`));
-    assert.ok(migration.includes(`grant execute on function public.${signature} to authenticated;`));
+    assert.ok(
+      migration.includes(`revoke all on function public.${signature} from public;`)
+      || migration.includes(`revoke all on function public.${signature} from public, anon, authenticated;`),
+    );
+    assert.ok(
+      migration.includes(`grant execute on function public.${signature} to authenticated;`)
+      || migration.includes(`grant execute on function public.${signature} to authenticated, service_role;`),
+    );
   }
+});
+
+test('students can discover future plans and teachers can review approved reports', () => {
+  assert.match(migration, /function public\.get_my_quran_report_overview\(\)/);
+  assert.match(migration, /'focus_date'/);
+  assert.match(migration, /min\(report_date\) filter \(where status = 'pending' and report_date > today_value\)/);
+  assert.match(migration, /function public\.get_quran_approved_report_plan\(/);
+  assert.match(migration, /can_review_quran_reports\(p_circle_id\)/);
+  assert.match(migration, /assigned_count/);
 });

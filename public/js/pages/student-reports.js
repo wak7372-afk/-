@@ -13,6 +13,7 @@ const state = {
   preview: false,
   selectedDate: muscatDateKey(),
   assignments: [],
+  overview: null,
   overdueCount: 0,
   earnedPoints: 0,
   selectedForExtension: new Set(),
@@ -31,11 +32,35 @@ async function initialize() {
   document.getElementById('previous-report-week').addEventListener('click', () => moveSelectedDate(-7));
   document.getElementById('next-report-week').addEventListener('click', () => moveSelectedDate(7));
   document.getElementById('quran-date-days').addEventListener('click', selectDate);
+  document.getElementById('quran-plan-notice').addEventListener('click', selectDate);
   document.getElementById('quran-student-report-list').addEventListener('click', handleReportAction);
   document.getElementById('quran-extension-form').addEventListener('submit', submitExtensionRequest);
+  const requestedDate = new URL(window.location.href).searchParams.get('date');
+  if (isDateKey(requestedDate)) state.selectedDate = requestedDate;
+  await loadOverview();
+  if (!isDateKey(requestedDate) && state.overview?.focus_date) state.selectedDate = state.overview.focus_date;
   await loadReports();
   setInterval(() => renderPage(), 60000);
   refreshIcons();
+}
+
+async function loadOverview() {
+  if (state.preview) {
+    state.overview = {
+      total_count: 5,
+      pending_count: 4,
+      first_report_date: addDateKey(muscatDateKey(), -1),
+      last_report_date: addDateKey(muscatDateKey(), 1),
+      focus_date: muscatDateKey(),
+    };
+    return;
+  }
+  const { data, error } = await supabase.rpc('get_my_quran_report_overview');
+  if (error) {
+    console.error('Loading Quran report overview failed:', error);
+    return;
+  }
+  state.overview = data || null;
 }
 
 async function loadReports() {
@@ -84,9 +109,33 @@ function renderPage() {
   updateDerivedState();
   renderDateStrip();
   renderMetrics();
+  renderPlanNotice();
   renderReports();
   renderExtensionStatus();
   refreshIcons();
+}
+
+function renderPlanNotice() {
+  const notice = document.getElementById('quran-plan-notice');
+  const overview = state.overview;
+  if (!overview?.total_count) {
+    notice.hidden = true;
+    notice.innerHTML = '';
+    return;
+  }
+  const today = muscatDateKey();
+  const firstDate = overview.first_report_date;
+  const lastDate = overview.last_report_date;
+  const upcoming = firstDate && firstDate > today;
+  notice.hidden = false;
+  notice.classList.toggle('is-upcoming', upcoming);
+  notice.innerHTML = `
+    <span><i data-lucide="${upcoming ? 'calendar-clock' : 'route'}"></i></span>
+    <div>
+      <strong>${upcoming ? `خطتك القرآنية تبدأ في ${escapeHtml(formatDate(firstDate))}` : 'خطة التقارير القرآنية مرتبطة بحسابك'}</strong>
+      <small>من ${escapeHtml(formatDate(firstDate))} إلى ${escapeHtml(formatDate(lastDate))} · ${Number(overview.pending_count || 0)} تقرير قيد الإنجاز</small>
+    </div>
+    ${overview.focus_date && overview.focus_date !== state.selectedDate ? `<button type="button" data-plan-focus="${escapeHtml(overview.focus_date)}">الانتقال لأقرب تقرير <i data-lucide="arrow-left"></i></button>` : ''}`;
 }
 
 function renderDateStrip() {
@@ -250,18 +299,34 @@ async function submitExtensionRequest(event) {
 }
 
 function selectDate(event) {
+  const focusButton = event.target.closest('[data-plan-focus]');
+  if (focusButton) {
+    state.selectedDate = focusButton.dataset.planFocus;
+    state.selectedForExtension.clear();
+    updateSelectedDateUrl();
+    loadReports();
+    return;
+  }
   const button = event.target.closest('[data-report-date]');
   if (!button) return;
   state.selectedDate = button.dataset.reportDate;
   state.selectedForExtension.clear();
+  updateSelectedDateUrl();
   renderPage();
 }
 
 async function moveSelectedDate(days) {
   state.selectedDate = addDateKey(state.selectedDate, days);
   state.selectedForExtension.clear();
+  updateSelectedDateUrl();
   if (state.preview) renderPage();
   else await loadReports();
+}
+
+function updateSelectedDateUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('date', state.selectedDate);
+  window.history.replaceState({}, '', url);
 }
 
 function reportsForSelectedDate() {
@@ -430,6 +495,10 @@ function addDays(date, days) {
 
 function addDateKey(value, days) {
   return toDateKey(addDays(parseDateKey(value), days));
+}
+
+function isDateKey(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(parseDateKey(value).getTime());
 }
 
 function refreshIcons() {

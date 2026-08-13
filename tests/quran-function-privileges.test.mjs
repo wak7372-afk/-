@@ -7,6 +7,7 @@ const root = path.resolve(import.meta.dirname, '..');
 const migration = [
   '0019_quran_function_privilege_hardening.sql',
   '0020_resilient_quran_report_import_archive.sql',
+  '0021_quran_report_visibility_and_review.sql',
 ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
 
 test('Quran report functions explicitly revoke anonymous execution', () => {
@@ -20,6 +21,8 @@ test('Quran report functions explicitly revoke anonymous execution', () => {
     'decide_quran_report_extension(uuid, jsonb)',
     'exempt_quran_report_assignment(uuid, text)',
     'publish_quran_daily_summaries(date, uuid)',
+    'get_my_quran_report_overview()',
+    'get_quran_approved_report_plan(uuid, date, date)',
   ];
 
   for (const signature of functions) {
@@ -34,6 +37,8 @@ test('only authenticated server operations regain execution access', () => {
   assert.match(migration, /alter default privileges for role postgres in schema public[\s\S]*revoke execute on functions from public, anon, authenticated/);
   assert.match(migration, /grant execute on function public\.get_my_quran_reports\(date, date\) to authenticated, service_role/);
   assert.match(migration, /grant execute on function public\.publish_quran_daily_summaries\(date, uuid\) to authenticated, service_role/);
+  assert.match(migration, /grant execute on function public\.get_my_quran_report_overview\(\) to authenticated, service_role/);
+  assert.match(migration, /grant execute on function public\.get_quran_approved_report_plan\(uuid, date, date\) to authenticated, service_role/);
   assert.doesNotMatch(migration, /grant execute on function public\.[^;]+ to anon/);
 });
 

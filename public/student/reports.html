@@ -8,8 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="manifest" href="../manifest.json">
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/student-dashboard.css?v=3">
-  <link rel="stylesheet" href="../css/quran-reports.css?v=1">
+  <link rel="stylesheet" href="../css/student-dashboard.css?v=4">
+  <link rel="stylesheet" href="../css/quran-reports.css?v=2">
 </head>
 <body class="student-shell quran-reports-shell">
   <header class="student-topbar">
@@ -44,6 +44,8 @@
         <div><strong id="quran-earned-points">0.00</strong><small>نقطة مكتسبة</small></div>
       </div>
     </section>
+
+    <section id="quran-plan-notice" class="quran-plan-notice" hidden aria-live="polite"></section>
 
     <section class="quran-date-strip" aria-label="اختيار يوم التقارير">
       <button id="previous-report-week" type="button" title="الأيام السابقة" aria-label="الأيام السابقة"><i data-lucide="chevron-right"></i></button>
@@ -100,6 +102,6 @@
     <a href="../account-settings.html"><i data-lucide="circle-user-round"></i><span>حسابي</span></a>
   </nav>
 
-  <script type="module" src="../js/pages/student-reports.js?v=1"></script>
+  <script type="module" src="../js/pages/student-reports.js?v=2"></script>
 </body>
 </html>

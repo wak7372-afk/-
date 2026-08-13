@@ -594,7 +594,7 @@
 
 /* Quran report accounting and extension review */
 .quran-manager-root { display: grid; gap: 16px; min-width: 0; }
-.quran-manager-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid #cdd8dd; border-radius: 7px; background: #fff; box-shadow: 0 8px 22px rgba(5,20,33,0.06); }
+.quran-manager-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); overflow: hidden; border: 1px solid #cdd8dd; border-radius: 7px; background: #fff; box-shadow: 0 8px 22px rgba(5,20,33,0.06); }
 .quran-manager-tabs button { position: relative; display: flex; min-height: 58px; align-items: center; justify-content: center; gap: 8px; border: 0; background: #fff; color: #667482; font-size: 0.65rem; font-weight: 900; }
 .quran-manager-tabs button + button { border-right: 1px solid #dfe5e8; }
 .quran-manager-tabs button svg { width: 17px; }
@@ -632,6 +632,38 @@
 .quran-accounting-metrics .is-gold svg { color: #927018; }
 .quran-accounting-metrics span { color: #74818d; font-size: 0.55rem; }
 .quran-accounting-metrics strong { color: var(--circle-navy); font-size: 1.05rem; }
+
+.quran-review-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(520px, 1.5fr); align-items: end; gap: 18px; padding: 20px; border: 1px solid #cad7dc; border-radius: 8px; background: #fff; box-shadow: var(--shadow-soft); }
+.quran-review-toolbar > div > span { color: #967116; font-size: 0.57rem; font-weight: 900; }
+.quran-review-toolbar h3 { margin: 2px 0; color: var(--circle-navy); font-family: var(--font-amiri); font-size: 1.35rem; }
+.quran-review-toolbar p { margin: 0; color: #74818d; font-size: 0.6rem; }
+.quran-review-toolbar form { display: grid; grid-template-columns: repeat(3, minmax(125px, 1fr)) auto; align-items: end; gap: 7px; }
+.quran-review-toolbar label { display: grid; gap: 5px; }
+.quran-review-toolbar label span { color: #526372; font-size: 0.53rem; font-weight: 900; }
+.quran-review-toolbar input,
+.quran-review-toolbar select { width: 100%; min-height: 39px; padding: 7px 9px; border: 1px solid #d1dce0; border-radius: 5px; background: #fff; color: #344757; font-size: 0.57rem; }
+.quran-review-toolbar button { display: inline-flex; min-height: 39px; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--circle-green); border-radius: 5px; background: var(--circle-green); color: #fff; font-size: 0.57rem; font-weight: 900; }
+.quran-review-toolbar button svg { width: 14px; }
+.quran-approved-plan-list { overflow: hidden; border: 1px solid #ced9dd; border-radius: 8px; background: #fff; box-shadow: var(--shadow-soft); }
+.quran-approved-plan-head,
+.quran-approved-report { display: grid; grid-template-columns: minmax(155px, 0.55fr) minmax(280px, 1.45fr) minmax(270px, 1fr); align-items: center; gap: 12px; }
+.quran-approved-plan-head { min-height: 43px; padding: 8px 14px; border-bottom: 1px solid #dce3e6; background: #f4f7f7; color: #74818c; font-size: 0.54rem; font-weight: 900; }
+.quran-approved-report { min-height: 76px; padding: 11px 14px; border-right: 4px solid var(--circle-gold); }
+.quran-approved-report + .quran-approved-report { border-top: 1px solid #e0e6e8; }
+.quran-approved-date,
+.quran-approved-content { display: grid; min-width: 0; gap: 4px; }
+.quran-approved-date time { color: var(--circle-navy); font-size: 0.6rem; font-weight: 900; }
+.quran-approved-date span { display: inline-flex; align-items: center; gap: 5px; color: #8b6814; font-size: 0.54rem; font-weight: 800; }
+.quran-approved-date svg { width: 13px; }
+.quran-approved-content strong,
+.quran-approved-content small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quran-approved-content strong { color: #304454; font-size: 0.62rem; }
+.quran-approved-content small { color: #798690; font-size: 0.53rem; }
+.quran-approved-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.quran-approved-counts span { display: grid; min-height: 40px; place-items: center; gap: 1px; padding: 5px; border: 1px solid #d8e0e3; border-radius: 5px; background: #f8faf9; color: #687783; font-size: 0.49rem; }
+.quran-approved-counts b { color: var(--circle-navy); font-size: 0.62rem; }
+.quran-approved-counts .is-green { border-color: #bbdccf; background: #f0f8f4; color: var(--circle-green); }
+.quran-approved-counts .is-gold { border-color: #ead59a; background: #fffaeb; color: #8b6814; }
 
 .quran-student-accounting-list { overflow: hidden; border: 1px solid #ced9dd; border-radius: 8px; background: #fff; box-shadow: var(--shadow-soft); }
 .quran-accounting-list-head,
@@ -841,7 +873,11 @@
   .quran-manager-tabs button { min-height: 54px; flex-direction: column; gap: 3px; padding: 5px; font-size: 0.54rem; }
   .quran-manager-tabs button svg { width: 15px; }
   .quran-accounting-toolbar,
+  .quran-review-toolbar,
   .quran-extension-queue-head { align-items: stretch; flex-direction: column; padding: 15px; }
+  .quran-review-toolbar { display: grid; grid-template-columns: 1fr; }
+  .quran-review-toolbar form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quran-review-toolbar form button { grid-column: 1 / -1; }
   .quran-accounting-date { width: 100%; }
   .quran-accounting-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-student-accounting-list { overflow: hidden; }
@@ -883,6 +919,9 @@
   .quran-extension-decision-controls { grid-template-columns: 1fr; }
   .quran-extension-decision-controls .decision-note,
   .quran-extension-decision-controls > button { grid-column: auto; }
+  .quran-approved-plan-list { overflow-x: auto; }
+  .quran-approved-plan-head,
+  .quran-approved-report { min-width: 720px; }
 }
 
 @media (max-width: 420px) {
@@ -908,4 +947,6 @@
   .quran-manager-tabs button + button { border-top: 1px solid #dfe5e8; border-right: 0; }
   .quran-manager-tabs button { flex-direction: row; }
   .quran-accounting-metrics { grid-template-columns: 1fr; }
+  .quran-review-toolbar form { grid-template-columns: 1fr; }
+  .quran-review-toolbar form button { grid-column: auto; }
 }

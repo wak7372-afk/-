@@ -187,6 +187,8 @@
 .classroom-icon svg { width: 16px; }.classroom-row > svg { width: 15px; color: #98a5ab; }
 .classroom-row strong, .classroom-row small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .classroom-row strong { font-size: 9px; }.classroom-row small { margin-top: 3px; color: #7b8890; font-size: 7px; }
+.task-empty .task-plan-link { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; padding: 7px 12px; border: 1px solid var(--student-gold); border-radius: 6px; background: #fff8e7; color: var(--student-navy); font-size: 8px; font-weight: 800; text-decoration: none; }
+.task-empty .task-plan-link svg { width: 14px; }
 .side-empty { padding: 14px 4px; color: #7a878f; font-size: 9px; }
 .family-section summary { display: grid; grid-template-columns: 38px 1fr 18px; align-items: center; gap: 10px; cursor: pointer; list-style: none; }
 .family-section summary::-webkit-details-marker { display: none; }

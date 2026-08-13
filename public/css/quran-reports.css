@@ -149,6 +149,17 @@
 .quran-reports-empty h3 { margin: 0; color: var(--report-navy); font-family: var(--font-amiri); font-size: 1.2rem; }
 .quran-reports-empty p { margin: 0; font-size: 0.61rem; }
 .quran-reports-empty.is-error svg { color: var(--report-red); }
+.quran-plan-notice { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; margin: 12px 0; padding: 13px 16px; border: 1px solid #b9d7cb; border-right: 4px solid var(--report-green); border-radius: 7px; background: #f5fbf8; box-shadow: 0 8px 20px rgba(5, 45, 35, 0.06); }
+.quran-plan-notice[hidden] { display: none; }
+.quran-plan-notice > span { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 6px; background: #e1f1ea; color: var(--report-green); }
+.quran-plan-notice > span svg { width: 19px; }
+.quran-plan-notice div { display: grid; min-width: 0; gap: 2px; }
+.quran-plan-notice strong { color: var(--report-navy); font-size: 0.66rem; }
+.quran-plan-notice small { color: #6f7f89; font-size: 0.56rem; }
+.quran-plan-notice button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 6px; padding: 7px 11px; border: 1px solid var(--report-gold); border-radius: 5px; background: #fff9e9; color: var(--report-navy); font-size: 0.56rem; font-weight: 900; }
+.quran-plan-notice button svg { width: 14px; }
+.quran-plan-notice.is-upcoming { border-color: #ead59b; border-right-color: var(--report-gold); background: #fffbef; }
+.quran-plan-notice.is-upcoming > span { background: #f8edc9; color: #8b6814; }
 
 @media (max-width: 1050px) {
   .quran-reports-layout { grid-template-columns: 1fr; }
@@ -173,6 +184,8 @@
   .quran-select-extension { min-width: 0; grid-column: 1 / -1; grid-template-columns: 20px auto; justify-content: center; }
   .quran-report-card-title { align-items: flex-start; flex-direction: column; }
   .quran-extension-side { grid-template-columns: 1fr; }
+  .quran-plan-notice { grid-template-columns: 40px minmax(0, 1fr); }
+  .quran-plan-notice button { grid-column: 1 / -1; }
 }
 
 @media (max-width: 430px) {

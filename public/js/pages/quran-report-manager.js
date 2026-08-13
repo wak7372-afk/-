@@ -13,6 +13,10 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     activeView: defaultView(),
     reportDate: muscatDateKey(),
     consoleData: null,
+    reviewPlan: null,
+    reviewStartDate: '',
+    reviewEndDate: '',
+    reviewType: 'all',
     extensionQueue: null,
     history: null,
     selectedStudentId: null,
@@ -35,6 +39,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     const views = [];
     if (permissions.can_create_tasks) views.push({ id: 'create', label: 'إنشاء التقارير', icon: 'file-spreadsheet' });
     if (permissions.can_review_submissions) {
+      views.push({ id: 'review', label: 'مراجعة التقارير', icon: 'calendar-search' });
       views.push({ id: 'accounting', label: 'محاسبة الطلاب', icon: 'users-round' });
       views.push({ id: 'extensions', label: 'طلبات التمديد', icon: 'timer-reset' });
     }
@@ -65,7 +70,48 @@ export function createQuranReportManager({ container, supabase, getContext, refr
       host.innerHTML = renderAccounting();
       return;
     }
+    if (state.activeView === 'review') {
+      host.innerHTML = renderReviewPlan();
+      return;
+    }
     host.innerHTML = renderExtensions();
+  }
+
+  function renderReviewPlan() {
+    if (!state.reviewPlan) return loadingState('جاري تحميل التقارير المعتمدة...');
+    const reports = (state.reviewPlan.reports || []).filter(report => state.reviewType === 'all' || report.task_type === state.reviewType);
+    const assigned = reports.reduce((sum, report) => sum + Number(report.assigned_count || 0), 0);
+    const completed = reports.reduce((sum, report) => sum + Number(report.completed_count || 0), 0);
+    const pending = reports.reduce((sum, report) => sum + Number(report.pending_count || 0), 0);
+    return `
+      <section class="quran-review-toolbar">
+        <div><span>الخطة المعتمدة</span><h3>مراجعة التقارير</h3><p>جميع تقارير الحفظ والتثبيت والمراجعة بعد اعتماد ملف الإكسل.</p></div>
+        <form data-review-filter>
+          <label><span>من</span><input name="review-start" type="date" value="${escapeHtml(state.reviewStartDate)}"></label>
+          <label><span>إلى</span><input name="review-end" type="date" value="${escapeHtml(state.reviewEndDate)}"></label>
+          <label><span>النوع</span><select name="review-type"><option value="all" ${state.reviewType === 'all' ? 'selected' : ''}>جميع الأنواع</option><option value="hifz" ${state.reviewType === 'hifz' ? 'selected' : ''}>الحفظ</option><option value="tathbit" ${state.reviewType === 'tathbit' ? 'selected' : ''}>التثبيت</option><option value="murajaa" ${state.reviewType === 'murajaa' ? 'selected' : ''}>المراجعة</option></select></label>
+          <button type="submit"><i data-lucide="search"></i><span>عرض</span></button>
+        </form>
+      </section>
+      <section class="quran-accounting-metrics" aria-label="ملخص التقارير المعتمدة">
+        ${metric('calendar-range', 'التقارير', reports.length)}
+        ${metric('users-round', 'التعيينات', assigned, 'gold')}
+        ${metric('circle-check-big', 'منجز', completed, 'green')}
+        ${metric('clock-3', 'قيد الإنجاز', pending, 'red')}
+      </section>
+      <section class="quran-approved-plan-list">
+        <div class="quran-approved-plan-head"><span>التاريخ والنوع</span><span>محتوى التقرير</span><span>حالة الطلاب</span></div>
+        ${reports.map(approvedReportRow).join('') || emptyState('calendar-x-2', 'لا توجد تقارير معتمدة ضمن هذا النطاق.')}
+      </section>`;
+  }
+
+  function approvedReportRow(report) {
+    const meta = TYPE_META[report.task_type] || TYPE_META.hifz;
+    return `<article class="quran-approved-report">
+      <div class="quran-approved-date"><time>${formatDate(report.report_date)}</time><span><i data-lucide="${meta.icon}"></i>${meta.label}</span></div>
+      <div class="quran-approved-content"><strong>${escapeHtml(report.content)}</strong><small>${report.repetitions ? `${Number(report.repetitions)} تكرارات · ` : ''}${Number(report.max_points || 0).toFixed(2)} نقطة${report.notes ? ` · ${escapeHtml(report.notes)}` : ''}</small></div>
+      <div class="quran-approved-counts"><span class="is-green"><b>${Number(report.completed_count || 0)}</b> منجز</span><span class="is-gold"><b>${Number(report.pending_count || 0)}</b> قيد الإنجاز</span><span><b>${Number(report.exempted_count || 0)}</b> معفى</span></div>
+    </article>`;
   }
 
   function renderAccounting() {
@@ -212,6 +258,16 @@ export function createQuranReportManager({ container, supabase, getContext, refr
   }
 
   async function handleSubmit(event) {
+    const reviewForm = event.target.closest('[data-review-filter]');
+    if (reviewForm) {
+      event.preventDefault();
+      const formData = new FormData(reviewForm);
+      state.reviewStartDate = String(formData.get('review-start') || '');
+      state.reviewEndDate = String(formData.get('review-end') || '');
+      state.reviewType = String(formData.get('review-type') || 'all');
+      await loadReviewPlan();
+      return;
+    }
     const extensionForm = event.target.closest('[data-extension-decision]');
     if (extensionForm) {
       event.preventDefault();
@@ -226,8 +282,24 @@ export function createQuranReportManager({ container, supabase, getContext, refr
   }
 
   async function loadActiveView() {
+    if (state.activeView === 'review') await loadReviewPlan();
     if (state.activeView === 'accounting') await loadAccounting();
     if (state.activeView === 'extensions') await loadExtensions();
+  }
+
+  async function loadReviewPlan() {
+    state.reviewPlan = null;
+    render();
+    try {
+      state.reviewPlan = isLocalPreviewMode() ? previewReviewPlan() : await rpc('get_quran_approved_report_plan', {
+        p_circle_id: getContext().circle.id,
+        p_start_date: state.reviewStartDate || null,
+        p_end_date: state.reviewEndDate || null,
+      });
+      render();
+    } catch (error) {
+      showToast(friendlyManagerError(error, 'تعذر تحميل التقارير المعتمدة.'), 'error');
+    }
   }
 
   async function loadAccounting() {
@@ -346,6 +418,27 @@ function previewConsole(date) {
     previewStudent('student-3', 'يحيى بن عبدالله العدوي', 'yahya.a', date, []),
   ];
   return { report_date: date, server_now: new Date().toISOString(), students };
+}
+
+function previewReviewPlan() {
+  const reports = [];
+  for (let day = 0; day < 8; day += 1) {
+    const date = addDateKey(muscatDateKey(), day);
+    ['hifz', 'tathbit', 'murajaa'].forEach((type, index) => reports.push({
+      id: `review-${day}-${type}`,
+      report_date: date,
+      task_type: type,
+      content: type === 'hifz' ? `حفظ سورة الملك، المقطع ${day + 1}` : type === 'tathbit' ? `تثبيت محفوظ اليوم ${day + 1}` : `مراجعة الورد السابق ${day + 1}`,
+      repetitions: type === 'tathbit' ? 3 : null,
+      notes: index === 2 ? 'العناية بمواضع التشابه.' : null,
+      max_points: type === 'hifz' ? 4 : 3,
+      assigned_count: 18,
+      completed_count: day === 0 ? 12 - index : 0,
+      pending_count: day === 0 ? 6 + index : 18,
+      exempted_count: 0,
+    }));
+  }
+  return { date_from: reports[0].report_date, date_to: reports.at(-1).report_date, reports };
 }
 
 function previewStudent(id, fullName, username, date, assignments, overdueCount = 0) {

@@ -117,7 +117,10 @@ test('Quran student reports and teacher console use protected report operations'
     'js/pages/student-reports.js',
     'js/pages/quran-report-manager.js',
   ].map(file => fs.readFileSync(path.join(publicRoot, file), 'utf8')).join('\n');
-  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0017_quran_report_operations.sql'), 'utf8');
+  const migration = [
+    '0017_quran_report_operations.sql',
+    '0021_quran_report_visibility_and_review.sql',
+  ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
   const requiredRpcs = [
     'get_my_quran_reports',
     'complete_quran_report_assignment',
@@ -127,11 +130,13 @@ test('Quran student reports and teacher console use protected report operations'
     'get_quran_extension_queue',
     'decide_quran_report_extension',
     'exempt_quran_report_assignment',
+    'get_my_quran_report_overview',
+    'get_quran_approved_report_plan',
   ];
 
   for (const rpc of requiredRpcs) {
     assert.match(scripts, new RegExp(`rpc\\('${rpc}'`));
-    assert.ok(migration.includes(`function public.${rpc}`), `${rpc} must be deployed by migration 0017`);
+    assert.ok(migration.includes(`function public.${rpc}`), `${rpc} must be deployed by the Quran operations migrations`);
   }
 });
 

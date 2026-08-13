@@ -10,6 +10,7 @@ const state = {
   selectedDate: toDateKey(new Date()),
   period: 'all',
   tasks: [],
+  quranOverview: null,
   notifications: [],
   notificationChannel: null,
 };
@@ -36,7 +37,7 @@ async function initializeStudentDashboard() {
   setupFamilyLink();
 
   renderWeek();
-  await Promise.all([loadTaskFeed(), loadJoinedClassrooms(), loadNotifications()]);
+  await Promise.all([loadTaskFeed(), loadJoinedLearningCircles(), loadNotifications()]);
   subscribeToNotifications();
   refreshIcons();
 }
@@ -205,19 +206,49 @@ async function loadTaskFeed() {
     return;
   }
 
-  const { data, error } = await supabase.rpc('get_student_task_feed', {
-    p_start_date: toDateKey(state.weekStart),
-    p_end_date: toDateKey(weekEnd),
-  });
-  if (error) {
-    console.error(error);
+  const startDate = toDateKey(state.weekStart);
+  const endDate = toDateKey(weekEnd);
+  const [legacyResult, quranResult, overviewResult] = await Promise.all([
+    supabase.rpc('get_student_task_feed', { p_start_date: startDate, p_end_date: endDate }),
+    supabase.rpc('get_my_quran_reports', { p_start_date: startDate, p_end_date: endDate }),
+    supabase.rpc('get_my_quran_report_overview'),
+  ]);
+  if (legacyResult.error && quranResult.error) {
+    console.error(legacyResult.error, quranResult.error);
     state.tasks = [];
     list.innerHTML = '<div class="task-empty is-error"><i data-lucide="cloud-off"></i><h3>تعذر تحميل المهام</h3><p>حدّث الصفحة أو تواصل مع إدارة المركز.</p></div>';
     refreshIcons();
     return;
   }
-  state.tasks = Array.isArray(data) ? data : [];
+  if (legacyResult.error) console.error('Loading legacy student tasks failed:', legacyResult.error);
+  if (quranResult.error) console.error('Loading Quran student reports failed:', quranResult.error);
+  if (overviewResult.error) console.error('Loading Quran report overview failed:', overviewResult.error);
+  const legacyTasks = Array.isArray(legacyResult.data) ? legacyResult.data : [];
+  const quranTasks = Array.isArray(quranResult.data?.assignments)
+    ? quranResult.data.assignments.map(quranReportTask)
+    : [];
+  state.tasks = [...legacyTasks, ...quranTasks];
+  state.quranOverview = overviewResult.data || null;
   renderDashboard();
+}
+
+function quranReportTask(assignment) {
+  return {
+    source: 'quran_report',
+    task_id: assignment.report_id,
+    submission_id: assignment.id,
+    title: taskTypeLabel(assignment.task_type),
+    content: assignment.content,
+    category: assignment.task_type,
+    task_date: assignment.report_date,
+    period: 'flexible',
+    due_at: assignment.effective_due_at,
+    estimated_minutes: 0,
+    priority: assignment.is_overdue ? 3 : 2,
+    status: assignment.status === 'completed' ? 'done' : assignment.is_overdue ? 'overdue' : assignment.status,
+    points: Number(assignment.awarded_points || 0),
+    context_name: assignment.circle_name,
+  };
 }
 
 function renderDashboard() {
@@ -278,11 +309,15 @@ function renderTasks() {
   const container = document.getElementById('student-task-list');
   const tasks = tasksForSelectedDay().filter(task => state.period === 'all' || task.period === state.period || task.period === 'flexible');
   if (!tasks.length) {
+    const focusDate = state.quranOverview?.focus_date;
+    const planMessage = focusDate
+      ? `<p>تبدأ أقرب تقارير خطتك القرآنية في ${escapeHtml(formatShortDate(parseDateKey(focusDate)))}.</p><a class="task-plan-link" href="./reports.html?date=${encodeURIComponent(focusDate)}">فتح خطة التقارير <i data-lucide="arrow-left"></i></a>`
+      : '<p>يمكنك مراجعة ما سبق أو الاستعداد للمهمة التالية.</p>';
     container.innerHTML = `
       <div class="task-empty">
         <i data-lucide="calendar-check-2"></i>
         <h3>لا توجد مهام في هذه الفترة</h3>
-        <p>يمكنك مراجعة ما سبق أو الاستعداد للمهمة التالية.</p>
+        ${planMessage}
       </div>`;
     refreshIcons();
     return;
@@ -292,10 +327,11 @@ function renderTasks() {
     const done = task.status === 'done';
     const overdue = task.status === 'overdue';
     const classroom = task.source === 'classroom';
+    const quranReport = task.source === 'quran_report';
     const statusLabel = done ? 'مكتملة' : overdue ? 'متأخرة' : 'قيد الإنجاز';
     return `
       <article class="student-task ${done ? 'is-done' : ''} ${overdue ? 'is-overdue' : ''}">
-        <div class="task-state-icon"><i data-lucide="${done ? 'circle-check-big' : classroom ? 'book-open-check' : task.category === 'murajaa' ? 'refresh-cw' : 'book-heart'}"></i></div>
+        <div class="task-state-icon"><i data-lucide="${done ? 'circle-check-big' : classroom ? 'book-open-check' : task.category === 'murajaa' ? 'library-big' : task.category === 'tathbit' ? 'refresh-cw' : 'book-heart'}"></i></div>
         <div class="task-body">
           <div class="task-meta-row">
             <span class="task-category ${classroom ? 'classroom' : task.category}">${escapeHtml(taskCategory(task))}</span>
@@ -312,8 +348,10 @@ function renderTasks() {
           </div>
         </div>
         <div class="task-command">
-          ${done
-            ? '<span class="done-mark"><i data-lucide="check"></i> تم الإنجاز</span>'
+          ${quranReport
+            ? `<a href="./reports.html?date=${encodeURIComponent(task.task_date)}">فتح التقرير <i data-lucide="arrow-left"></i></a>`
+            : done
+              ? '<span class="done-mark"><i data-lucide="check"></i> تم الإنجاز</span>'
             : classroom
               ? `<a href="./classroom.html?id=${encodeURIComponent(task.classroom_id || '')}">فتح المهمة <i data-lucide="arrow-left"></i></a>`
               : `<button type="button" data-complete="${escapeHtml(task.submission_id)}">تسجيل الإتمام <i data-lucide="check"></i></button>`}
@@ -351,30 +389,34 @@ async function handleTaskAction(event) {
   }
 }
 
-async function loadJoinedClassrooms() {
+async function loadJoinedLearningCircles() {
   const container = document.getElementById('joined-classrooms-list');
   if (state.preview) {
-    container.innerHTML = classroomCard({ id: 'preview', name: 'التجويد التطبيقي', subject: { name: 'التجويد' }, teacher: { full_name: 'المعلم حمزة' } });
+    container.innerHTML = learningCircleCard({ id: 'preview', name: 'حلقة الإتقان', circle_type: 'quran', subjects: [], lead_teacher: { full_name: 'المعلم حمزة' } });
     refreshIcons();
     return;
   }
-  const { data: rels, error } = await supabase
-    .from('classroom_students')
-    .select('classroom:classroom_id(*, subject:subject_id(name), teacher:teacher_id(full_name))')
-    .eq('student_id', state.profile.id);
-  if (error || !rels?.length) {
-    container.innerHTML = '<p class="side-empty">لا توجد فصول مرتبطة حالياً.</p>';
+  const { data: circles, error } = await supabase.rpc('list_my_learning_circles');
+  if (error) {
+    console.error('Loading student learning circles failed:', error);
+    container.innerHTML = '<p class="side-empty">تعذر تحميل الحلقات المرتبطة.</p>';
     return;
   }
-  container.innerHTML = rels.map(item => item.classroom ? classroomCard(item.classroom) : '').join('');
+  if (!Array.isArray(circles) || !circles.length) {
+    container.innerHTML = '<p class="side-empty">لا توجد حلقات أو فصول مرتبطة حالياً.</p>';
+    return;
+  }
+  container.innerHTML = circles.map(learningCircleCard).join('');
   refreshIcons();
 }
 
-function classroomCard(classroom) {
+function learningCircleCard(circle) {
+  const quran = circle.circle_type === 'quran';
+  const subjects = Array.isArray(circle.subjects) ? circle.subjects.map(subject => subject.name).filter(Boolean).join('، ') : '';
   return `
-    <a class="classroom-row" href="./classroom.html?id=${encodeURIComponent(classroom.id)}">
-      <span class="classroom-icon"><i data-lucide="book-open-text"></i></span>
-      <span><strong>${escapeHtml(classroom.name)}</strong><small>${escapeHtml(classroom.subject?.name || 'مادة تعليمية')} · ${escapeHtml(classroom.teacher?.full_name || '')}</small></span>
+    <a class="classroom-row" href="../circle.html?id=${encodeURIComponent(circle.id)}">
+      <span class="classroom-icon"><i data-lucide="${quran ? 'book-open-check' : 'graduation-cap'}"></i></span>
+      <span><strong>${escapeHtml(circle.name)}</strong><small>${escapeHtml(quran ? 'حلقة قرآنية' : subjects || 'حلقة تعليمية')} · ${escapeHtml(circle.lead_teacher?.full_name || 'لم يحدد المعلم')}</small></span>
       <i data-lucide="chevron-left"></i>
     </a>`;
 }
@@ -385,7 +427,13 @@ function tasksForSelectedDay() {
 
 function taskCategory(task) {
   if (task.source === 'classroom') return 'واجب فصل';
-  return task.category === 'murajaa' ? 'مراجعة' : 'حفظ';
+  return taskTypeLabel(task.category);
+}
+
+function taskTypeLabel(type) {
+  if (type === 'murajaa') return 'مراجعة';
+  if (type === 'tathbit') return 'تثبيت';
+  return 'حفظ';
 }
 
 function dueLabel(task) {
