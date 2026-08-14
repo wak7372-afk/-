@@ -8,8 +8,12 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/tasks.css">
+  <link rel="stylesheet" href="/css/design-system.css?v=1">
+  <link rel="stylesheet" href="/css/teacher-workspace.css?v=1">
+  <link rel="stylesheet" href="/css/teacher-command-center.css?v=1">
 </head>
-<body class="task-app-shell">
+<body class="task-app-shell teacher-task-page teacher-unified-shell teacher-command-center" data-teacher-section="tasks">
+  <div class="teacher-page">
   <header class="task-topbar islamic-pattern-band">
     <div class="task-topbar-inner">
       <div class="task-brand-block">
@@ -18,16 +22,13 @@
         </a>
         <div class="task-brand-mark" aria-hidden="true">ذ</div>
         <div>
-          <p class="task-eyebrow">العملية التعليمية</p>
-          <h1 class="font-amiri">مركز مهام الطلاب</h1>
+          <p class="task-eyebrow">مساحة المعلم</p>
+          <h1 class="font-amiri">مركز المتابعة</h1>
         </div>
       </div>
       <nav class="task-top-actions" aria-label="أدوات المعلم">
         <a href="/teacher/ai-assistant.html" class="task-button task-button-gold">
           <i data-lucide="file-spreadsheet"></i><span>استيراد Excel</span>
-        </a>
-        <a href="/teacher/halaqat.html" class="task-button task-button-quiet">
-          <i data-lucide="users"></i><span>الحلقات</span>
         </a>
         <button id="logout-btn" type="button" class="task-icon-link" aria-label="تسجيل الخروج" title="تسجيل الخروج">
           <i data-lucide="log-out"></i>
@@ -39,14 +40,26 @@
   <main class="task-workspace">
     <section class="task-intro" aria-labelledby="tasks-heading">
       <div>
-        <p class="task-kicker">تخطيط يومي منضبط</p>
-        <h2 id="tasks-heading" class="font-amiri">أنشئ المهمة مرة، ودع الجدول يوصلها في وقتها</h2>
-        <p>وزّع مهام الحفظ والمراجعة على طالب أو حلقة كاملة، وراجع كل موعد قبل النشر.</p>
+        <p class="task-kicker">السلام عليكم، <strong id="teacher-welcome-name">معلمنا</strong></p>
+        <h2 id="tasks-heading" class="font-amiri">متابعة يومك وإنشاء المهام من مكان واحد</h2>
+        <p>ابدأ من الحلقة، حدّد المطلوب، ثم راجع الجدول قبل الاعتماد.</p>
+        <ol class="task-flow" aria-label="مراحل إنشاء المهمة">
+          <li class="is-active"><b>1</b><span>المستهدف</span></li>
+          <li><b>2</b><span>المحتوى</span></li>
+          <li><b>3</b><span>المراجعة والنشر</span></li>
+        </ol>
       </div>
       <div class="task-intro-stat">
-        <span>مهام منشورة</span>
+        <span>آخر المهام المنشورة</span>
         <strong id="published-count">0</strong>
       </div>
+    </section>
+
+    <section class="teacher-command-metrics" aria-label="ملخص مركز المتابعة">
+      <article class="is-gold"><span class="command-metric-icon"><i data-lucide="users-round"></i></span><div><small>حلقاتي</small><strong id="command-halaqat-count">0</strong><span>حلقة مرتبطة</span></div></article>
+      <article class="is-green"><span class="command-metric-icon"><i data-lucide="user-round-check"></i></span><div><small>طلاب الحلقة</small><strong id="command-students-count">0</strong><span>في الحلقة المحددة</span></div></article>
+      <article class="is-blue"><span class="command-metric-icon"><i data-lucide="clipboard-check"></i></span><div><small>المهام المنشورة</small><strong id="command-published-count">0</strong><span>آخر المهام المحملة</span></div></article>
+      <article class="is-red"><span class="command-metric-icon"><i data-lucide="scan-eye"></i></span><div><small>بانتظار الاعتماد</small><strong id="command-preview-count">0</strong><span>عنصر في المعاينة</span></div></article>
     </section>
 
     <div class="task-layout">
@@ -60,6 +73,11 @@
         </div>
 
         <form id="task-form" class="task-form">
+          <section class="task-form-section" aria-labelledby="target-section-title">
+            <div class="task-form-section-title">
+              <span>1</span>
+              <div><strong id="target-section-title">اختر المستهدف</strong><small>حدّد الحلقة والطلاب الذين ستصلهم المهمة.</small></div>
+            </div>
           <div class="task-form-grid task-form-grid-2">
             <label class="task-field">
               <span>الحلقة</span>
@@ -78,7 +96,13 @@
             <span>الطالب</span>
             <select id="task-student"></select>
           </label>
+          </section>
 
+          <section class="task-form-section" aria-labelledby="content-section-title">
+            <div class="task-form-section-title">
+              <span>2</span>
+              <div><strong id="content-section-title">اكتب محتوى المهمة</strong><small>اجعل العنوان مختصراً والتوجيهات قابلة للتنفيذ.</small></div>
+            </div>
           <div class="task-form-grid task-form-grid-2">
             <label class="task-field">
               <span>نوع المهمة</span>
@@ -97,7 +121,13 @@
             <span>المحتوى والتوجيهات</span>
             <textarea id="task-content" rows="4" maxlength="2000" required placeholder="الآيات أو الصفحات المطلوبة، وملاحظات الأداء والتجويد"></textarea>
           </label>
+          </section>
 
+          <section class="task-form-section" aria-labelledby="schedule-section-title">
+            <div class="task-form-section-title">
+              <span>3</span>
+              <div><strong id="schedule-section-title">اضبط الجدول</strong><small>حدّد تاريخ الظهور والتسليم والتكرار عند الحاجة.</small></div>
+            </div>
           <div class="task-form-grid task-form-grid-3">
             <label class="task-field">
               <span>التاريخ</span>
@@ -160,6 +190,7 @@
               <label><input type="checkbox" value="5"><span>الجمعة</span></label>
             </div>
           </fieldset>
+          </section>
 
           <div class="task-form-actions">
             <button id="preview-task" type="button" class="task-button task-button-dark">
@@ -192,7 +223,9 @@
       </aside>
     </div>
   </main>
+  </div>
 
-  <script type="module" src="/js/pages/teacher-tasks.js"></script>
+  <script type="module" src="/js/lib/teacher-shell.js?v=1"></script>
+  <script type="module" src="/js/pages/teacher-tasks.js?v=1"></script>
 </body>
 </html>

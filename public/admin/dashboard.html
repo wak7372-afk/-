@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061421">
   <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | مركز قيادة المدير</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/style.css?v=2">
+  <link rel="stylesheet" href="/css/admin.css?v=3">
+  <link rel="stylesheet" href="/css/design-system.css?v=1">
 </head>
 <body class="admin-command-shell">
   <div id="sidebar-overlay" class="admin-sidebar-overlay" hidden></div>
@@ -458,6 +459,74 @@
     </form>
   </dialog>
 
+  <dialog id="reset-password-dialog" class="admin-dialog" aria-labelledby="reset-password-title">
+    <form id="reset-password-form" class="admin-dialog-card">
+      <input id="reset-password-account-id" type="hidden">
+      <div class="admin-dialog-header">
+        <div>
+          <p class="admin-section-kicker">استعادة الوصول</p>
+          <h2 id="reset-password-title" class="font-amiri">كلمة مرور مؤقتة</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="reset-password-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-dialog-body">
+        <div class="admin-operation-summary">
+          <strong id="reset-password-account-name">الحساب</strong>
+          <span>سيُطلب من صاحب الحساب تغيير كلمة المرور بعد دخوله.</span>
+        </div>
+        <div class="admin-form-grid">
+          <div class="admin-field admin-field-wide">
+            <label for="reset-password-value">كلمة المرور المؤقتة</label>
+            <input id="reset-password-value" type="text" required minlength="8" autocomplete="new-password" dir="ltr">
+            <small>ثمانية أحرف على الأقل، وتحتوي حرفاً ورقماً. لا تُحفظ في لوحة المدير.</small>
+          </div>
+          <div class="admin-field admin-field-wide">
+            <label for="reset-password-confirmation">تأكيد كلمة المرور</label>
+            <input id="reset-password-confirmation" type="text" required minlength="8" autocomplete="new-password" dir="ltr">
+          </div>
+        </div>
+        <div class="admin-password-tools">
+          <button id="generate-temporary-password" type="button" class="admin-secondary-button">توليد كلمة مؤقتة</button>
+          <button id="copy-temporary-password" type="button" class="admin-secondary-button">نسخ</button>
+        </div>
+        <p id="reset-password-result" class="admin-operation-success" hidden>تم تعيين كلمة المرور. سلّمها لصاحب الحساب بطريقة آمنة.</p>
+      </div>
+      <div class="admin-dialog-footer">
+        <button type="button" class="admin-secondary-button" data-close-dialog="reset-password-dialog">إغلاق</button>
+        <button id="reset-password-submit" type="submit" class="admin-primary-button">اعتماد كلمة المرور</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-account-dialog" class="admin-dialog" aria-labelledby="delete-account-title">
+    <form id="delete-account-form" class="admin-dialog-card">
+      <input id="delete-account-id" type="hidden">
+      <input id="delete-account-username" type="hidden">
+      <div class="admin-dialog-header">
+        <div>
+          <p class="admin-section-kicker">عملية غير قابلة للتراجع</p>
+          <h2 id="delete-account-title" class="font-amiri">حذف الحساب نهائياً</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="delete-account-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-dialog-body">
+        <div class="admin-operation-warning">
+          <strong id="delete-account-name">الحساب</strong>
+          <span>لن يسمح النظام بالحذف إذا كان للحساب تقارير أو عضويات أو سجلات تعليمية.</span>
+        </div>
+        <div class="admin-field">
+          <label for="delete-account-confirmation">اكتب اسم المستخدم للتأكيد</label>
+          <input id="delete-account-confirmation" type="text" required autocomplete="off" dir="ltr">
+          <small id="delete-account-hint"></small>
+        </div>
+      </div>
+      <div class="admin-dialog-footer">
+        <button type="button" class="admin-secondary-button" data-close-dialog="delete-account-dialog">إلغاء</button>
+        <button id="delete-account-submit" type="submit" class="admin-danger-button">حذف نهائي</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="create-circle-dialog" class="admin-dialog" aria-labelledby="create-circle-title">
     <form id="create-circle-form" class="admin-dialog-card">
       <div class="admin-dialog-header">
@@ -664,6 +733,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="/js/pages/admin-dashboard.js"></script>
+  <script type="module" src="/js/pages/admin-dashboard.js?v=2"></script>
 </body>
 </html>

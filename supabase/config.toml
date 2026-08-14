@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.account-recovery]
 verify_jwt = false
+
+[functions.admin-account-actions]
+verify_jwt = true

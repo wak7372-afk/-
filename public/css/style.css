@@ -22,8 +22,11 @@
   --color-figma-gold: var(--color-gold);
   --color-figma-gold-btn: var(--color-gold);
   --color-figma-gold-btn-hover: #e0bd5a;
-  --shadow-soft: 0 12px 30px rgba(5, 20, 33, 0.08);
-  --shadow-raised: 0 16px 42px rgba(5, 20, 33, 0.14);
+  --shadow-soft: 0 16px 44px rgba(5, 20, 33, 0.075);
+  --shadow-raised: 0 24px 64px rgba(5, 20, 33, 0.13);
+  --shadow-float: 0 28px 78px rgba(5, 20, 33, 0.16);
+  --motion-fast: 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-smooth: 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 *,
@@ -188,7 +191,8 @@ button:disabled,
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(110deg, rgba(5, 9, 13, 0.12), rgba(7, 51, 37, 0.42));
+  background:
+    linear-gradient(118deg, rgba(5, 9, 13, 0.2) 0%, rgba(6, 38, 48, 0.34) 46%, rgba(7, 62, 43, 0.42) 78%, rgba(168, 124, 25, 0.12) 100%);
   content: '';
   pointer-events: none;
 }
@@ -277,14 +281,10 @@ main h3.border-b,
   border: 1px solid rgba(8, 29, 48, 0.12) !important;
   border-top: 2px solid rgba(212, 173, 67, 0.75) !important;
   border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
   box-shadow: var(--shadow-soft) !important;
-  backdrop-filter: blur(12px);
-}
-
-.glass-card:hover {
-  border-color: rgba(11, 74, 51, 0.3) !important;
-  box-shadow: var(--shadow-raised) !important;
+  backdrop-filter: blur(18px) saturate(1.08);
+  transition: border-color var(--motion-smooth), box-shadow var(--motion-smooth), transform var(--motion-smooth);
 }
 
 main section.bg-white,
@@ -300,8 +300,9 @@ main > section.bg-white {
   border: 1px solid rgba(8, 29, 48, 0.14) !important;
   border-top: 2px solid rgba(212, 173, 67, 0.75) !important;
   border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.97) !important;
+  background: rgba(255, 255, 255, 0.93) !important;
   box-shadow: var(--shadow-raised) !important;
+  backdrop-filter: blur(20px) saturate(1.08);
 }
 
 .glass-dark,
@@ -336,7 +337,7 @@ main > section.bg-white {
   font-weight: 800;
   line-height: 1.35;
   text-decoration: none;
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition: background-color var(--motion-fast), border-color var(--motion-fast), box-shadow var(--motion-fast), transform var(--motion-fast);
 }
 
 .btn-emerald {
@@ -372,7 +373,57 @@ main > section.bg-white {
 .btn-gold:active,
 .btn-figma-gold:active {
   box-shadow: none !important;
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.995);
+}
+
+/* Entry experience */
+.auth-brand-stage,
+.auth-login-stage {
+  animation: auth-stage-enter 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.auth-login-stage { animation-delay: 90ms; }
+
+.auth-mobile-brand { display: none; }
+
+.auth-feature-card {
+  background: rgba(255, 255, 255, 0.085) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+  transition: border-color var(--motion-smooth), background-color var(--motion-smooth), transform var(--motion-smooth);
+}
+
+.auth-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-panel::before {
+  position: absolute;
+  top: 0;
+  right: 10%;
+  left: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), var(--color-emerald), transparent);
+  content: '';
+}
+
+@keyframes auth-stage-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover {
+    border-color: rgba(11, 74, 51, 0.3) !important;
+    box-shadow: var(--shadow-float) !important;
+    transform: translateY(-3px);
+  }
+
+  .auth-feature-card:hover {
+    border-color: rgba(239, 213, 141, 0.42) !important;
+    background: rgba(255, 255, 255, 0.13) !important;
+    transform: translateY(-2px);
+  }
 }
 
 /* Forms */
@@ -535,9 +586,57 @@ main code {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+
+  .auth-brand-stage,
+  .auth-login-stage {
+    animation: none !important;
+  }
 }
 
 @media (max-width: 767px) {
+  body:has(.auth-login-stage) main {
+    padding: 0 !important;
+  }
+
+  .auth-login-stage {
+    min-height: 100svh;
+    order: -1;
+    padding: 26px 20px !important;
+  }
+
+  .auth-mobile-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 24px;
+    color: var(--color-navy-950);
+  }
+
+  .auth-mobile-brand > span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 1px solid var(--color-gold-dark);
+    border-radius: 7px;
+    background: var(--color-gold);
+    color: var(--color-navy-950);
+    font-family: var(--font-amiri);
+    font-size: 1.4rem;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(168, 124, 25, 0.18);
+  }
+
+  .auth-mobile-brand div { display: flex; flex-direction: column; }
+  .auth-mobile-brand strong { font-size: 1.15rem; line-height: 1.35; }
+  .auth-mobile-brand small { color: var(--color-muted); font-size: 0.6rem; }
+
+  .auth-brand-stage {
+    min-height: auto !important;
+  }
+
   header.bg-emerald-gold-gradient {
     position: sticky;
     padding: 12px 14px !important;

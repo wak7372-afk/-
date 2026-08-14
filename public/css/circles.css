@@ -621,6 +621,25 @@
 .quran-extension-queue-head > button { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; padding: 7px 12px; border: 1px solid var(--circle-green); border-radius: 6px; background: var(--circle-green); color: #fff; font-size: 0.61rem; font-weight: 900; }
 .quran-extension-queue-head > button svg { width: 15px; }
 
+.quran-accounting-controls { display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(170px, 0.55fr) auto auto; align-items: end; gap: 8px; margin-top: 11px; padding: 12px; border: 1px solid #d3dde1; border-radius: 7px; background: #f7f9f9; }
+.quran-accounting-controls label { display: grid; gap: 5px; }
+.quran-accounting-controls label > span { color: #526372; font-size: 0.53rem; font-weight: 900; }
+.quran-accounting-controls input,
+.quran-accounting-controls select { width: 100%; min-height: 39px; padding: 7px 9px; border: 1px solid #ced9dd; border-radius: 5px; background: #fff; color: #344757; font-size: 0.57rem; }
+.quran-accounting-search { position: relative; }
+.quran-accounting-search svg { position: absolute; z-index: 1; top: 50%; right: 10px; width: 15px; color: #76858f; transform: translateY(-50%); }
+.quran-accounting-search input { padding-right: 34px; }
+.quran-accounting-controls button { display: inline-flex; min-height: 39px; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--circle-green); border-radius: 5px; background: var(--circle-green); color: #fff; font-size: 0.56rem; font-weight: 900; }
+.quran-accounting-controls button.export-command { border-color: #c7a33f; background: #fff9e9; color: #75580f; }
+.quran-accounting-controls button svg { width: 14px; }
+.quran-accounting-legend { display: flex; align-items: center; gap: 7px; margin: -3px 0 12px; padding: 0 3px; color: #78858f; font-size: 0.51rem; }
+.quran-accounting-legend span { padding: 4px 7px; border-right: 3px solid #c7d0d4; background: #f7f9f9; font-weight: 900; }
+.quran-accounting-legend .is-early { border-color: var(--circle-green); color: var(--circle-green); }
+.quran-accounting-legend .is-middle { border-color: var(--circle-gold); color: #8c6915; }
+.quran-accounting-legend .is-late_on_time { border-color: #c87928; color: #995b1f; }
+.quran-accounting-legend .is-late { border-color: var(--circle-red); color: var(--circle-red); }
+.quran-accounting-legend small { margin-right: auto; }
+
 .quran-accounting-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin: 13px 0; }
 .quran-accounting-metrics article { display: grid; min-height: 82px; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 13px; border: 1px solid #d6dfe2; border-top: 4px solid var(--circle-navy-soft); border-radius: 7px; background: #fff; }
 .quran-accounting-metrics article.is-green { border-top-color: var(--circle-green); }
@@ -646,10 +665,15 @@
 .quran-review-toolbar button svg { width: 14px; }
 .quran-approved-plan-list { overflow: hidden; border: 1px solid #ced9dd; border-radius: 8px; background: #fff; box-shadow: var(--shadow-soft); }
 .quran-approved-plan-head,
-.quran-approved-report { display: grid; grid-template-columns: minmax(155px, 0.55fr) minmax(280px, 1.45fr) minmax(270px, 1fr); align-items: center; gap: 12px; }
+.quran-approved-report { display: grid; grid-template-columns: minmax(145px, 0.55fr) minmax(260px, 1.35fr) minmax(230px, 0.9fr) 84px; align-items: center; gap: 12px; }
 .quran-approved-plan-head { min-height: 43px; padding: 8px 14px; border-bottom: 1px solid #dce3e6; background: #f4f7f7; color: #74818c; font-size: 0.54rem; font-weight: 900; }
 .quran-approved-report { min-height: 76px; padding: 11px 14px; border-right: 4px solid var(--circle-gold); }
 .quran-approved-report + .quran-approved-report { border-top: 1px solid #e0e6e8; }
+.quran-approved-report.is-cancelled { border-right-color: #9aa7ad; background: #f8f9f9; color: #71808a; }
+.quran-approved-report.is-cancelled .quran-approved-content strong { text-decoration: line-through; text-decoration-thickness: 1px; }
+.quran-report-manage-command { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 5px; padding: 6px 9px; border: 1px solid #b9c9cf; border-radius: 5px; background: #fff; color: var(--circle-navy); font-size: 0.52rem; font-weight: 900; }
+.quran-report-manage-command:hover { border-color: var(--circle-gold); background: #fff9e9; }
+.quran-report-manage-command svg { width: 14px; }
 .quran-approved-date,
 .quran-approved-content { display: grid; min-width: 0; gap: 4px; }
 .quran-approved-date time { color: var(--circle-navy); font-size: 0.6rem; font-weight: 900; }
@@ -674,6 +698,8 @@
 .quran-accounting-student.tone-complete { border-right-color: var(--circle-green); }
 .quran-accounting-student.tone-late { border-right-color: var(--circle-red); background: #fffafa; }
 .quran-accounting-student.tone-partial { border-right-color: var(--circle-gold); }
+.quran-accounting-student.tone-pending { border-right-color: var(--circle-navy-soft); }
+.quran-accounting-student.tone-exempted { border-right-color: #87969e; background: #fafbfb; }
 .quran-accounting-person { display: flex; min-width: 0; align-items: center; gap: 9px; }
 .quran-accounting-person .person-avatar { width: 35px; height: 35px; font-size: 0.9rem; }
 .quran-accounting-person > div { display: grid; min-width: 0; gap: 2px; }
@@ -694,6 +720,7 @@
 .quran-accounting-status { display: grid; gap: 2px; }
 .quran-accounting-status b { color: #344756; font-size: 0.61rem; }
 .quran-accounting-status small { color: #7b8792; font-size: 0.52rem; }
+.quran-accounting-status button { width: fit-content; padding: 0; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: var(--circle-red); font-size: 0.51rem; font-weight: 900; cursor: pointer; }
 .tone-late .quran-accounting-status b,
 .tone-late .quran-accounting-status small { color: var(--circle-red); }
 .quran-accounting-student > button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 5px; border: 1px solid #d0dade; border-radius: 5px; background: #fff; color: #506170; font-size: 0.56rem; font-weight: 900; }
@@ -703,8 +730,35 @@
 .quran-history-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #dce3e5; }
 .quran-history-heading span { color: #977218; font-size: 0.55rem; font-weight: 900; }
 .quran-history-heading p { margin: 0; color: #7a8792; font-size: 0.54rem; }
-.quran-history-heading > button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #d2dce0; border-radius: 5px; background: #fff; color: #637280; }
-.quran-history-heading > button svg { width: 15px; }
+.quran-history-actions { display: flex; align-items: center; gap: 7px; }
+.quran-history-actions button { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; gap: 6px; padding: 6px 9px; border: 1px solid #d2dce0; border-radius: 5px; background: #fff; color: #637280; font-size: 0.54rem; font-weight: 900; }
+.quran-history-actions button:not(.plan-command) { width: 34px; padding: 0; }
+.quran-history-actions .plan-command { border-color: #b8d5c9; background: #eff7f3; color: var(--circle-green); }
+.quran-history-actions button svg { width: 15px; }
+.quran-history-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+.quran-history-progress article { display: grid; min-height: 82px; grid-template-columns: 24px minmax(0, 1fr); align-content: center; gap: 2px 8px; padding: 11px; border-right: 3px solid var(--circle-green); background: #f7faf9; }
+.quran-history-progress article.is-empty { border-right-color: #b8c4c9; }
+.quran-history-progress svg { grid-row: 1 / 4; width: 18px; color: var(--circle-green); }
+.quran-history-progress span { color: #8c6915; font-size: 0.5rem; font-weight: 900; }
+.quran-history-progress strong { overflow: hidden; color: #344756; font-size: 0.57rem; text-overflow: ellipsis; white-space: nowrap; }
+.quran-history-progress small { color: #7c8992; font-size: 0.49rem; }
+.quran-history-periods { display: inline-grid; grid-template-columns: repeat(3, 1fr); margin-top: 11px; overflow: hidden; border: 1px solid #d1dce0; border-radius: 5px; }
+.quran-history-periods button { min-width: 86px; min-height: 34px; border: 0; background: #fff; color: #667783; font-size: 0.53rem; font-weight: 900; }
+.quran-history-periods button + button { border-right: 1px solid #dce3e6; }
+.quran-history-periods button.is-active { background: var(--circle-navy); color: #fff; }
+.quran-history-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
+.quran-history-metrics article { display: grid; min-height: 60px; grid-template-columns: 21px minmax(0, 1fr) auto; align-items: center; gap: 5px; padding: 8px; border-top: 3px solid var(--circle-navy-soft); background: #f8faf9; }
+.quran-history-metrics article.is-green { border-color: var(--circle-green); }
+.quran-history-metrics article.is-gold { border-color: var(--circle-gold); }
+.quran-history-metrics article.is-red { border-color: var(--circle-red); }
+.quran-history-metrics svg { width: 15px; color: var(--circle-navy-soft); }
+.quran-history-metrics span { color: #74828c; font-size: 0.48rem; }
+.quran-history-metrics strong { color: var(--circle-navy); font-size: 0.68rem; }
+.quran-history-filters { display: grid; grid-template-columns: repeat(2, minmax(150px, 220px)) minmax(100px, 1fr); align-items: end; gap: 8px; margin-top: 11px; padding: 9px; border-top: 1px solid #dce3e5; border-bottom: 1px solid #dce3e5; }
+.quran-history-filters label { display: grid; gap: 4px; }
+.quran-history-filters label span { color: #526372; font-size: 0.5rem; font-weight: 900; }
+.quran-history-filters select { min-height: 35px; padding: 6px 8px; border: 1px solid #d1dce0; border-radius: 5px; background: #fff; color: #3c4f5d; font-size: 0.54rem; }
+.quran-history-filters > span { justify-self: end; padding-bottom: 8px; color: #7a8791; font-size: 0.51rem; }
 .quran-history-list { display: grid; max-height: 540px; margin-top: 9px; overflow: auto; }
 .quran-history-list article { display: grid; grid-template-columns: 118px 82px minmax(0, 1fr) 92px 80px 72px; align-items: center; gap: 9px; min-height: 58px; padding: 8px 10px; border-right: 3px solid #c9d3d7; }
 .quran-history-list article + article { border-top: 1px solid #e1e6e8; }
@@ -712,6 +766,7 @@
 .quran-history-list article.history-middle { border-right-color: var(--circle-gold); }
 .quran-history-list article.history-late,
 .quran-history-list article.history-late_on_time { border-right-color: var(--circle-red); background: #fffafa; }
+.quran-history-list article.history-replaced { border-right-color: #91a0aa; background: #f6f8f8; opacity: 0.78; }
 .quran-history-list time { color: #6c7a87; font-size: 0.54rem; }
 .quran-history-list article > span { display: inline-flex; align-items: center; gap: 5px; color: #485b6b; font-size: 0.56rem; font-weight: 900; }
 .quran-history-list article > span svg { width: 13px; }
@@ -724,6 +779,18 @@
 .quran-history-list article > em { color: #8c6915; font-size: 0.55rem; font-style: normal; font-weight: 900; }
 .quran-history-list article > button { display: inline-flex; min-height: 31px; align-items: center; justify-content: center; gap: 4px; border: 1px solid #e0b8ba; border-radius: 5px; background: #fff4f4; color: var(--circle-red); font-size: 0.52rem; font-weight: 900; }
 .quran-history-list article > button svg { width: 13px; }
+.quran-history-events { margin-top: 12px; border-top: 1px solid #dce3e5; }
+.quran-history-events summary { display: flex; min-height: 43px; align-items: center; gap: 7px; color: #415563; font-size: 0.56rem; font-weight: 900; cursor: pointer; list-style: none; }
+.quran-history-events summary svg { width: 15px; color: #8d6914; }
+.quran-history-events summary b { display: grid; min-width: 22px; height: 22px; margin-right: auto; place-items: center; border-radius: 50%; background: #edf2f3; color: #536572; font-size: 0.5rem; }
+.quran-history-events > div { display: grid; }
+.quran-history-events article { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 9px 4px; border-top: 1px solid #e3e8ea; }
+.quran-history-events article > svg { width: 17px; color: var(--circle-green); }
+.quran-history-events article > div { display: grid; gap: 2px; }
+.quran-history-events article b { color: #344756; font-size: 0.55rem; }
+.quran-history-events article span,
+.quran-history-events article small,
+.quran-history-events p { margin: 0; color: #7b8791; font-size: 0.5rem; }
 
 .quran-extension-queue { display: grid; gap: 12px; margin-top: 13px; }
 .quran-extension-request { overflow: hidden; border: 1px solid #d0dade; border-right: 4px solid var(--circle-gold); border-radius: 8px; background: #fff; box-shadow: var(--shadow-soft); }
@@ -774,6 +841,145 @@
 .quran-exempt-dialog footer button { min-height: 38px; padding: 6px 12px; border: 1px solid #d1dade; border-radius: 5px; background: #fff; color: #586977; font-size: 0.57rem; font-weight: 900; }
 .quran-exempt-dialog footer button[type="submit"] { border-color: var(--circle-red); background: var(--circle-red); color: #fff; }
 
+.quran-plan-dialog { width: min(760px, calc(100% - 24px)); max-height: calc(100vh - 28px); padding: 0; overflow: auto; border: 1px solid #bfcdd3; border-radius: 8px; background: #fff; box-shadow: 0 24px 80px rgba(4,19,31,0.38); }
+.quran-plan-dialog::backdrop { background: rgba(4,19,31,0.66); }
+.quran-plan-dialog form { padding: 22px; }
+.quran-plan-dialog form.is-busy { cursor: wait; }
+.quran-plan-dialog header { display: grid; grid-template-columns: 42px minmax(0, 1fr) 34px; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #dce4e7; }
+.quran-plan-dialog header > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 6px; background: #eaf4f0; color: var(--circle-green); }
+.quran-plan-dialog header > span svg { width: 20px; }
+.quran-plan-dialog header small { color: #987117; font-size: 0.53rem; font-weight: 900; }
+.quran-plan-dialog h3 { margin: 1px 0; color: var(--circle-navy); font-family: var(--font-amiri); font-size: 1.35rem; }
+.quran-plan-dialog header > button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #d1dcdf; border-radius: 5px; background: #fff; color: #62727f; }
+.quran-plan-dialog header > button svg { width: 15px; }
+.quran-plan-intro { margin: 13px 0; padding: 9px 11px; border-right: 3px solid var(--circle-gold); background: #fffbef; color: #667580; font-size: 0.57rem; line-height: 1.75; }
+.quran-plan-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; border: 0; }
+.quran-plan-modes legend { margin-bottom: 7px; color: #3e5160; font-size: 0.58rem; font-weight: 900; }
+.quran-plan-modes label { position: relative; }
+.quran-plan-modes input { position: absolute; opacity: 0; }
+.quran-plan-modes label > span { display: grid; min-height: 78px; grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; column-gap: 8px; padding: 11px; border: 1px solid #d3dde1; border-radius: 6px; background: #fff; cursor: pointer; }
+.quran-plan-modes label > span svg { width: 20px; grid-row: 1 / 3; align-self: center; color: #72818c; }
+.quran-plan-modes label > span b { color: #344857; font-size: 0.61rem; }
+.quran-plan-modes label > span small { color: #7a8791; font-size: 0.51rem; }
+.quran-plan-modes input:checked + span { border-color: var(--circle-green); background: #eef7f3; box-shadow: inset 0 0 0 1px var(--circle-green); }
+.quran-plan-modes input:checked + span svg,
+.quran-plan-modes input:checked + span b { color: var(--circle-green); }
+.quran-plan-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 13px; }
+.quran-plan-fields label { display: grid; gap: 5px; }
+.quran-plan-fields label[hidden] { display: none; }
+.quran-plan-fields label > span { color: #4b5e6d; font-size: 0.54rem; font-weight: 900; }
+.quran-plan-fields input,
+.quran-plan-fields textarea { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid #d0dade; border-radius: 5px; background: #fff; color: #344756; font-size: 0.57rem; }
+.quran-plan-fields textarea { resize: vertical; line-height: 1.7; }
+.quran-plan-reason { grid-column: 1 / -1; }
+.quran-plan-preview { margin-top: 13px; overflow: hidden; border: 1px solid #c9d8d2; border-radius: 7px; background: #fbfdfc; }
+.quran-plan-preview-head { display: grid; grid-template-columns: 35px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 11px 13px; border-bottom: 1px solid #dce5e1; }
+.quran-plan-preview-head > svg { width: 20px; color: var(--circle-green); }
+.quran-plan-preview-head > div { display: grid; gap: 1px; }
+.quran-plan-preview-head small { color: #7a878f; font-size: 0.49rem; }
+.quran-plan-preview-head strong { color: var(--circle-navy); font-size: 0.59rem; }
+.quran-plan-preview-head > span { padding: 4px 7px; border-radius: 5px; font-size: 0.51rem; font-weight: 900; }
+.quran-plan-preview-head .is-ready { background: #e6f4ed; color: var(--circle-green); }
+.quran-plan-preview-head .is-blocked { background: #fff0f0; color: var(--circle-red); }
+.quran-plan-preview-metrics { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #dfe6e3; }
+.quran-plan-preview-metrics span { display: grid; min-height: 52px; place-items: center; gap: 1px; padding: 6px; color: #74818a; font-size: 0.49rem; }
+.quran-plan-preview-metrics span + span { border-right: 1px solid #dfe6e3; }
+.quran-plan-preview-metrics b { color: var(--circle-navy); font-size: 0.7rem; }
+.quran-plan-date-change { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: center; gap: 8px; padding: 10px 13px; }
+.quran-plan-date-change > span { display: grid; gap: 2px; }
+.quran-plan-date-change small { color: #7a878f; font-size: 0.49rem; }
+.quran-plan-date-change b { color: #3a4e5d; font-size: 0.54rem; }
+.quran-plan-date-change > svg { width: 15px; color: #9a761c; }
+.quran-plan-preview > p { display: flex; align-items: center; gap: 6px; margin: 0; padding: 9px 13px; border-top: 1px solid #dfe6e3; color: #65747f; font-size: 0.52rem; }
+.quran-plan-preview > p svg { width: 14px; }
+.quran-plan-preview > p.is-warning { background: #fff3f3; color: var(--circle-red); }
+.quran-plan-dialog footer { display: flex; justify-content: flex-end; gap: 7px; margin-top: 15px; padding-top: 14px; border-top: 1px solid #dce4e7; }
+.quran-plan-dialog footer button { display: inline-flex; min-height: 39px; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border: 1px solid #d0dade; border-radius: 5px; background: #fff; color: #596a77; font-size: 0.55rem; font-weight: 900; }
+.quran-plan-dialog footer button svg { width: 14px; }
+.quran-plan-dialog footer .preview-command { border-color: var(--circle-navy); color: var(--circle-navy); }
+.quran-plan-dialog footer .apply-command { border-color: var(--circle-green); background: var(--circle-green); color: #fff; }
+.quran-plan-dialog footer button:disabled { cursor: not-allowed; opacity: 0.48; }
+
+.quran-report-management-dialog { width: min(980px, calc(100% - 24px)); max-height: calc(100vh - 28px); padding: 0; overflow: auto; border: 1px solid #bfcdd3; border-radius: 8px; background: #fff; box-shadow: 0 24px 80px rgba(4,19,31,0.42); }
+.quran-report-management-dialog::backdrop { background: rgba(4,19,31,0.7); }
+.quran-report-management-dialog form { padding: 22px; }
+.quran-report-management-dialog form.is-busy { cursor: wait; }
+.quran-report-management-dialog header { display: grid; grid-template-columns: 44px minmax(0, 1fr) 34px; align-items: center; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid #dce4e7; }
+.quran-report-management-dialog header > span { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 6px; background: #eaf4f0; color: var(--circle-green); }
+.quran-report-management-dialog header > span svg { width: 20px; }
+.quran-report-management-dialog header small { color: #987117; font-size: 0.52rem; font-weight: 900; }
+.quran-report-management-dialog h3 { margin: 1px 0; color: var(--circle-navy); font-family: var(--font-amiri); font-size: 1.42rem; }
+.quran-report-management-dialog header p { margin: 0; color: #71808b; font-size: 0.52rem; }
+.quran-report-management-dialog header > button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #d1dcdf; border-radius: 5px; background: #fff; color: #62727f; }
+.quran-report-management-dialog header > button svg { width: 15px; }
+.quran-report-management-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
+.quran-report-management-stats article { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; min-height: 48px; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid #dce4e7; border-right: 3px solid #8da0a8; border-radius: 5px; background: #f9fbfb; }
+.quran-report-management-stats article.is-gold { border-right-color: var(--circle-gold); }
+.quran-report-management-stats article.is-green { border-right-color: var(--circle-green); }
+.quran-report-management-stats svg { width: 17px; color: #71828b; }
+.quran-report-management-stats span { color: #687983; font-size: 0.51rem; font-weight: 800; }
+.quran-report-management-stats b { color: var(--circle-navy); font-size: 0.85rem; }
+.quran-report-management-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr); gap: 16px; }
+.quran-report-edit-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; align-content: start; }
+.quran-report-edit-fields > label { display: grid; gap: 5px; color: #344957; font-size: 0.53rem; font-weight: 900; }
+.quran-report-edit-fields > label:nth-of-type(2),
+.quran-report-edit-fields > label:nth-of-type(4),
+.quran-report-change-reason { grid-column: 1 / -1; }
+.quran-report-edit-fields input,
+.quran-report-edit-fields textarea { width: 100%; border: 1px solid #cbd7dc; border-radius: 5px; background: #fff; color: var(--circle-navy); font-family: inherit; font-size: 0.57rem; }
+.quran-report-edit-fields input { min-height: 42px; padding: 8px 10px; }
+.quran-report-edit-fields textarea { resize: vertical; padding: 10px; line-height: 1.7; }
+.quran-report-edit-fields input:focus,
+.quran-report-edit-fields textarea:focus { border-color: var(--circle-gold); outline: 2px solid rgba(210,164,42,0.14); }
+.quran-report-edit-fields :disabled { background: #f2f4f5; color: #7f8c93; }
+.quran-report-fixed-meta { grid-column: 1 / -1; display: flex; min-height: 42px; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-right: 3px solid var(--circle-gold); background: #fbf8ed; color: #68767e; font-size: 0.51rem; }
+.quran-report-fixed-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.quran-report-fixed-meta svg { width: 14px; }
+.quran-report-fixed-meta b { color: var(--circle-navy); white-space: nowrap; }
+.quran-report-recipient-panel { min-width: 0; border-right: 1px solid #dce4e7; padding-right: 15px; }
+.quran-report-recipient-panel > div:first-child { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; color: #5e707b; font-size: 0.53rem; font-weight: 900; }
+.quran-report-recipient-panel > div:first-child b { display: grid; min-width: 27px; height: 27px; place-items: center; border-radius: 50%; background: var(--circle-navy); color: #fff; }
+.quran-report-recipient-list { max-height: 245px; overflow: auto; border-block: 1px solid #e1e7e9; }
+.quran-report-recipient-list article { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 7px; min-height: 51px; padding: 7px 2px; border-bottom: 1px solid #e5eaec; }
+.quran-report-recipient-list article:last-child { border-bottom: 0; }
+.quran-report-recipient-list .person-avatar { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #e9f1f3; color: var(--circle-navy); font-weight: 900; }
+.quran-report-recipient-list b { display: block; overflow: hidden; color: var(--circle-navy); font-size: 0.51rem; text-overflow: ellipsis; white-space: nowrap; }
+.quran-report-recipient-list small { color: #89969d; font-size: 0.46rem; }
+.quran-report-recipient-list strong { color: #8a6717; font-size: 0.48rem; }
+.quran-report-recipient-list .status-completed strong { color: var(--circle-green); }
+.quran-report-recipient-list .status-exempted strong,
+.quran-report-recipient-list .status-cancelled strong { color: #71808a; }
+.quran-report-version-history { margin-top: 11px; }
+.quran-report-version-history summary { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 37px; cursor: pointer; color: var(--circle-navy); font-size: 0.52rem; font-weight: 900; }
+.quran-report-version-history summary svg { width: 15px; }
+.quran-report-version-history summary b { color: #8c6a1a; }
+.quran-report-version-history article { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: start; gap: 7px; padding: 8px 0; border-top: 1px solid #e3e8ea; }
+.quran-report-version-history article svg { width: 14px; color: #71828b; }
+.quran-report-version-history article b { display: block; color: #364c59; font-size: 0.48rem; }
+.quran-report-version-history article small { color: #829098; font-size: 0.44rem; }
+.quran-report-version-history article em { color: #9b751d; font-size: 0.46rem; font-style: normal; font-weight: 900; }
+.quran-report-management-preview { margin-top: 15px; padding: 13px; border: 1px solid #cbd8dc; border-right: 4px solid var(--circle-green); border-radius: 5px; background: #f7faf9; }
+.quran-report-preview-head { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.quran-report-preview-head > svg { width: 22px; color: var(--circle-green); }
+.quran-report-preview-head small { display: block; color: #7a898f; font-size: 0.46rem; }
+.quran-report-preview-head strong { color: var(--circle-navy); font-size: 0.58rem; }
+.quran-report-preview-head > span { padding: 5px 8px; border-radius: 4px; background: #dff1e8; color: #086644; font-size: 0.46rem; font-weight: 900; }
+.quran-report-preview-head > span.is-blocked { background: #fde8e5; color: #a42f27; }
+.quran-report-preview-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+.quran-report-preview-metrics span { padding: 7px; border: 1px solid #dde5e7; background: #fff; color: #6b7b84; font-size: 0.48rem; text-align: center; }
+.quran-report-preview-metrics b { display: block; color: var(--circle-navy); font-size: 0.72rem; }
+.quran-report-management-preview p { display: flex; align-items: center; gap: 6px; margin: 7px 0 0; color: #4d626e; font-size: 0.5rem; }
+.quran-report-management-preview p svg { width: 15px; flex: 0 0 auto; }
+.quran-report-management-preview p.is-warning { color: #a42f27; }
+.quran-report-management-dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #dce4e7; }
+.quran-report-management-dialog footer button { display: inline-flex; min-height: 39px; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border: 1px solid #cbd6da; border-radius: 5px; background: #fff; color: #596a77; font-size: 0.53rem; font-weight: 900; }
+.quran-report-management-dialog footer button svg { width: 14px; }
+.quran-report-management-dialog footer .edit-preview-command { border-color: var(--circle-navy); color: var(--circle-navy); }
+.quran-report-management-dialog footer .cancel-preview-command { border-color: #c96c64; color: #a1352c; }
+.quran-report-management-dialog footer .edit-apply-command { border-color: var(--circle-green); background: var(--circle-green); color: #fff; }
+.quran-report-management-dialog footer .cancel-apply-command { border-color: #a93029; background: #a93029; color: #fff; }
+.quran-report-management-dialog footer button:disabled { cursor: not-allowed; opacity: 0.48; }
+
 @media (max-width: 1020px) {
   .circles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .circle-topbar-inner { grid-template-columns: auto 1fr auto; }
@@ -786,8 +992,11 @@
   .quran-student-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-conflict-layout { grid-template-columns: 1fr; }
   .quran-conflict-strategies { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quran-accounting-controls { grid-template-columns: minmax(230px, 1fr) minmax(155px, 0.55fr) auto; }
+  .quran-accounting-controls .export-command { grid-column: 1 / -1; }
   .quran-accounting-list-head,
   .quran-accounting-student { grid-template-columns: minmax(180px, 0.8fr) minmax(280px, 1.2fr) minmax(110px, 0.5fr) 72px; }
+  .quran-history-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .quran-extension-decision-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-extension-decision-controls .decision-note { grid-column: 1 / -1; }
   .quran-extension-decision-controls > button { grid-column: 1 / -1; }
@@ -879,6 +1088,11 @@
   .quran-review-toolbar form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-review-toolbar form button { grid-column: 1 / -1; }
   .quran-accounting-date { width: 100%; }
+  .quran-accounting-controls { grid-template-columns: 1fr 1fr; }
+  .quran-accounting-search { grid-column: 1 / -1; }
+  .quran-accounting-controls .export-command { grid-column: auto; }
+  .quran-accounting-legend { align-items: flex-start; flex-wrap: wrap; }
+  .quran-accounting-legend small { width: 100%; margin-right: 0; }
   .quran-accounting-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .quran-student-accounting-list { overflow: hidden; }
   .quran-accounting-list-head { display: none; }
@@ -897,6 +1111,11 @@
     min-width: 76px;
   }
   .quran-student-history { padding: 14px; }
+  .quran-history-progress { grid-template-columns: 1fr; }
+  .quran-history-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quran-history-filters { grid-template-columns: 1fr 1fr; }
+  .quran-history-filters > span { grid-column: 1 / -1; justify-self: start; padding-bottom: 0; }
+  .quran-plan-dialog { width: min(700px, calc(100% - 18px)); }
   .quran-history-list { overflow-x: hidden; }
   .quran-history-list article {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -921,7 +1140,11 @@
   .quran-extension-decision-controls > button { grid-column: auto; }
   .quran-approved-plan-list { overflow-x: auto; }
   .quran-approved-plan-head,
-  .quran-approved-report { min-width: 720px; }
+  .quran-approved-report { min-width: 820px; }
+  .quran-report-management-dialog { width: min(720px, calc(100% - 18px)); }
+  .quran-report-management-layout { grid-template-columns: 1fr; }
+  .quran-report-recipient-panel { border-top: 1px solid #dce4e7; border-right: 0; padding-top: 14px; padding-right: 0; }
+  .quran-report-recipient-list { max-height: 190px; }
 }
 
 @media (max-width: 420px) {
@@ -946,7 +1169,214 @@
   .quran-manager-tabs { grid-template-columns: 1fr; }
   .quran-manager-tabs button + button { border-top: 1px solid #dfe5e8; border-right: 0; }
   .quran-manager-tabs button { flex-direction: row; }
+  .quran-accounting-controls { grid-template-columns: 1fr; }
+  .quran-accounting-search,
+  .quran-accounting-controls .export-command { grid-column: auto; }
+  .quran-history-heading { align-items: center; }
+  .quran-history-actions .plan-command span { display: none; }
+  .quran-history-periods { display: grid; width: 100%; }
+  .quran-history-periods button { min-width: 0; }
+  .quran-history-metrics,
+  .quran-history-filters { grid-template-columns: 1fr; }
+  .quran-history-filters > span { grid-column: auto; }
+  .quran-plan-dialog form { padding: 15px; }
+  .quran-plan-modes,
+  .quran-plan-fields { grid-template-columns: 1fr; }
+  .quran-plan-reason { grid-column: auto; }
+  .quran-plan-preview-metrics { grid-template-columns: 1fr; }
+  .quran-plan-preview-metrics span + span { border-top: 1px solid #dfe6e3; border-right: 0; }
+  .quran-plan-date-change { grid-template-columns: 1fr; }
+  .quran-plan-date-change > svg { transform: rotate(-90deg); }
+  .quran-plan-dialog footer { display: grid; grid-template-columns: 1fr 1fr; }
+  .quran-plan-dialog footer .apply-command { grid-column: 1 / -1; }
+  .quran-report-management-dialog form { padding: 15px; }
+  .quran-report-management-stats { grid-template-columns: repeat(2, 1fr); }
+  .quran-report-edit-fields { grid-template-columns: 1fr; }
+  .quran-report-edit-fields > label:nth-of-type(2),
+  .quran-report-edit-fields > label:nth-of-type(4),
+  .quran-report-change-reason { grid-column: auto; }
+  .quran-report-fixed-meta { grid-column: auto; align-items: flex-start; flex-direction: column; }
+  .quran-report-fixed-meta b { white-space: normal; }
+  .quran-report-preview-metrics { grid-template-columns: 1fr; }
+  .quran-report-management-dialog footer { display: grid; grid-template-columns: 1fr 1fr; }
+  .quran-report-management-dialog footer .edit-apply-command,
+  .quran-report-management-dialog footer .cancel-apply-command { grid-column: 1 / -1; }
   .quran-accounting-metrics { grid-template-columns: 1fr; }
   .quran-review-toolbar form { grid-template-columns: 1fr; }
   .quran-review-toolbar form button { grid-column: auto; }
+}
+
+/* Quran accounting workspace v2 */
+.quran-accounting-toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid #173c4d;
+  border-right: 5px solid var(--circle-gold);
+  border-radius: 7px;
+  background: var(--circle-navy);
+  box-shadow: 0 12px 30px rgba(5, 25, 39, 0.12);
+}
+.quran-accounting-heading > span { color: #e0bd5d; font-size: 0.62rem; font-weight: 900; }
+.quran-accounting-heading h3 { margin: 2px 0; color: #fff; font-size: 1.45rem; }
+.quran-accounting-heading p { margin: 0; color: #c8d3d9; font-size: 0.63rem; }
+.quran-accounting-toolbar-actions { display: flex; align-items: stretch; gap: 7px; }
+.quran-accounting-toolbar .quran-accounting-date { border-color: rgba(255,255,255,0.25); background: #fff; }
+.quran-accounting-menu { position: relative; }
+.quran-accounting-menu summary { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,0.34); border-radius: 5px; background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; list-style: none; }
+.quran-accounting-menu summary::-webkit-details-marker { display: none; }
+.quran-accounting-menu summary svg { width: 18px; }
+.quran-accounting-menu > div { position: absolute; top: calc(100% + 7px); left: 0; z-index: 12; width: 220px; padding: 6px; border: 1px solid #ccd8dd; border-radius: 6px; background: #fff; box-shadow: 0 16px 40px rgba(5,25,39,0.2); }
+.quran-accounting-menu > div button { display: flex; width: 100%; min-height: 38px; align-items: center; gap: 7px; padding: 7px 9px; border: 0; border-radius: 4px; background: #fff; color: #354958; font-size: 0.58rem; font-weight: 900; text-align: right; }
+.quran-accounting-menu > div button:hover { background: #eff6f3; color: var(--circle-green); }
+.quran-accounting-menu > div svg { width: 15px; }
+
+.quran-accounting-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 11px 0; }
+.quran-accounting-metrics > button { display: grid; min-height: 76px; grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; gap: 1px 8px; padding: 11px 13px; border: 1px solid #d2dde1; border-top: 4px solid var(--circle-navy-soft); border-radius: 6px; background: #fff; color: #71808a; text-align: right; cursor: pointer; }
+.quran-accounting-metrics > button svg { grid-row: 1 / 3; width: 19px; color: var(--circle-navy-soft); }
+.quran-accounting-metrics > button span { align-self: end; font-size: 0.58rem; font-weight: 900; }
+.quran-accounting-metrics > button strong { grid-row: 1 / 3; grid-column: 3; color: var(--circle-navy); font-size: 1.15rem; }
+.quran-accounting-metrics > button small { align-self: start; color: #9aa5ac; font-size: 0.48rem; }
+.quran-accounting-metrics > button.is-red { border-top-color: var(--circle-red); }
+.quran-accounting-metrics > button.is-red svg { color: var(--circle-red); }
+.quran-accounting-metrics > button.is-green { border-top-color: var(--circle-green); }
+.quran-accounting-metrics > button.is-green svg { color: var(--circle-green); }
+.quran-accounting-metrics > button.is-active { border-color: var(--circle-gold); background: #fffaf0; box-shadow: inset 0 0 0 1px var(--circle-gold); }
+
+.quran-accounting-workbar { display: grid; grid-template-columns: minmax(240px, 0.75fr) minmax(450px, 1.5fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid #d7e0e3; border-bottom: 1px solid #d7e0e3; background: #f7f9f9; }
+.quran-accounting-controls { display: block; margin: 0; padding: 0; border: 0; background: transparent; }
+.quran-accounting-search { position: relative; display: block; }
+.quran-accounting-search > svg { right: 11px; }
+.quran-accounting-search input { min-height: 40px; padding-right: 35px; padding-left: 40px; font-size: 0.61rem; }
+.quran-accounting-search button { position: absolute; top: 4px; left: 4px; display: grid; width: 32px; min-height: 32px; place-items: center; padding: 0; border: 0; border-radius: 4px; background: var(--circle-green); color: #fff; }
+.quran-accounting-search button svg { width: 14px; }
+.quran-accounting-quick-filters { display: flex; min-width: 0; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: thin; }
+.quran-accounting-quick-filters button { min-height: 34px; flex: 0 0 auto; padding: 5px 9px; border: 1px solid #d2dce0; border-radius: 5px; background: #fff; color: #5f707d; font-size: 0.54rem; font-weight: 900; }
+.quran-accounting-quick-filters button.is-active { border-color: var(--circle-navy); background: var(--circle-navy); color: #fff; }
+.quran-accounting-result-count { color: #78858e; font-size: 0.52rem; white-space: nowrap; }
+.quran-accounting-legend { margin: 0; padding: 8px 12px; border-bottom: 1px solid #dce4e7; background: #fff; }
+
+.quran-student-accounting-list { border-radius: 0 0 7px 7px; box-shadow: 0 10px 28px rgba(5,25,39,0.07); }
+.quran-accounting-list-head,
+.quran-accounting-student { grid-template-columns: minmax(210px, 0.85fr) minmax(150px, 0.55fr) minmax(340px, 1.35fr) 104px; gap: 12px; }
+.quran-accounting-list-head { min-height: 40px; padding: 7px 15px; background: #edf2f3; font-size: 0.55rem; }
+.quran-accounting-student { min-height: 82px; padding: 11px 15px; background: #fff; transition: background 160ms ease; }
+.quran-accounting-student:hover { background: #fbfcfc; }
+.quran-accounting-person { gap: 10px; }
+.quran-accounting-person .person-avatar { width: 39px; height: 39px; background: var(--circle-navy); color: #fff; font-size: 0.92rem; }
+.quran-accounting-person b { font-size: 0.67rem; }
+.quran-accounting-person small { font-size: 0.53rem; }
+.quran-accounting-status { display: grid; grid-template-columns: 9px minmax(0, 1fr); align-items: center; gap: 8px; }
+.quran-accounting-status > div { display: grid; gap: 2px; }
+.quran-status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--circle-navy-soft); box-shadow: 0 0 0 4px rgba(29,92,123,0.09); }
+.tone-complete .quran-status-dot { background: var(--circle-green); box-shadow: 0 0 0 4px rgba(7,119,80,0.09); }
+.tone-late .quran-status-dot { background: var(--circle-red); box-shadow: 0 0 0 4px rgba(174,55,55,0.09); }
+.tone-partial .quran-status-dot { background: var(--circle-gold); box-shadow: 0 0 0 4px rgba(213,171,54,0.13); }
+.tone-exempted .quran-status-dot,
+.tone-empty .quran-status-dot { background: #91a0a8; box-shadow: 0 0 0 4px rgba(145,160,168,0.11); }
+.quran-accounting-status b { font-size: 0.61rem; }
+.quran-accounting-status small,
+.quran-accounting-status button { font-size: 0.51rem; }
+.quran-accounting-tasks { gap: 6px; }
+.quran-accounting-tasks > span { min-height: 42px; padding: 6px 8px; font-size: 0.55rem; }
+.quran-accounting-student > .quran-open-student-command { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 6px; padding: 6px 9px; border: 1px solid #b8cbd3; border-radius: 5px; background: #fff; color: var(--circle-navy); font-size: 0.55rem; font-weight: 900; }
+.quran-accounting-student > .quran-open-student-command:hover { border-color: var(--circle-green); background: #eef7f3; color: var(--circle-green); }
+
+.quran-history-backdrop { position: fixed; inset: 0; z-index: 89; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(3,18,29,0.56); cursor: default; }
+.quran-student-history { position: fixed; inset: 0 auto 0 0; z-index: 90; display: grid; width: min(720px, calc(100vw - 280px)); min-width: 580px; grid-template-rows: auto auto minmax(0, 1fr); margin: 0; padding: 0; overflow: hidden; border: 0; border-right: 1px solid #b9c8ce; border-radius: 0; background: #fff; box-shadow: 24px 0 70px rgba(3,18,29,0.3); }
+.quran-history-heading { position: sticky; top: 0; display: flex; min-height: 88px; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #d9e2e5; background: var(--circle-navy); }
+.quran-history-person { display: flex; min-width: 0; align-items: center; gap: 10px; }
+.quran-history-person .person-avatar { width: 44px; height: 44px; flex: 0 0 auto; background: var(--circle-gold); color: var(--circle-navy); font-size: 1rem; }
+.quran-history-person > div { min-width: 0; }
+.quran-history-person small { color: #e0bd5d; font-size: 0.51rem; font-weight: 900; }
+.quran-history-person h3 { overflow: hidden; margin: 0; color: #fff; font-size: 1.18rem; text-overflow: ellipsis; white-space: nowrap; }
+.quran-history-person p { overflow: hidden; margin: 1px 0 0; color: #bdcad1; font-size: 0.52rem; text-overflow: ellipsis; white-space: nowrap; }
+.quran-history-actions button { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.08); color: #fff; }
+.quran-history-actions .plan-command { border-color: #d6b44f; background: #d6b44f; color: var(--circle-navy); }
+.quran-history-actions .close-command { width: 36px; }
+.quran-history-sections { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #d7e0e3; background: #f5f8f8; }
+.quran-history-sections button { position: relative; display: flex; min-height: 48px; align-items: center; justify-content: center; gap: 6px; border: 0; background: transparent; color: #657681; font-size: 0.57rem; font-weight: 900; }
+.quran-history-sections button + button { border-right: 1px solid #dce4e7; }
+.quran-history-sections button svg { width: 15px; }
+.quran-history-sections button.is-active { background: #fff; color: var(--circle-navy); }
+.quran-history-sections button.is-active::after { position: absolute; inset: auto 15px 0; height: 3px; background: var(--circle-gold); content: ''; }
+.quran-history-body { min-height: 0; overflow-y: auto; padding: 16px 18px 24px; background: #fff; }
+.quran-history-summary { display: grid; }
+.quran-history-alert { display: grid; min-height: 62px; grid-template-columns: 27px minmax(0, 1fr) 20px; align-items: center; gap: 9px; margin-bottom: 12px; padding: 10px 12px; border: 1px solid #e3b9bb; border-right: 4px solid var(--circle-red); border-radius: 6px; background: #fff5f5; color: var(--circle-red); text-align: right; }
+.quran-history-alert > svg { width: 19px; }
+.quran-history-alert > span { display: grid; gap: 2px; }
+.quran-history-alert b { font-size: 0.61rem; }
+.quran-history-alert small { color: #846d6d; font-size: 0.51rem; }
+.quran-history-periods { justify-self: start; margin: 0; }
+.quran-history-metrics { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 10px; }
+.quran-history-metrics article { min-height: 66px; grid-template-columns: 20px minmax(0, 1fr); grid-template-rows: auto auto; }
+.quran-history-metrics article svg { grid-row: 1 / 3; }
+.quran-history-metrics article strong { font-size: 0.7rem; }
+.quran-history-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: 18px; padding-bottom: 8px; border-bottom: 1px solid #dce4e7; }
+.quran-history-section-heading span { color: #927018; font-size: 0.5rem; font-weight: 900; }
+.quran-history-section-heading h4 { margin: 1px 0 0; color: var(--circle-navy); font-family: var(--font-amiri); font-size: 1.05rem; }
+.quran-history-section-heading small { color: #7c8992; font-size: 0.5rem; }
+.quran-history-progress { grid-template-columns: 1fr; margin-top: 9px; }
+.quran-history-progress article { min-height: 72px; }
+.quran-history-progress strong { font-size: 0.6rem; }
+.quran-history-filters { position: sticky; top: -16px; z-index: 2; grid-template-columns: repeat(2, minmax(140px, 1fr)) auto; margin: -16px -18px 0; padding: 10px 18px; background: #f5f8f8; }
+.quran-history-list { max-height: none; margin-top: 8px; overflow: visible; }
+.quran-history-list article { grid-template-columns: 92px 70px minmax(0, 1fr) 78px 70px 65px; min-height: 62px; }
+.quran-history-events { margin: 0; border: 0; }
+.quran-history-events > div { margin-top: 8px; }
+.quran-history-events article { padding: 11px 5px; }
+body:has(.quran-student-history) { overflow: hidden; }
+
+@media (max-width: 1020px) {
+  .quran-accounting-workbar { grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr); }
+  .quran-accounting-result-count { grid-column: 1 / -1; }
+  .quran-accounting-list-head,
+  .quran-accounting-student { grid-template-columns: minmax(150px, 0.8fr) minmax(112px, 0.55fr) minmax(220px, 1.25fr) 86px; }
+  .quran-student-history { width: min(680px, calc(100vw - 80px)); min-width: 0; }
+}
+
+@media (max-width: 760px) {
+  .quran-accounting-toolbar { display: grid; grid-template-columns: 1fr; padding: 16px; }
+  .quran-accounting-toolbar-actions { width: 100%; }
+  .quran-accounting-toolbar .quran-accounting-date { flex: 1; }
+  .quran-accounting-menu > div { right: auto; left: 0; }
+  .quran-accounting-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quran-accounting-metrics > button { min-height: 72px; }
+  .quran-accounting-workbar { grid-template-columns: 1fr; padding: 9px; }
+  .quran-accounting-quick-filters { margin: 0 -9px; padding: 0 9px 3px; }
+  .quran-accounting-result-count { grid-column: auto; }
+  .quran-accounting-list-head { display: none; }
+  .quran-accounting-student { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 13px; }
+  .quran-accounting-person { grid-column: 1; }
+  .quran-accounting-status { grid-column: 2; justify-self: end; }
+  .quran-accounting-tasks { grid-column: 1 / -1; }
+  .quran-accounting-student > .quran-open-student-command { grid-column: 1 / -1; grid-row: auto; width: 100%; }
+  .quran-student-history { inset: 0; width: 100%; min-width: 0; padding: 0; border: 0; }
+  .quran-history-heading { min-height: 78px; padding: 11px 12px; }
+  .quran-history-actions .plan-command span { display: none; }
+  .quran-history-body { padding: 13px 12px 92px; }
+  .quran-history-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quran-history-filters { top: -13px; grid-template-columns: 1fr 1fr; margin: -13px -12px 0; padding: 9px 12px; }
+  .quran-history-filters > span { grid-column: 1 / -1; justify-self: start; padding: 0; }
+  .quran-history-list article { grid-template-columns: minmax(0, 1fr) auto; }
+}
+
+@media (max-width: 420px) {
+  .quran-accounting-heading h3 { font-size: 1.25rem; }
+  .quran-accounting-heading p { font-size: 0.57rem; }
+  .quran-accounting-toolbar-actions { align-items: stretch; }
+  .quran-accounting-metrics > button { grid-template-columns: 24px minmax(0, 1fr) auto; padding: 9px; }
+  .quran-accounting-metrics > button small { display: none; }
+  .quran-accounting-person .person-avatar { width: 36px; height: 36px; }
+  .quran-accounting-status { grid-column: 1 / -1; justify-self: stretch; padding: 7px 9px; background: #f6f8f8; }
+  .quran-accounting-tasks > span { grid-template-columns: 14px minmax(0, 1fr) auto; }
+  .quran-history-sections button { min-height: 46px; flex-direction: column; gap: 2px; font-size: 0.5rem; }
+  .quran-history-person .person-avatar { width: 38px; height: 38px; }
+  .quran-history-person h3 { font-size: 1rem; }
+  .quran-history-periods { display: grid; width: 100%; }
+  .quran-history-metrics { grid-template-columns: 1fr 1fr; }
+  .quran-history-filters { grid-template-columns: 1fr; }
+  .quran-history-filters > span { grid-column: auto; }
 }

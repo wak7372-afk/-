@@ -14,11 +14,11 @@
   </script>
   <link rel="manifest" href="./manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/style.css?v=2">
 </head>
 <body class="bg-slate-50 min-h-screen">
   <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-    <section class="figma-green-pattern-bg relative flex min-h-[34vh] flex-col justify-between overflow-hidden p-7 text-white md:p-12 lg:min-h-screen lg:p-16" aria-labelledby="brand-title">
+    <section class="auth-brand-stage figma-green-pattern-bg relative flex min-h-[34vh] flex-col justify-between overflow-hidden p-7 text-white md:p-12 lg:min-h-screen lg:p-16" aria-labelledby="brand-title">
       <div class="relative z-10 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-amber-300 bg-white/10 font-amiri text-2xl text-amber-300">ذ</div>
@@ -36,15 +36,15 @@
         <p class="mt-5 max-w-lg text-sm leading-8 text-emerald-50 md:text-base" data-i18n="app_tagline">نظام ذكي متكامل لإدارة مركز تعليم القرآن الكريم وعلومه</p>
 
         <div class="mt-8 grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-3">
-          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+          <div class="auth-feature-card rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
             <p class="text-sm font-bold text-amber-200">حلقات التحفيظ</p>
             <p class="mt-1 text-[11px] leading-5 text-emerald-100">متابعة الحفظ والمراجعة اليومية</p>
           </div>
-          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+          <div class="auth-feature-card rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
             <p class="text-sm font-bold text-amber-200">الفصول الشرعية</p>
             <p class="mt-1 text-[11px] leading-5 text-emerald-100">دروس واختبارات وواجبات</p>
           </div>
-          <div class="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+          <div class="auth-feature-card rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
             <p class="text-sm font-bold text-amber-200">متابعة الأسرة</p>
             <p class="mt-1 text-[11px] leading-5 text-emerald-100">حضور ودرجات وإنجاز الأبناء</p>
           </div>
@@ -54,8 +54,12 @@
       <p class="relative z-10 border-t border-amber-300/20 pt-4 text-[11px] text-emerald-100/80">© 1448 هـ — مركز ذات الخيل لتعليم القرآن الكريم وعلومه</p>
     </section>
 
-    <section class="flex items-center justify-center p-5 sm:p-8 lg:p-12" aria-labelledby="login-title">
+    <section class="auth-login-stage flex items-center justify-center p-5 sm:p-8 lg:p-12" aria-labelledby="login-title">
       <div class="w-full max-w-md">
+        <div class="auth-mobile-brand" aria-label="مركز ذات خيل لتعليم القرآن الكريم وعلومه">
+          <span aria-hidden="true">ذ</span>
+          <div><strong class="font-amiri">مركز ذات خيل</strong><small>لتعليم القرآن الكريم وعلومه</small></div>
+        </div>
         <div class="mb-6 text-center lg:text-right">
           <p class="text-xs font-bold text-amber-700">بوابة المركز الإلكترونية</p>
           <h2 id="login-title" class="mt-2 font-amiri text-4xl font-bold text-emerald-950" data-i18n="login">تسجيل الدخول</h2>

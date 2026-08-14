@@ -114,6 +114,9 @@ function getAuthErrorMessage(error) {
     return 'تعذر التحقق من بيانات الحساب. تأكد من اسم المستخدم وكلمة المرور.';
   }
   const message = (error?.message || '').toLowerCase();
+  if (message.includes('failed to send a request') || message.includes('failed to fetch') || message.includes('network')) {
+    return 'تعذر الاتصال بخدمة تسجيل الدخول. تحقق من اتصالك ثم حاول مرة أخرى.';
+  }
   if (message.includes('rate limit')) return 'تم تجاوز عدد المحاولات المسموح. حاول مرة أخرى بعد قليل.';
   if (message.includes('password')) return 'كلمة المرور غير صحيحة أو لا تحقق المتطلبات.';
   return error?.message || 'تعذر إتمام عملية المصادقة. حاول مرة أخرى.';

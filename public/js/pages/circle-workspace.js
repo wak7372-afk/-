@@ -2,7 +2,8 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js';
-import { createQuranReportManager } from './quran-report-manager.js';
+import { createQuranReportManager } from './quran-report-manager.js?v=5';
+import { mountTeacherShell } from '../lib/teacher-shell.js';
 
 const POST_TYPES = {
   announcement: { label: 'إعلان', icon: 'megaphone' },
@@ -47,6 +48,7 @@ async function initialize() {
   if (!authData) return;
 
   state.profile = authData.profile;
+  if (state.profile.role === 'teacher') mountTeacherShell('circles');
   setupStaticControls();
   await loadWorkspace();
   renderWorkspace();
@@ -119,14 +121,18 @@ function renderWorkspace() {
 function renderHeader() {
   const { circle, permissions, people } = state.workspace;
   const quran = circle.circle_type === 'quran';
+  const participantRole = PARTICIPANT_LABELS[permissions.staff_role || (permissions.is_admin ? 'admin' : 'student')] || 'عضو';
   document.title = `مركز ذات خيل لتعليم القرآن الكريم وعلومه | ${circle.name}`;
   document.getElementById('workspace-title').textContent = circle.name;
-  document.getElementById('workspace-role-label').textContent = PARTICIPANT_LABELS[permissions.staff_role || (permissions.is_admin ? 'admin' : 'student')] || 'مساحة الحلقة';
+  document.getElementById('workspace-role-label').textContent = participantRole;
   document.getElementById('workspace-type').textContent = quran ? 'حلقة قرآنية' : 'حلقة تعليمية';
-  document.getElementById('workspace-participant-role').textContent = PARTICIPANT_LABELS[permissions.staff_role || (permissions.is_admin ? 'admin' : 'student')] || 'عضو';
+  document.getElementById('workspace-participant-role').textContent = participantRole;
   document.getElementById('workspace-hero-title').textContent = circle.name;
   document.getElementById('workspace-description').textContent = circle.description || (quran ? 'متابعة قرآنية منظمة للحفظ والمراجعة والتثبيت.' : 'دروس ومهام وموارد تعليمية مرتبطة بمواد الحلقة.');
   document.getElementById('workspace-students-count').textContent = Number(people.students_count || 0);
+  document.getElementById('workspace-user-name').textContent = state.profile.full_name || state.profile.username || 'حسابي';
+  document.getElementById('workspace-user-role').textContent = participantRole;
+  document.getElementById('workspace-user-avatar').textContent = firstCharacter(state.profile.full_name || state.profile.username || 'م');
   document.getElementById('work-tab-label').textContent = quran ? 'التقارير' : 'المهام';
   document.getElementById('work-heading').textContent = quran ? 'تقارير الحلقة' : 'مهام الحلقة';
   document.getElementById('workspace-subjects').innerHTML = (circle.subjects || []).map(subject => `<span>${escapeHtml(subject.name)}</span>`).join('');
@@ -135,6 +141,14 @@ function renderHeader() {
   const safeMeetLink = getSafeExternalUrl(circle.meet_link);
   meetLink.hidden = !safeMeetLink;
   if (safeMeetLink) meetLink.href = safeMeetLink;
+  renderCircleSidebarContext(circle, participantRole, quran);
+}
+
+function renderCircleSidebarContext(circle, participantRole, quran) {
+  const note = document.querySelector('.teacher-sidebar-note');
+  if (!note) return;
+  note.classList.add('is-circle-context');
+  note.innerHTML = `<i data-lucide="${quran ? 'book-open-check' : 'graduation-cap'}"></i><span><small>أنت داخل</small><strong>${escapeHtml(circle.name)}</strong><small>${escapeHtml(participantRole)}</small></span>`;
 }
 
 function switchTab(tab) {

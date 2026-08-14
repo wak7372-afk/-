@@ -1,0 +1,538 @@
+/* Circle workspace: compact operational dashboard */
+.circle-dashboard-theme {
+  --circle-dashboard-navy: #052b35;
+  --circle-dashboard-navy-deep: #031f29;
+  --circle-dashboard-green: #176846;
+  --circle-dashboard-gold: #d6a947;
+  --circle-dashboard-gold-soft: #f4e5bd;
+  --circle-dashboard-line: #e2e1da;
+  --circle-dashboard-surface: #fff;
+  --circle-dashboard-canvas: #f7f7f4;
+  background: var(--circle-dashboard-canvas) !important;
+  background-image: none !important;
+}
+
+.circle-dashboard-theme.teacher-unified-shell {
+  --teacher-sidebar-width: 218px;
+}
+
+.circle-dashboard-theme .teacher-sidebar {
+  border-left-color: rgba(214, 169, 71, 0.42);
+  background-color: var(--circle-dashboard-navy-deep);
+  background-image:
+    linear-gradient(45deg, transparent 47%, rgba(214, 169, 71, 0.045) 48%, rgba(214, 169, 71, 0.045) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 47%, rgba(23, 104, 70, 0.08) 48%, rgba(23, 104, 70, 0.08) 50%, transparent 51%);
+  background-size: 46px 46px;
+  box-shadow: -12px 0 32px rgba(3, 31, 41, 0.12);
+}
+
+.circle-dashboard-theme .teacher-sidebar-brand {
+  min-height: 74px;
+  padding: 12px 15px;
+}
+
+.circle-dashboard-theme .teacher-sidebar-mark {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  border-radius: 6px;
+  background: var(--circle-dashboard-gold);
+  font-size: 1.35rem;
+}
+
+.circle-dashboard-theme .teacher-sidebar-brand strong { font-size: 1.02rem; }
+.circle-dashboard-theme .teacher-sidebar-brand small { font-size: 0.62rem; }
+
+.circle-dashboard-theme .teacher-sidebar-nav {
+  gap: 2px;
+  padding: 16px 10px;
+}
+
+.circle-dashboard-theme .teacher-sidebar-nav a {
+  min-height: 44px;
+  gap: 10px;
+  padding: 8px 11px;
+  border-radius: 5px;
+  color: #cad8d4;
+  font-size: 0.72rem;
+}
+
+.circle-dashboard-theme .teacher-sidebar-nav a.is-active {
+  border-color: rgba(214, 169, 71, 0.52);
+  background: rgba(214, 169, 71, 0.12);
+  box-shadow: inset -3px 0 0 var(--circle-dashboard-gold);
+  color: #f2d992;
+}
+
+.circle-dashboard-theme .teacher-sidebar-note.is-circle-context {
+  align-items: flex-start;
+  margin: auto 10px 12px;
+  padding: 13px 11px;
+  border-color: rgba(214, 169, 71, 0.26);
+  border-radius: 6px;
+  background-color: rgba(23, 104, 70, 0.15);
+  background-image:
+    linear-gradient(45deg, transparent 48%, rgba(214, 169, 71, 0.055) 49%, rgba(214, 169, 71, 0.055) 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(214, 169, 71, 0.055) 49%, rgba(214, 169, 71, 0.055) 51%, transparent 52%);
+  background-size: 34px 34px;
+}
+
+.circle-dashboard-theme .teacher-sidebar-note.is-circle-context > svg {
+  width: 19px;
+  margin-top: 2px;
+  color: var(--circle-dashboard-gold);
+}
+
+.circle-dashboard-theme .teacher-sidebar-note.is-circle-context span { min-width: 0; }
+.circle-dashboard-theme .teacher-sidebar-note.is-circle-context strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.circle-dashboard-theme .teacher-sidebar-note.is-circle-context small {
+  color: #a9bdb6;
+  font-size: 0.56rem;
+}
+
+.circle-dashboard-theme.teacher-unified-shell:not(.teacher-task-page) > header {
+  min-height: 66px;
+  padding: 0 18px !important;
+  border-bottom-color: var(--circle-dashboard-line) !important;
+  box-shadow: 0 4px 16px rgba(3, 31, 41, 0.055) !important;
+}
+
+.circle-dashboard-theme.teacher-unified-shell:not(.teacher-task-page) > header > div {
+  min-height: 66px;
+}
+
+.circle-dashboard-theme .circle-topbar-pattern { display: none; }
+
+.circle-dashboard-theme .circle-back-command {
+  min-height: 38px;
+  padding: 7px 11px;
+  border-color: #d8ddd9 !important;
+  border-radius: 5px !important;
+  font-size: 0.68rem;
+}
+
+.circle-dashboard-theme .circle-page-title span {
+  color: #9a7727;
+  font-size: 0.58rem;
+}
+
+.circle-dashboard-theme .circle-page-title h1 {
+  color: var(--circle-dashboard-navy-deep) !important;
+  font-size: 1.25rem !important;
+}
+
+.circle-dashboard-theme .circle-account-actions { gap: 6px; }
+
+.circle-dashboard-theme .circle-meet-command {
+  min-height: 38px;
+  padding: 7px 12px;
+  border-color: var(--circle-dashboard-gold) !important;
+  border-radius: 5px !important;
+  background: var(--circle-dashboard-gold) !important;
+  color: var(--circle-dashboard-navy-deep) !important;
+  font-size: 0.65rem;
+}
+
+.circle-dashboard-theme .circle-profile-command {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 11px;
+  border: 1px solid #d8ddd9 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  color: #263d46 !important;
+  text-decoration: none;
+}
+
+.circle-dashboard-theme .circle-profile-avatar {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--circle-dashboard-navy);
+  color: #f3da92;
+  font-family: var(--font-amiri);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.circle-dashboard-theme .circle-profile-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+  text-align: right;
+}
+
+.circle-dashboard-theme .circle-profile-copy b {
+  max-width: 120px;
+  overflow: hidden;
+  font-size: 0.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.circle-dashboard-theme .circle-profile-copy small {
+  color: #7c898c;
+  font-size: 0.49rem;
+}
+
+.circle-dashboard-theme .circle-icon-command.is-danger {
+  width: 38px;
+  height: 38px;
+  border-color: #ead4d3 !important;
+  border-radius: 5px !important;
+  background: #fff8f7 !important;
+  color: #a34646 !important;
+}
+
+.circle-dashboard-theme.teacher-unified-shell:not(.teacher-task-page) > main {
+  width: min(1380px, calc(100% - 34px)) !important;
+  max-width: 1380px !important;
+  padding: 18px 0 50px !important;
+}
+
+.circle-dashboard-theme .circle-workspace-hero {
+  min-height: 142px;
+  padding: 21px 24px;
+  border: 1px solid rgba(214, 169, 71, 0.72);
+  border-right-width: 4px;
+  border-radius: 6px;
+  background-color: var(--circle-dashboard-navy);
+  background-image:
+    linear-gradient(45deg, transparent 47%, rgba(214, 169, 71, 0.055) 48%, rgba(214, 169, 71, 0.055) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 47%, rgba(23, 104, 70, 0.13) 48%, rgba(23, 104, 70, 0.13) 50%, transparent 51%);
+  background-size: 42px 42px;
+  box-shadow: 0 10px 25px rgba(3, 31, 41, 0.11);
+}
+
+.circle-dashboard-theme .workspace-hero-meta { gap: 5px; }
+
+.circle-dashboard-theme .circle-type-badge,
+.circle-dashboard-theme .circle-role-badge {
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 0.52rem;
+}
+
+.circle-dashboard-theme .circle-workspace-hero h2 {
+  margin: 7px 0 2px;
+  color: #fff !important;
+  font-size: 1.78rem;
+}
+
+.circle-dashboard-theme .circle-workspace-hero p {
+  max-width: 680px;
+  font-size: 0.68rem;
+  line-height: 1.75;
+}
+
+.circle-dashboard-theme .workspace-subjects { margin-top: 9px; }
+.circle-dashboard-theme .workspace-subjects span { border-radius: 4px; font-size: 0.52rem; }
+
+.circle-dashboard-theme .workspace-hero-status {
+  min-width: 132px;
+  grid-template-columns: 34px auto;
+  grid-template-rows: auto auto;
+  justify-items: start;
+  column-gap: 9px;
+  padding: 13px 15px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.055);
+  text-align: right;
+}
+
+.circle-dashboard-theme .workspace-status-icon {
+  width: 34px;
+  height: 34px;
+  grid-row: 1 / 3;
+  margin: 0;
+}
+
+.circle-dashboard-theme .workspace-hero-status strong { font-size: 1.18rem; }
+.circle-dashboard-theme .workspace-hero-status > span:last-child { font-size: 0.52rem; }
+
+.circle-dashboard-theme .workspace-tabs {
+  top: 66px;
+  margin: 12px 0 16px;
+  border-color: var(--circle-dashboard-line);
+  border-radius: 5px;
+  box-shadow: 0 5px 14px rgba(3, 31, 41, 0.05);
+}
+
+.circle-dashboard-theme .workspace-tabs button {
+  min-height: 47px;
+  gap: 6px;
+  padding: 6px;
+  color: #5d6c6f;
+  font-size: 0.62rem;
+}
+
+.circle-dashboard-theme .workspace-tabs button svg { width: 15px; }
+
+.circle-dashboard-theme .workspace-tabs button.is-active {
+  background: var(--circle-dashboard-navy);
+  color: #fff;
+  box-shadow: inset 0 -3px 0 var(--circle-dashboard-gold);
+}
+
+.circle-dashboard-theme .workspace-panel { min-height: 360px; }
+
+.circle-dashboard-theme .workspace-panel-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 0 2px 9px;
+  border-bottom-color: var(--circle-dashboard-line);
+}
+
+.circle-dashboard-theme .workspace-panel-heading .circle-kicker {
+  color: #a07c25;
+  font-size: 0.52rem;
+}
+
+.circle-dashboard-theme .workspace-panel-heading h2 {
+  margin: 1px 0 0;
+  font-size: 1.2rem;
+}
+
+.circle-dashboard-theme .quran-manager-root { gap: 11px; }
+
+.circle-dashboard-theme .quran-manager-tabs {
+  border-color: var(--circle-dashboard-line);
+  border-radius: 5px;
+  box-shadow: 0 5px 14px rgba(3, 31, 41, 0.045);
+}
+
+.circle-dashboard-theme .quran-manager-tabs button {
+  min-height: 48px;
+  gap: 6px;
+  color: #657275;
+  font-size: 0.6rem;
+}
+
+.circle-dashboard-theme .quran-manager-tabs button.is-active {
+  background: #fff;
+  color: var(--circle-dashboard-navy-deep);
+  box-shadow: inset 0 -3px 0 var(--circle-dashboard-gold);
+}
+
+.circle-dashboard-theme .quran-manager-tabs button.is-active svg { color: var(--circle-dashboard-green); }
+
+.circle-dashboard-theme .quran-accounting-toolbar {
+  min-height: 106px;
+  padding: 15px 17px;
+  border-color: #16424a;
+  border-right-color: var(--circle-dashboard-gold);
+  border-radius: 6px;
+  background: var(--circle-dashboard-navy);
+  box-shadow: 0 9px 22px rgba(3, 31, 41, 0.1);
+}
+
+.circle-dashboard-theme .quran-accounting-heading > span { color: #e0bd68; font-size: 0.53rem; }
+.circle-dashboard-theme .quran-accounting-heading h3 { font-family: var(--font-amiri); font-size: 1.25rem; }
+.circle-dashboard-theme .quran-accounting-heading p { color: #c9d7d4; font-size: 0.55rem; }
+
+.circle-dashboard-theme .quran-accounting-metrics {
+  gap: 7px;
+  margin: 8px 0;
+}
+
+.circle-dashboard-theme .quran-accounting-metrics > button {
+  min-height: 69px;
+  padding: 9px 11px;
+  border: 1px solid var(--circle-dashboard-line);
+  border-top: 1px solid var(--circle-dashboard-line);
+  border-right: 3px solid #4b7a87;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(3, 31, 41, 0.035);
+}
+
+.circle-dashboard-theme .quran-accounting-metrics > button.is-red { border-right-color: #b64a4e; }
+.circle-dashboard-theme .quran-accounting-metrics > button.is-green { border-right-color: var(--circle-dashboard-green); }
+.circle-dashboard-theme .quran-accounting-metrics > button.is-active {
+  border-color: var(--circle-dashboard-gold);
+  background: #fffaf0;
+  box-shadow: inset 0 0 0 1px var(--circle-dashboard-gold);
+}
+
+.circle-dashboard-theme .quran-accounting-workbar {
+  padding: 8px 10px;
+  border: 1px solid var(--circle-dashboard-line);
+  border-radius: 5px 5px 0 0;
+  background: #fbfbf8;
+}
+
+.circle-dashboard-theme .quran-accounting-quick-filters button,
+.circle-dashboard-theme .quran-accounting-search input {
+  border-radius: 4px !important;
+}
+
+.circle-dashboard-theme .quran-accounting-search button {
+  border-radius: 3px;
+  background: var(--circle-dashboard-green);
+}
+
+.circle-dashboard-theme .quran-accounting-quick-filters button.is-active {
+  border-color: var(--circle-dashboard-navy);
+  background: var(--circle-dashboard-navy);
+}
+
+.circle-dashboard-theme .quran-accounting-legend { background: #fff; }
+
+.circle-dashboard-theme .quran-student-accounting-list {
+  border: 1px solid var(--circle-dashboard-line);
+  border-top: 0;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 7px 20px rgba(3, 31, 41, 0.05);
+}
+
+.circle-dashboard-theme .quran-accounting-list-head {
+  min-height: 36px;
+  background: #f0f3f0;
+}
+
+.circle-dashboard-theme .quran-accounting-student {
+  min-height: 75px;
+  padding-block: 9px;
+}
+
+.circle-dashboard-theme .quran-accounting-person .person-avatar {
+  background: var(--circle-dashboard-navy);
+  color: #f2d58a;
+}
+
+.circle-dashboard-theme .quran-accounting-student > .quran-open-student-command {
+  border-radius: 4px;
+  border-color: #c8d1ce;
+}
+
+.circle-dashboard-theme :is(.workspace-composer, .workspace-file-uploader, .workspace-settings-block, .workspace-post, .person-row, .workspace-file-row, .performance-metric) {
+  border-color: var(--circle-dashboard-line);
+  border-radius: 5px;
+  box-shadow: 0 4px 14px rgba(3, 31, 41, 0.04);
+}
+
+@media (max-width: 1100px) {
+  .circle-dashboard-theme.teacher-unified-shell { --teacher-sidebar-width: 196px; }
+  .circle-dashboard-theme .circle-profile-copy { display: none; }
+  .circle-dashboard-theme .circle-profile-command { padding: 4px; }
+}
+
+@media (max-width: 860px) {
+  .circle-dashboard-theme.teacher-unified-shell.circle-workspace-shell {
+    padding-bottom: 76px;
+  }
+
+  .circle-dashboard-theme.teacher-unified-shell.circle-workspace-shell .teacher-sidebar { display: none; }
+
+  .circle-dashboard-theme.teacher-unified-shell:not(.teacher-task-page) > header {
+    min-height: 62px;
+    padding-inline: 9px !important;
+  }
+
+  .circle-dashboard-theme.teacher-unified-shell:not(.teacher-task-page) > header > div { min-height: 62px; }
+  .circle-dashboard-theme .circle-page-title h1 { font-size: 1.08rem !important; }
+  .circle-dashboard-theme .circle-page-title span { display: none; }
+
+  .circle-dashboard-theme .circle-workspace-hero {
+    min-height: 126px;
+    align-items: center;
+    flex-direction: row;
+    padding: 17px;
+  }
+
+  .circle-dashboard-theme .circle-workspace-hero h2 { font-size: 1.45rem; }
+  .circle-dashboard-theme .workspace-hero-status { min-width: 112px; }
+
+  .circle-dashboard-theme .workspace-tabs {
+    position: fixed;
+    inset: auto 8px 8px;
+    z-index: 75;
+    margin: 0;
+    border-color: rgba(214, 169, 71, 0.55);
+    background: rgba(3, 31, 41, 0.98);
+    box-shadow: 0 12px 30px rgba(3, 31, 41, 0.24);
+  }
+
+  .circle-dashboard-theme .workspace-tabs button {
+    min-height: 58px;
+    flex-direction: column;
+    gap: 2px;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: transparent;
+    color: #c6d3cf;
+    font-size: 0.52rem;
+  }
+
+  .circle-dashboard-theme .workspace-tabs button.is-active {
+    background: rgba(214, 169, 71, 0.14);
+    color: #f0d78f;
+    box-shadow: inset 0 3px 0 var(--circle-dashboard-gold);
+  }
+
+  .circle-dashboard-theme .quran-manager-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .circle-dashboard-theme .circle-back-command span,
+  .circle-dashboard-theme .circle-meet-command span,
+  .circle-dashboard-theme .circle-profile-command { display: none; }
+
+  .circle-dashboard-theme .circle-back-command,
+  .circle-dashboard-theme .circle-meet-command {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .circle-dashboard-theme .circle-workspace-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .circle-dashboard-theme .workspace-hero-status {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 30px auto 1fr;
+    grid-template-rows: auto;
+    align-items: center;
+  }
+
+  .circle-dashboard-theme .workspace-status-icon { width: 30px; height: 30px; grid-row: auto; }
+  .circle-dashboard-theme .workspace-hero-status > span:last-child { justify-self: end; }
+
+  .circle-dashboard-theme .workspace-tabs button { min-width: 0; font-size: 0.46rem; }
+  .circle-dashboard-theme .workspace-tabs button svg { width: 14px; }
+
+  .circle-dashboard-theme .quran-manager-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+  }
+
+  .circle-dashboard-theme .quran-manager-tabs button {
+    min-width: 0;
+    min-height: 56px;
+    flex-direction: column;
+    gap: 2px;
+    padding-inline: 3px;
+    font-size: 0.49rem;
+    line-height: 1.35;
+    white-space: normal;
+  }
+}

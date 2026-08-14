@@ -132,6 +132,23 @@ test('administrator actions have an immutable server audit contract', () => {
   assert.match(dashboard, /source: 'admin-dashboard'/);
 });
 
+test('administrator account deletion and password reset stay server-controlled', () => {
+  const operation = fs.readFileSync(path.join(root, 'supabase/functions/admin-account-actions/index.ts'), 'utf8');
+  const dashboard = fs.readFileSync(path.join(root, 'public/js/pages/admin-dashboard.js'), 'utf8');
+
+  assert.match(operation, /callerProfile\?\.role !== 'admin'/);
+  assert.match(operation, /target\.role === 'admin'/);
+  assert.match(operation, /targetId === userData\.user\.id/);
+  assert.match(operation, /historyChecks/);
+  assert.match(operation, /ACCOUNT_HAS_HISTORY/);
+  assert.match(operation, /admin\.auth\.admin\.deleteUser/);
+  assert.match(operation, /admin\.auth\.admin\.updateUserById/);
+  assert.match(operation, /must_change_password: true/);
+  assert.doesNotMatch(operation, /metadata:\s*\{[^}]*password/s);
+  assert.match(dashboard, /admin-account-actions/);
+  assert.match(dashboard, /confirmation !== account\.username/);
+});
+
 test('edge function secret examples use placeholders', () => {
   const example = fs.readFileSync(path.join(root, 'supabase/functions/.env.example'), 'utf8');
   assert.match(example, /GEMINI_API_KEY=your_/);

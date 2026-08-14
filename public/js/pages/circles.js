@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
+import { mountTeacherShell } from '../lib/teacher-shell.js';
 
 const ROLE_LABELS = {
   admin: 'إدارة جميع المساحات التعليمية',
@@ -35,6 +36,7 @@ async function initialize() {
   if (!authData) return;
 
   state.profile = authData.profile;
+  if (state.profile.role === 'teacher') mountTeacherShell('circles');
   setupHeader();
   setupFilters();
   await loadCircles();

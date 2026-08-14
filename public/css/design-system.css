@@ -1,0 +1,507 @@
+:root {
+  --zk-font-ui: 'Cairo', 'Noto Kufi Arabic', sans-serif;
+  --zk-font-display: 'Amiri', serif;
+  --zk-ink: #071827;
+  --zk-navy: #071a2b;
+  --zk-navy-soft: #0d304b;
+  --zk-green: #0b6a4d;
+  --zk-blue: #1d638c;
+  --zk-gold: #d4ad43;
+  --zk-gold-soft: #f2d985;
+  --zk-red: #b44348;
+  --zk-paper: #f5f7f8;
+  --zk-surface: #ffffff;
+  --zk-border: #d8e1e5;
+  --zk-muted: #667784;
+  --zk-radius: 8px;
+  --zk-shadow-sm: 0 5px 18px rgba(7, 24, 39, 0.055);
+  --zk-shadow-md: 0 12px 34px rgba(7, 24, 39, 0.09);
+  --zk-motion: 180ms ease;
+}
+
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) {
+  color: var(--zk-ink);
+  background-color: var(--zk-paper) !important;
+  background-image:
+    linear-gradient(rgba(7, 26, 43, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 26, 43, 0.022) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  font-family: var(--zk-font-ui);
+}
+
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, a, input, select, textarea, summary) {
+  transition-duration: var(--zk-motion);
+}
+
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, input, select, textarea):focus-visible,
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  a:focus-visible {
+  outline: 3px solid rgba(212, 173, 67, 0.42);
+  outline-offset: 3px;
+}
+
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(input, select, textarea) {
+  color: var(--zk-ink);
+  background: var(--zk-surface);
+}
+
+:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(input, select):not([type='checkbox']):not([type='radio']) {
+  min-height: 44px;
+}
+
+/* Student experience */
+.student-shell {
+  --student-ink: var(--zk-ink);
+  --student-navy: var(--zk-navy);
+  --student-blue: var(--zk-blue);
+  --student-green: var(--zk-green);
+  --student-gold: var(--zk-gold);
+  --student-paper: var(--zk-paper);
+  --student-border: var(--zk-border);
+}
+
+.student-topbar {
+  min-height: 82px;
+  border-bottom-width: 1px;
+  background: var(--zk-navy);
+  box-shadow: 0 8px 26px rgba(7, 24, 39, 0.16);
+}
+
+.student-topbar::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 5%, var(--zk-gold), var(--zk-green), transparent 95%);
+  content: '';
+}
+
+.student-topbar-pattern {
+  opacity: 0.09;
+  background-size: 58px 58px;
+}
+
+.student-topbar-inner {
+  width: min(1320px, calc(100% - 48px));
+  min-height: 82px;
+  gap: 20px;
+}
+
+.student-brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(212, 173, 67, 0.1);
+  font-size: 1.7rem;
+}
+
+.student-brand strong {
+  font-size: 1.35rem;
+}
+
+.student-brand small,
+.student-welcome span {
+  font-size: 0.75rem;
+}
+
+.student-welcome h1 {
+  font-size: 1.65rem;
+}
+
+.icon-command {
+  width: 42px;
+  height: 42px;
+  border-radius: 7px;
+}
+
+.icon-command.has-badge > span {
+  min-width: 20px;
+  height: 20px;
+  font-size: 0.67rem;
+}
+
+.notification-heading button,
+.notification-item strong,
+.notification-empty {
+  font-size: 0.78rem;
+}
+
+.notification-item small {
+  font-size: 0.72rem;
+}
+
+.notification-item time {
+  font-size: 0.68rem;
+}
+
+.student-main {
+  width: min(1320px, calc(100% - 48px));
+  margin-top: 24px;
+}
+
+.day-command {
+  min-height: 132px;
+  padding: 24px 30px;
+  background: var(--zk-navy);
+  box-shadow: var(--zk-shadow-md);
+}
+
+.day-command::after {
+  opacity: 0.1;
+}
+
+.section-kicker {
+  font-size: 0.76rem;
+}
+
+.day-command h2 {
+  font-size: clamp(1.8rem, 3vw, 2.25rem);
+}
+
+.day-command p {
+  font-size: 0.88rem;
+}
+
+.day-command-progress > div > span,
+.week-heading span,
+.week-day span,
+.student-metric div span {
+  font-size: 0.75rem;
+}
+
+.week-day small {
+  font-size: 0.67rem;
+}
+
+.week-arrow {
+  width: 34px;
+  height: 36px;
+}
+
+.student-metric {
+  min-height: 92px;
+  padding: 16px 18px;
+  box-shadow: var(--zk-shadow-sm);
+}
+
+.student-task-section,
+.side-section,
+.week-panel {
+  box-shadow: var(--zk-shadow-sm);
+}
+
+.period-tabs button {
+  min-height: 38px;
+  font-size: 0.76rem;
+}
+
+.task-category,
+.task-status {
+  font-size: 0.69rem;
+}
+
+.student-task h3 {
+  font-size: 1.35rem;
+}
+
+.task-content {
+  font-size: 0.84rem;
+}
+
+.task-context,
+.task-facts,
+.teacher-note,
+.done-mark,
+.task-empty p,
+.student-loading,
+.classroom-row strong,
+.side-empty,
+.family-section summary strong {
+  font-size: 0.75rem;
+}
+
+.teacher-note {
+  line-height: 1.85;
+}
+
+.classroom-row small,
+.family-section summary small {
+  font-size: 0.68rem;
+}
+
+.task-command button,
+.task-command a,
+.task-empty .task-plan-link {
+  min-height: 44px;
+  font-size: 0.76rem;
+}
+
+.student-mobile-nav {
+  height: 72px;
+  border-color: rgba(212, 173, 67, 0.46);
+  background: rgba(7, 26, 43, 0.97);
+}
+
+.student-mobile-nav a,
+.student-mobile-nav button {
+  min-height: 56px;
+  font-size: 0.68rem;
+}
+
+/* Quran reports */
+.quran-day-hero,
+.quran-date-strip,
+.quran-report-metrics article,
+.quran-reports-panel,
+.quran-extension-panel {
+  box-shadow: var(--zk-shadow-sm);
+}
+
+.quran-day-hero {
+  background: var(--zk-navy);
+}
+
+.quran-date-days span,
+.quran-date-days small,
+.quran-report-metrics span,
+.quran-report-card p,
+.quran-report-fact,
+.quran-report-state small,
+.quran-extension-panel p,
+.quran-completion-message p {
+  font-size: 0.75rem;
+}
+
+.quran-report-card h3 {
+  font-size: 1.45rem;
+}
+
+.quran-report-card button,
+.quran-extension-panel button,
+.quran-extension-form button,
+.quran-extension-form input,
+.quran-extension-form textarea {
+  min-height: 44px;
+  font-size: 0.78rem;
+}
+
+/* Admin workspace */
+.admin-command-shell {
+  --admin-sidebar-width: 286px;
+  --admin-panel-border: var(--zk-border);
+  --admin-panel-shadow: var(--zk-shadow-sm);
+}
+
+.admin-sidebar {
+  background-color: var(--zk-navy);
+  background-size: 52px 52px;
+}
+
+.admin-brand-mark,
+.admin-avatar {
+  border-radius: 8px;
+}
+
+.admin-brand-copy span,
+.admin-profile-summary span:not(.admin-avatar),
+.admin-logout-button,
+.admin-eyebrow,
+.admin-section-kicker,
+.admin-panel-meta,
+.admin-status-badge,
+.admin-command-shell small {
+  font-size: 0.72rem;
+}
+
+.admin-nav-label {
+  font-size: 0.7rem;
+}
+
+.admin-nav-item {
+  min-height: 46px;
+  font-size: 0.84rem;
+}
+
+.admin-nav-symbol,
+.admin-nav-count {
+  font-size: 0.67rem;
+}
+
+.admin-profile-summary strong,
+.admin-topbar-actions button,
+.admin-command-shell :is(input, select, textarea, label, th, td),
+.admin-command-shell :is(.admin-primary-button, .admin-secondary-button, .admin-text-button) {
+  font-size: 0.78rem;
+}
+
+.admin-topbar {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 4px 18px rgba(7, 24, 39, 0.055);
+}
+
+.admin-panel,
+.admin-filter-panel,
+.admin-table-panel {
+  box-shadow: var(--zk-shadow-sm);
+}
+
+.admin-welcome-band {
+  background-color: var(--zk-navy);
+  box-shadow: var(--zk-shadow-md);
+}
+
+.admin-command-shell :is(.admin-primary-button, .admin-secondary-button) {
+  min-height: 44px;
+}
+
+/* Circles and teacher tools */
+.circle-portal-shell,
+.circle-workspace-shell {
+  --circle-navy: var(--zk-navy);
+  --circle-green: var(--zk-green);
+  --circle-gold: var(--zk-gold);
+}
+
+.circle-topbar,
+.task-topbar {
+  background: var(--zk-navy);
+  box-shadow: 0 8px 26px rgba(7, 24, 39, 0.16);
+}
+
+.circle-topbar-pattern,
+.islamic-pattern-band::before {
+  opacity: 0.08;
+}
+
+:where(.circle-portal-shell, .circle-workspace-shell) :is(p, label, small),
+.task-app-shell :is(p, label, small) {
+  font-size: max(0.75rem, 1em);
+}
+
+:where(.circle-portal-shell, .circle-workspace-shell) :is(button, input, select, textarea),
+.task-app-shell :is(button, input, select, textarea) {
+  font-size: 0.78rem;
+}
+
+.workspace-tabs button,
+.quran-manager-tabs button {
+  min-height: 58px;
+  font-size: 0.76rem;
+}
+
+.circle-primary-command,
+.circle-secondary-command,
+.task-button {
+  min-height: 44px;
+  font-size: 0.8rem;
+}
+
+.circle-workspace-hero,
+.circle-portal-command,
+.workspace-panel,
+.task-panel,
+.task-intro {
+  box-shadow: var(--zk-shadow-sm);
+}
+
+.circle-workspace-hero h2,
+.circle-portal-command h2,
+.task-intro h2,
+.quran-day-hero h2 {
+  color: #ffffff !important;
+}
+
+.circle-workspace-hero p,
+.circle-portal-command p,
+.task-intro p,
+.quran-day-hero p {
+  color: #c7d9d2;
+}
+
+.task-intro {
+  background: var(--zk-navy);
+}
+
+@media (max-width: 900px) {
+  .student-topbar-inner {
+    width: calc(100% - 28px);
+  }
+
+  .student-main {
+    width: calc(100% - 28px);
+  }
+
+  .admin-command-shell {
+    --admin-sidebar-width: 286px;
+  }
+}
+
+@media (max-width: 680px) {
+  .student-topbar,
+  .student-topbar-inner {
+    min-height: 72px;
+  }
+
+  .student-brand-mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .student-brand strong {
+    font-size: 1.15rem;
+  }
+
+  .student-brand small {
+    font-size: 0.62rem;
+  }
+
+  .day-command {
+    min-height: 118px;
+    padding: 20px;
+  }
+
+  .student-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-metric {
+    min-height: 84px;
+  }
+
+  .workspace-tabs button {
+    min-height: 62px;
+    font-size: 0.64rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .student-main {
+    width: calc(100% - 20px);
+  }
+
+  .student-mobile-nav {
+    bottom: 8px;
+    width: calc(100% - 16px);
+  }
+
+  .student-mobile-nav a,
+  .student-mobile-nav button {
+    font-size: 0.64rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) *,
+  :where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) *::before,
+  :where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

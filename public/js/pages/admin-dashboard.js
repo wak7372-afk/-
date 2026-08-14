@@ -153,6 +153,10 @@ function setupDialogs() {
 
   document.getElementById('create-account-form').addEventListener('submit', handleCreateAccount);
   document.getElementById('edit-account-form').addEventListener('submit', handleEditAccount);
+  document.getElementById('reset-password-form').addEventListener('submit', handleResetPassword);
+  document.getElementById('delete-account-form').addEventListener('submit', handleDeleteAccount);
+  document.getElementById('generate-temporary-password').addEventListener('click', generateTemporaryPassword);
+  document.getElementById('copy-temporary-password').addEventListener('click', copyTemporaryPassword);
 }
 
 function setupAccountControls() {
@@ -318,7 +322,7 @@ function normalizeAccount(account) {
 }
 
 function isProtectedAccount(account) {
-  return account.protected === true || (account.role === 'admin' && account.username === PRIMARY_ADMIN_USERNAME);
+  return account.protected === true || account.role === 'admin';
 }
 
 function renderDashboard() {
@@ -489,7 +493,9 @@ function renderAccountsTable() {
             ? '<span class="admin-panel-meta">الحساب الأساسي محمي</span>'
             : `<div class="admin-row-actions">
                 <button type="button" data-account-action="edit" data-account-id="${escapeHtml(account.id)}">تعديل</button>
+                <button type="button" class="is-security" data-account-action="reset" data-account-id="${escapeHtml(account.id)}">كلمة المرور</button>
                 <button type="button" class="${account.is_active ? 'is-danger' : 'is-success'}" data-account-action="toggle" data-account-id="${escapeHtml(account.id)}">${account.is_active ? 'إيقاف' : 'تفعيل'}</button>
+                <button type="button" class="is-danger" data-account-action="delete" data-account-id="${escapeHtml(account.id)}">حذف</button>
               </div>`}
         </td>
       </tr>
@@ -506,7 +512,9 @@ function handleAccountTableClick(event) {
   if (!account || isProtectedAccount(account)) return;
 
   if (button.dataset.accountAction === 'edit') openEditAccountDialog(account);
+  if (button.dataset.accountAction === 'reset') openResetPasswordDialog(account);
   if (button.dataset.accountAction === 'toggle') toggleAccountStatus(account);
+  if (button.dataset.accountAction === 'delete') openDeleteAccountDialog(account);
 }
 
 function handleAccountSelectionChange(event) {
@@ -567,6 +575,140 @@ function openEditAccountDialog(account) {
   document.getElementById('edit-account-phone').value = account.phone;
   document.getElementById('edit-account-role').value = account.role;
   document.getElementById('edit-account-dialog').showModal();
+}
+
+function openResetPasswordDialog(account) {
+  const form = document.getElementById('reset-password-form');
+  form.reset();
+  document.getElementById('reset-password-account-id').value = account.id;
+  document.getElementById('reset-password-account-name').textContent = `${account.full_name} (@${account.username})`;
+  document.getElementById('reset-password-result').hidden = true;
+  document.getElementById('reset-password-submit').disabled = false;
+  document.getElementById('reset-password-dialog').showModal();
+  generateTemporaryPassword();
+}
+
+function generateTemporaryPassword() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const random = Array.from(bytes, byte => alphabet[byte % alphabet.length]).join('');
+  const password = `Zk${random}7`;
+  document.getElementById('reset-password-value').value = password;
+  document.getElementById('reset-password-confirmation').value = password;
+  document.getElementById('reset-password-result').hidden = true;
+}
+
+async function copyTemporaryPassword() {
+  const input = document.getElementById('reset-password-value');
+  if (!input.value) return;
+  try {
+    await navigator.clipboard.writeText(input.value);
+    showToast('تم نسخ كلمة المرور المؤقتة.', 'success');
+  } catch {
+    input.select();
+    document.execCommand('copy');
+    showToast('تم نسخ كلمة المرور المؤقتة.', 'success');
+  }
+}
+
+function openDeleteAccountDialog(account) {
+  const form = document.getElementById('delete-account-form');
+  form.reset();
+  document.getElementById('delete-account-id').value = account.id;
+  document.getElementById('delete-account-username').value = account.username;
+  document.getElementById('delete-account-name').textContent = `${account.full_name} (@${account.username})`;
+  document.getElementById('delete-account-hint').textContent = `اكتب ${account.username} للمتابعة.`;
+  document.getElementById('delete-account-dialog').showModal();
+  requestAnimationFrame(() => document.getElementById('delete-account-confirmation').focus());
+}
+
+async function invokeAdminAccountAction(body) {
+  const { data, error } = await supabase.functions.invoke('admin-account-actions', { body });
+  if (error) {
+    let message = data?.error || error.message;
+    try {
+      const payload = await error.context?.json();
+      if (payload?.error) message = payload.error;
+    } catch {
+      // The generic SDK message remains available when no JSON body is returned.
+    }
+    throw new Error(message || 'تعذر تنفيذ العملية.');
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
+async function handleResetPassword(event) {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+
+  const accountId = document.getElementById('reset-password-account-id').value;
+  const account = state.accounts.find(item => item.id === accountId);
+  const password = document.getElementById('reset-password-value').value;
+  const confirmation = document.getElementById('reset-password-confirmation').value;
+  if (!account || isProtectedAccount(account)) return;
+  if (password !== confirmation) {
+    showToast('كلمتا المرور غير متطابقتين.', 'error');
+    return;
+  }
+
+  const submitButton = document.getElementById('reset-password-submit');
+  setButtonLoading(submitButton, true, 'جاري التعيين...');
+  try {
+    if (isLocalPreviewMode()) {
+      state.accounts = state.accounts.map(item => item.id === accountId ? { ...item, must_change_password: true } : item);
+      savePreviewAccounts();
+    } else {
+      await invokeAdminAccountAction({ action: 'reset_password', accountId, password });
+      await Promise.all([loadAccounts(), loadAuditActivities()]);
+    }
+    document.getElementById('reset-password-result').hidden = false;
+    renderDashboard();
+    renderAccountsTable();
+    showToast('تم تعيين كلمة المرور المؤقتة.', 'success');
+  } catch (error) {
+    console.error('Password reset failed:', error);
+    showToast(error.message || 'تعذر إعادة تعيين كلمة المرور.', 'error');
+  } finally {
+    setButtonLoading(submitButton, false, 'اعتماد كلمة المرور');
+  }
+}
+
+async function handleDeleteAccount(event) {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+
+  const accountId = document.getElementById('delete-account-id').value;
+  const account = state.accounts.find(item => item.id === accountId);
+  const confirmation = document.getElementById('delete-account-confirmation').value.trim().toLowerCase();
+  if (!account || isProtectedAccount(account)) return;
+  if (confirmation !== account.username) {
+    showToast('اسم المستخدم المكتوب لا يطابق الحساب.', 'error');
+    return;
+  }
+
+  const submitButton = document.getElementById('delete-account-submit');
+  setButtonLoading(submitButton, true, 'جاري الحذف...');
+  try {
+    if (isLocalPreviewMode()) {
+      state.accounts = state.accounts.filter(item => item.id !== accountId);
+      savePreviewAccounts();
+    } else {
+      await invokeAdminAccountAction({ action: 'delete_account', accountId, confirmation });
+      await Promise.all([loadAccounts(), loadAuditActivities()]);
+    }
+    state.selectedAccountIds.delete(accountId);
+    document.getElementById('delete-account-dialog').close();
+    renderDashboard();
+    renderAccountsTable();
+    circleController.render();
+    showToast('تم حذف الحساب نهائياً.', 'success');
+  } catch (error) {
+    console.error('Permanent account deletion failed:', error);
+    showToast(error.message || 'تعذر حذف الحساب نهائياً.', 'error');
+  } finally {
+    setButtonLoading(submitButton, false, 'حذف نهائي');
+  }
 }
 
 async function handleCreateAccount(event) {

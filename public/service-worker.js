@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zat-khail-v11';
+const CACHE_NAME = 'zat-khail-v23';
 const ASSETS = [
   '/',
   '/index.html',
@@ -16,7 +16,12 @@ const ASSETS = [
   '/css/tasks.css',
   '/css/student-dashboard.css',
   '/css/circles.css',
+  '/css/circle-dashboard.css',
   '/css/quran-reports.css',
+  '/css/design-system.css',
+  '/css/teacher-workspace.css',
+  '/css/teacher-command-center.css',
+  '/js/lib/teacher-shell.js',
   '/js/lib/quran-report-excel.js',
   '/js/pages/quran-report-manager.js',
   '/js/pages/quran-report-importer.js',

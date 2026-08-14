@@ -120,6 +120,9 @@ test('Quran student reports and teacher console use protected report operations'
   const migration = [
     '0017_quran_report_operations.sql',
     '0021_quran_report_visibility_and_review.sql',
+    '0022_quran_student_plan_adjustments.sql',
+    '0023_quran_approved_report_management.sql',
+    '0024_quran_student_accounting_analytics.sql',
   ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
   const requiredRpcs = [
     'get_my_quran_reports',
@@ -132,6 +135,9 @@ test('Quran student reports and teacher console use protected report operations'
     'exempt_quran_report_assignment',
     'get_my_quran_report_overview',
     'get_quran_approved_report_plan',
+    'adjust_quran_student_plan',
+    'get_quran_report_management_details',
+    'manage_quran_approved_report',
   ];
 
   for (const rpc of requiredRpcs) {

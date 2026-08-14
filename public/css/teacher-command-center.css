@@ -1,0 +1,180 @@
+/* Teacher command center: operational dashboard */
+.teacher-command-center {
+  --command-navy: #052b35;
+  --command-navy-deep: #031f29;
+  --command-green: #176846;
+  --command-gold: #d6a947;
+  --command-gold-soft: #f4e5bd;
+  --command-red: #a84649;
+  --command-line: #e2e1da;
+  --command-canvas: #f7f7f4;
+  --teacher-sidebar-width: 218px;
+  background: var(--command-canvas) !important;
+  background-image: none !important;
+}
+
+.teacher-command-center .teacher-page { margin-right: var(--teacher-sidebar-width); }
+
+.teacher-command-center .teacher-sidebar {
+  width: var(--teacher-sidebar-width);
+  border-left-color: rgba(214, 169, 71, 0.42);
+  background-color: var(--command-navy-deep);
+  background-image:
+    linear-gradient(45deg, transparent 47%, rgba(214, 169, 71, 0.045) 48%, rgba(214, 169, 71, 0.045) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 47%, rgba(23, 104, 70, 0.08) 48%, rgba(23, 104, 70, 0.08) 50%, transparent 51%);
+  background-size: 46px 46px;
+  box-shadow: -12px 0 32px rgba(3, 31, 41, 0.12);
+}
+
+.teacher-command-center .teacher-sidebar-brand { min-height: 74px; padding: 12px 15px; }
+.teacher-command-center .teacher-sidebar-mark { width: 38px; height: 38px; flex-basis: 38px; border-radius: 6px; background: var(--command-gold); font-size: 1.35rem; }
+.teacher-command-center .teacher-sidebar-brand strong { font-size: 1.02rem; }
+.teacher-command-center .teacher-sidebar-brand small { font-size: 0.62rem; }
+.teacher-command-center .teacher-sidebar-nav { gap: 2px; padding: 16px 10px; }
+.teacher-command-center .teacher-sidebar-nav a { min-height: 44px; gap: 10px; padding: 8px 11px; border-radius: 5px; color: #cad8d4; font-size: 0.72rem; }
+.teacher-command-center .teacher-sidebar-nav a.is-active { border-color: rgba(214, 169, 71, 0.52); background: rgba(214, 169, 71, 0.12); box-shadow: inset -3px 0 0 var(--command-gold); color: #f2d992; }
+.teacher-command-center .teacher-sidebar-note { border-color: rgba(214, 169, 71, 0.22); border-radius: 6px; background: rgba(23, 104, 70, 0.14); }
+
+.teacher-command-center .task-topbar {
+  min-height: 66px;
+  border-bottom-color: var(--command-line);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 4px 16px rgba(3, 31, 41, 0.055);
+}
+
+.teacher-command-center .task-topbar::after { display: none; }
+.teacher-command-center .task-topbar-inner { width: min(1380px, calc(100% - 34px)); min-height: 66px; }
+.teacher-command-center .task-brand-block { gap: 10px; }
+.teacher-command-center .task-brand-block h1 { color: var(--command-navy-deep); font-size: 1.25rem; }
+.teacher-command-center .task-eyebrow { color: #9a7727; font-size: 0.58rem; }
+.teacher-command-center .task-icon-link { width: 38px; height: 38px; border-color: #d8ddd9; border-radius: 5px; background: #fff; color: #40565d; }
+.teacher-command-center .task-top-actions .task-button-gold { min-height: 38px; padding: 7px 12px; border-radius: 5px; background: var(--command-gold); color: var(--command-navy-deep); font-size: 0.65rem; box-shadow: none; }
+
+.teacher-command-center .task-workspace { width: min(1380px, calc(100% - 34px)); padding: 18px 0 50px; }
+
+.teacher-command-center .task-intro {
+  min-height: 148px;
+  padding: 21px 24px;
+  border: 1px solid rgba(214, 169, 71, 0.72);
+  border-right: 4px solid var(--command-gold);
+  border-radius: 6px;
+  background-color: var(--command-navy);
+  box-shadow: 0 10px 25px rgba(3, 31, 41, 0.11);
+}
+
+.teacher-command-center .task-intro::after { opacity: 0.42; }
+.teacher-command-center .task-intro h2 { margin: 5px 0 2px; color: #fff !important; font-size: 1.72rem; }
+.teacher-command-center .task-intro p:last-of-type { color: #c8d6d2; font-size: 0.68rem; }
+.teacher-command-center .task-intro .task-kicker { color: #e0bd68; font-size: 0.56rem; }
+.teacher-command-center .task-intro .task-kicker strong { color: #fff; }
+.teacher-command-center .task-flow { margin-top: 11px; }
+.teacher-command-center .task-flow li { min-height: 30px; padding: 4px 8px; border-radius: 4px; font-size: 0.57rem; }
+.teacher-command-center .task-flow li b { width: 19px; height: 19px; border-radius: 3px; font-size: 0.56rem; }
+.teacher-command-center .task-intro-stat { min-width: 128px; border-radius: 5px; }
+.teacher-command-center .task-intro-stat span { color: #c9d6d3; font-size: 0.54rem; }
+.teacher-command-center .task-intro-stat strong { color: #f0d47f; font-size: 1.65rem; }
+
+.teacher-command-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.teacher-command-metrics article {
+  display: grid;
+  min-height: 76px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 1px solid var(--command-line);
+  border-right: 3px solid #4b7a87;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(3, 31, 41, 0.035);
+}
+
+.teacher-command-metrics article.is-gold { border-right-color: var(--command-gold); }
+.teacher-command-metrics article.is-green { border-right-color: var(--command-green); }
+.teacher-command-metrics article.is-red { border-right-color: var(--command-red); }
+
+.command-metric-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #eef4f2;
+  color: var(--command-navy);
+}
+
+.command-metric-icon svg { width: 16px; }
+.teacher-command-metrics article.is-gold .command-metric-icon { background: #fbf3df; color: #967016; }
+.teacher-command-metrics article.is-green .command-metric-icon { background: #eaf4ef; color: var(--command-green); }
+.teacher-command-metrics article.is-red .command-metric-icon { background: #fbebeb; color: var(--command-red); }
+.teacher-command-metrics article > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: 8px; }
+.teacher-command-metrics small { color: #657477; font-size: 0.57rem; font-weight: 800; }
+.teacher-command-metrics strong { grid-row: 1 / 3; grid-column: 2; color: var(--command-navy-deep); font-size: 1.25rem; }
+.teacher-command-metrics article > div > span { color: #9a9f9d; font-size: 0.48rem; }
+
+.teacher-command-center .task-layout { grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; margin-top: 15px; }
+.teacher-command-center .task-editor,
+.teacher-command-center .task-preview-panel,
+.teacher-command-center .task-recent-panel { border-color: var(--command-line); border-radius: 5px; box-shadow: 0 5px 16px rgba(3, 31, 41, 0.045); }
+.teacher-command-center .task-editor > .task-section-heading { padding: 17px 19px; background: #fbfbf8; }
+.teacher-command-center .task-section-heading h2 { font-size: 1.12rem; }
+.teacher-command-center .task-kicker { color: #9a7727; font-size: 0.52rem; }
+.teacher-command-center .task-draft-badge { border-radius: 4px; font-size: 0.52rem; }
+.teacher-command-center .task-form-section { gap: 13px; padding: 18px 19px; }
+.teacher-command-center .task-form-section-title { gap: 9px; }
+.teacher-command-center .task-form-section-title > span { width: 28px; height: 28px; flex-basis: 28px; border-radius: 5px; font-size: 0.66rem; }
+.teacher-command-center .task-form-section-title strong { font-size: 0.75rem; }
+.teacher-command-center .task-form-section-title small { font-size: 0.57rem; }
+.teacher-command-center .task-field > span,
+.teacher-command-center .task-repeat-box legend { font-size: 0.61rem; }
+.teacher-command-center .task-field :is(input, select, textarea) { min-height: 40px; border-radius: 5px; font-size: 0.67rem; }
+.teacher-command-center .task-field textarea { min-height: 88px; }
+.teacher-command-center .task-repeat-box { border-radius: 5px; background: #fafbf9; }
+.teacher-command-center .task-form-actions { padding: 13px 19px; }
+.teacher-command-center .task-form-actions .task-button { min-height: 40px; border-radius: 5px; font-size: 0.64rem; }
+.teacher-command-center .task-preview-panel,
+.teacher-command-center .task-recent-panel { padding: 16px; }
+.teacher-command-center .task-side-column { top: 82px; gap: 12px; }
+.teacher-command-center .task-preview-item { border-radius: 5px; }
+.teacher-command-center .task-kind-badge { border-radius: 4px; }
+
+@media (max-width: 1120px) {
+  .teacher-command-center { --teacher-sidebar-width: 196px; }
+  .teacher-command-center .task-layout { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+
+@media (max-width: 860px) {
+  .teacher-command-center { padding-bottom: 82px; }
+  .teacher-command-center .teacher-page { margin-right: 0; }
+  .teacher-command-center .teacher-sidebar { width: auto; }
+  .teacher-command-center .task-topbar,
+  .teacher-command-center .task-topbar-inner { min-height: 62px; }
+  .teacher-command-center .task-workspace { width: calc(100% - 20px); padding-top: 12px; }
+  .teacher-command-center .task-intro { min-height: 132px; padding: 17px; }
+  .teacher-command-center .task-intro h2 { font-size: 1.38rem; }
+  .teacher-command-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .teacher-command-center .task-layout { grid-template-columns: 1fr; }
+  .teacher-command-center .task-side-column { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .teacher-command-center .task-top-actions .task-button span { display: none; }
+  .teacher-command-center .task-intro-stat { display: none; }
+  .teacher-command-center .task-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .teacher-command-center .task-flow li { justify-content: center; }
+  .teacher-command-center .task-flow li span { display: inline; }
+  .teacher-command-metrics article { min-height: 68px; grid-template-columns: 29px minmax(0, 1fr); padding: 8px; }
+  .teacher-command-metrics .command-metric-icon { width: 29px; height: 29px; }
+  .teacher-command-metrics article > div > span { display: none; }
+  .teacher-command-metrics strong { font-size: 1rem; }
+  .teacher-command-center .task-side-column { grid-template-columns: 1fr; }
+  .teacher-command-center .task-editor > .task-section-heading,
+  .teacher-command-center .task-form-section { padding: 15px; }
+  .teacher-command-center .task-form-actions { padding: 12px 15px; }
+}

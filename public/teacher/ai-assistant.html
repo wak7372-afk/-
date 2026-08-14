@@ -9,8 +9,10 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/tasks.css">
+  <link rel="stylesheet" href="/css/design-system.css?v=1">
+  <link rel="stylesheet" href="/css/teacher-workspace.css?v=2">
 </head>
-<body class="task-app-shell">
+<body class="task-app-shell teacher-unified-shell" data-teacher-section="reports">
   <header class="task-topbar islamic-pattern-band">
     <div class="task-topbar-inner">
       <div class="task-brand-block">
@@ -101,6 +103,7 @@
     </section>
   </main>
 
+  <script type="module" src="/js/lib/teacher-shell.js?v=1"></script>
   <script type="module" src="/js/pages/teacher-ai-assistant.js?v=3"></script>
 </body>
 </html>

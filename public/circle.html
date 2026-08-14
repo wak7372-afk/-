@@ -8,9 +8,12 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./css/style.css">
-  <link rel="stylesheet" href="./css/circles.css?v=3">
+  <link rel="stylesheet" href="./css/circles.css?v=4">
+  <link rel="stylesheet" href="./css/design-system.css?v=1">
+  <link rel="stylesheet" href="./css/teacher-workspace.css?v=2">
+  <link rel="stylesheet" href="./css/circle-dashboard.css?v=2">
 </head>
-<body class="circle-workspace-shell">
+<body class="circle-workspace-shell circle-dashboard-theme">
   <header class="circle-topbar circle-workspace-topbar">
     <div class="circle-topbar-pattern" aria-hidden="true"></div>
     <div class="circle-topbar-inner">
@@ -21,7 +24,10 @@
       </div>
       <nav class="circle-account-actions" aria-label="إجراءات الحلقة">
         <a id="top-meet-link" class="circle-meet-command" href="#" target="_blank" rel="noopener noreferrer" hidden><i data-lucide="video"></i><span>دخول اللقاء</span></a>
-        <a class="circle-icon-command" href="./account-settings.html" title="إعدادات الحساب" aria-label="إعدادات الحساب"><i data-lucide="user-round-cog"></i></a>
+        <a class="circle-profile-command" href="./account-settings.html" title="إعدادات الحساب" aria-label="إعدادات الحساب">
+          <span id="workspace-user-avatar" class="circle-profile-avatar">م</span>
+          <span class="circle-profile-copy"><b id="workspace-user-name">...</b><small id="workspace-user-role">...</small></span>
+        </a>
         <button id="logout-btn" type="button" class="circle-icon-command is-danger" title="تسجيل الخروج" aria-label="تسجيل الخروج"><i data-lucide="log-out"></i></button>
       </nav>
     </div>
@@ -126,6 +132,6 @@
   </main>
 
   <script src="./js/vendor/xlsx.full.min.js"></script>
-  <script type="module" src="./js/pages/circle-workspace.js?v=4"></script>
+  <script type="module" src="./js/pages/circle-workspace.js?v=10"></script>
 </body>
 </html>

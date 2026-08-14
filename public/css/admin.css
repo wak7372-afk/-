@@ -2,7 +2,8 @@
   --admin-sidebar-width: 274px;
   --admin-topbar-height: 82px;
   --admin-panel-border: #dce2e5;
-  --admin-panel-shadow: 0 10px 28px rgba(5, 20, 33, 0.07);
+  --admin-panel-shadow: 0 16px 44px rgba(5, 20, 33, 0.065);
+  --admin-panel-shadow-raised: 0 24px 62px rgba(5, 20, 33, 0.12);
 }
 
 body.admin-command-shell {
@@ -115,7 +116,7 @@ body.admin-command-shell {
   font-weight: 700;
   text-align: right;
   text-decoration: none;
-  transition: 150ms ease;
+  transition: color var(--motion-fast), background-color var(--motion-fast), border-color var(--motion-fast), transform var(--motion-fast);
 }
 
 .admin-nav-item:hover {
@@ -516,6 +517,7 @@ body.admin-command-shell {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--admin-panel-shadow);
+  transition: border-color var(--motion-smooth), box-shadow var(--motion-smooth), transform var(--motion-smooth);
 }
 
 .admin-metric::before {
@@ -569,8 +571,10 @@ body.admin-command-shell {
   overflow: hidden;
   border: 1px solid var(--admin-panel-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--admin-panel-shadow);
+  backdrop-filter: blur(16px) saturate(1.05);
+  transition: border-color var(--motion-smooth), box-shadow var(--motion-smooth), transform var(--motion-smooth);
 }
 
 .admin-panel-heading {
@@ -624,6 +628,7 @@ body.admin-command-shell {
   border-bottom: 1px solid #e7ebed;
   color: inherit;
   text-decoration: none;
+  transition: background-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
 }
 
 .admin-operation-row:last-child {
@@ -725,6 +730,35 @@ body.admin-command-shell {
   gap: 10px;
   padding: 9px 2px;
   border-bottom: 1px solid #e8ecee;
+  transition: background-color var(--motion-fast), transform var(--motion-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-nav-item:hover { transform: translateX(-2px); }
+
+  .admin-metric:hover {
+    border-color: rgba(11, 74, 51, 0.26);
+    box-shadow: var(--admin-panel-shadow-raised);
+    transform: translateY(-3px);
+  }
+
+  .admin-panel:hover {
+    border-color: rgba(8, 29, 48, 0.18);
+    box-shadow: var(--admin-panel-shadow-raised);
+  }
+
+  .admin-operation-row:not(.is-static):hover {
+    border-radius: 6px;
+    background: rgba(212, 173, 67, 0.075);
+    transform: translateX(-2px);
+  }
+
+  .admin-recent-account:hover,
+  .admin-activity-item:hover {
+    border-radius: 6px;
+    background: rgba(11, 106, 71, 0.055);
+    transform: translateX(-2px);
+  }
 }
 
 .admin-recent-account:last-child,
@@ -1031,6 +1065,12 @@ body.admin-command-shell {
   color: #08704a;
 }
 
+.admin-row-actions .is-security {
+  border-color: #bdd2df;
+  background: #f3f8fb;
+  color: #175d83;
+}
+
 .admin-empty-state {
   display: flex;
   min-height: 230px;
@@ -1124,6 +1164,61 @@ body.admin-command-shell {
   margin-top: 4px;
   color: #87929c;
   font-size: 0.52rem;
+}
+
+.admin-operation-summary,
+.admin-operation-warning,
+.admin-operation-success {
+  margin-bottom: 18px;
+  padding: 13px 14px;
+  border: 1px solid #d7e2e6;
+  border-radius: 7px;
+  background: #f6f9f9;
+}
+
+.admin-operation-summary strong,
+.admin-operation-summary span,
+.admin-operation-warning strong,
+.admin-operation-warning span {
+  display: block;
+}
+
+.admin-operation-summary strong,
+.admin-operation-warning strong {
+  color: var(--color-navy-950);
+  font-size: 0.78rem;
+}
+
+.admin-operation-summary span,
+.admin-operation-warning span {
+  margin-top: 4px;
+  color: #6f7d86;
+  font-size: 0.62rem;
+  line-height: 1.8;
+}
+
+.admin-operation-warning {
+  border-color: #ebcccc;
+  background: #fff7f7;
+}
+
+.admin-operation-warning strong {
+  color: #9b3535;
+}
+
+.admin-password-tools {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-operation-success {
+  margin: 14px 0 0;
+  border-color: #bddaca;
+  background: #eff8f4;
+  color: #08704a;
+  font-size: 0.66rem;
+  font-weight: 800;
 }
 
 .admin-checkbox-row {

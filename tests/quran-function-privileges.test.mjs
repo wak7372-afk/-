@@ -8,6 +8,7 @@ const migration = [
   '0019_quran_function_privilege_hardening.sql',
   '0020_resilient_quran_report_import_archive.sql',
   '0021_quran_report_visibility_and_review.sql',
+  '0024_quran_student_accounting_analytics.sql',
 ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
 
 test('Quran report functions explicitly revoke anonymous execution', () => {

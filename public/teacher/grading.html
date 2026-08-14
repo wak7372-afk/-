@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | تصحيح وتقييم الواجبات</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/design-system.css?v=2">
+  <link rel="stylesheet" href="/css/teacher-workspace.css?v=2">
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen flex flex-col teacher-unified-shell" data-teacher-section="circles">
 
   <!-- Navbar -->
   <header class="bg-emerald-gold-gradient text-white shadow-lg py-4 px-6 sticky top-0 z-40">
@@ -33,6 +36,7 @@
 
   </main>
 
+  <script type="module" src="/js/lib/teacher-shell.js?v=1"></script>
   <script type="module" src="/js/pages/teacher-grading.js"></script>
 </body>
 </html>

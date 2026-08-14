@@ -1,0 +1,710 @@
+.teacher-task-page {
+  --teacher-sidebar-width: 252px;
+  background: #f3f6f7 !important;
+}
+
+.teacher-unified-shell {
+  --teacher-sidebar-width: 252px;
+  min-height: 100vh;
+  background-color: #f3f6f7 !important;
+  background-image:
+    linear-gradient(rgba(7, 26, 43, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 26, 43, 0.022) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  color: #071827;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) {
+  padding-right: var(--teacher-sidebar-width);
+}
+
+.teacher-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: flex;
+  width: var(--teacher-sidebar-width);
+  flex-direction: column;
+  border-left: 1px solid rgba(212, 173, 67, 0.3);
+  background-color: #071a2b;
+  background-image:
+    linear-gradient(45deg, transparent 47%, rgba(212, 173, 67, 0.045) 48%, rgba(212, 173, 67, 0.045) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 47%, rgba(11, 106, 77, 0.06) 48%, rgba(11, 106, 77, 0.06) 50%, transparent 51%);
+  background-size: 52px 52px;
+  box-shadow: -10px 0 32px rgba(7, 24, 39, 0.13);
+}
+
+.teacher-sidebar-brand {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(239, 213, 141, 0.15);
+  color: #fff;
+  text-decoration: none;
+}
+
+.teacher-sidebar-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid #efd58d;
+  border-radius: 8px;
+  background: #d4ad43;
+  color: #071a2b;
+  font-family: var(--font-amiri);
+  font-size: 1.55rem;
+  font-weight: 700;
+}
+
+.teacher-sidebar-brand strong,
+.teacher-sidebar-brand small {
+  display: block;
+}
+
+.teacher-sidebar-brand strong {
+  color: #efd58d;
+  font-size: 1.15rem;
+}
+
+.teacher-sidebar-brand small {
+  margin-top: 2px;
+  color: #a9beb6;
+  font-size: 0.7rem;
+}
+
+.teacher-sidebar-nav {
+  display: grid;
+  gap: 5px;
+  padding: 20px 12px;
+}
+
+.teacher-sidebar-nav a {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #c4d3ce;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.teacher-sidebar-nav a:hover {
+  border-color: rgba(239, 213, 141, 0.18);
+  background: rgba(255, 255, 255, 0.055);
+  color: #fff;
+}
+
+.teacher-sidebar-nav a.is-active {
+  border-color: rgba(212, 173, 67, 0.42);
+  background: rgba(212, 173, 67, 0.12);
+  box-shadow: inset -3px 0 0 #d4ad43;
+  color: #efd58d;
+}
+
+.teacher-sidebar-nav svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+
+.teacher-sidebar-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: auto 12px 14px;
+  padding: 12px;
+  border: 1px solid rgba(171, 204, 191, 0.16);
+  border-radius: 8px;
+  background: rgba(11, 106, 77, 0.12);
+  color: #d8e6e1;
+}
+
+.teacher-sidebar-note > svg {
+  width: 20px;
+  color: #efd58d;
+}
+
+.teacher-sidebar-note strong,
+.teacher-sidebar-note small {
+  display: block;
+}
+
+.teacher-sidebar-note strong {
+  font-size: 0.72rem;
+}
+
+.teacher-sidebar-note small {
+  margin-top: 3px;
+  color: #93aaa2;
+  font-size: 0.62rem;
+  line-height: 1.65;
+}
+
+.teacher-page {
+  min-height: 100vh;
+  margin-right: var(--teacher-sidebar-width);
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  min-height: 82px;
+  padding: 0 24px !important;
+  border-bottom: 1px solid #d9e1e5 !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  background-image: none !important;
+  box-shadow: 0 5px 20px rgba(7, 24, 39, 0.06) !important;
+  color: #071827 !important;
+  backdrop-filter: blur(14px);
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header::after {
+  display: none;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header > div {
+  width: min(1380px, 100%) !important;
+  min-height: 82px;
+  margin-inline: auto !important;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header h1 {
+  color: #071827 !important;
+  font-size: 1.65rem !important;
+  letter-spacing: 0 !important;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header p {
+  color: #687985 !important;
+  font-size: 0.74rem !important;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header a {
+  min-height: 40px;
+  border: 1px solid #d5dee2 !important;
+  border-radius: 7px !important;
+  background: #fff !important;
+  color: #425664 !important;
+  box-shadow: none !important;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > header a:hover {
+  border-color: #d4ad43 !important;
+  color: #071827 !important;
+}
+
+.teacher-unified-shell .teacher-context-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teacher-unified-shell .teacher-context-actions > span {
+  border: 1px solid #d9e2e5 !important;
+  border-radius: 7px !important;
+  background: #f7f9f9 !important;
+  color: #425664 !important;
+}
+
+.teacher-unified-shell .teacher-context-actions [id='logout-btn'] {
+  min-height: 40px;
+  padding: 8px 14px !important;
+  border: 1px solid #e5c5c7 !important;
+  border-radius: 7px !important;
+  background: #fff6f6 !important;
+  color: #a33d42 !important;
+  box-shadow: none !important;
+}
+
+.teacher-unified-shell:not(.teacher-task-page) > main {
+  width: min(1280px, calc(100% - 48px)) !important;
+  max-width: 1280px !important;
+  margin-inline: auto !important;
+  padding: 28px 0 64px !important;
+}
+
+.teacher-unified-shell :is(.glass-card, .task-editor, .task-preview-panel, .task-recent-panel) {
+  border: 1px solid #d8e1e5 !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 6px 20px rgba(7, 24, 39, 0.055) !important;
+}
+
+.teacher-unified-shell :is(input, select, textarea) {
+  min-height: 44px;
+  border-color: #cad6dc !important;
+  border-radius: 7px !important;
+  background: #fff !important;
+  color: #071827 !important;
+  font-size: 0.82rem !important;
+}
+
+.teacher-unified-shell textarea {
+  min-height: 104px;
+}
+
+.teacher-unified-shell :is(input, select, textarea):focus {
+  border-color: #b48b26 !important;
+  box-shadow: 0 0 0 3px rgba(212, 173, 67, 0.12) !important;
+  outline: 0 !important;
+}
+
+.teacher-unified-shell label {
+  color: #415463 !important;
+  font-size: 0.76rem !important;
+}
+
+.teacher-unified-shell .btn-emerald {
+  min-height: 44px;
+  border: 1px solid #aa7f19 !important;
+  border-radius: 7px !important;
+  background: #d4ad43 !important;
+  color: #071827 !important;
+  box-shadow: 0 6px 14px rgba(168, 124, 25, 0.14) !important;
+}
+
+.teacher-unified-shell .btn-emerald:hover {
+  background: #e2bf61 !important;
+}
+
+.teacher-unified-shell .btn-gold {
+  min-height: 42px;
+  border: 1px solid #8db9a8 !important;
+  border-radius: 7px !important;
+  background: #f2f8f5 !important;
+  color: #0b6a4d !important;
+  box-shadow: none !important;
+}
+
+.teacher-unified-shell :is(h2, h3, h4) {
+  color: #071827 !important;
+}
+
+.teacher-unified-shell table thead tr {
+  background: #eef3f3 !important;
+  color: #314754 !important;
+}
+
+.teacher-task-page .task-topbar {
+  position: sticky;
+  min-height: 82px;
+  border-bottom: 1px solid #d9e1e5;
+  background: rgba(255, 255, 255, 0.97);
+  background-image: none;
+  box-shadow: 0 5px 20px rgba(7, 24, 39, 0.06);
+  color: #071827;
+  backdrop-filter: blur(14px);
+}
+
+.teacher-task-page .task-topbar-inner,
+.teacher-task-page .task-workspace {
+  width: min(1380px, calc(100% - 48px));
+}
+
+.teacher-task-page .task-topbar-inner {
+  min-height: 82px;
+}
+
+.teacher-task-page .task-brand-mark {
+  display: none;
+}
+
+.teacher-task-page .task-brand-block h1 {
+  color: #071827;
+  font-size: 1.65rem;
+}
+
+.teacher-task-page .task-eyebrow {
+  color: #967116;
+  font-size: 0.72rem;
+}
+
+.teacher-task-page .task-icon-link {
+  border-color: #d5dee2;
+  background: #fff;
+  color: #425664;
+}
+
+.teacher-task-page .task-icon-link:hover {
+  border-color: #d4ad43;
+  color: #071827;
+}
+
+.teacher-task-page .task-top-actions .task-button-gold {
+  min-height: 44px;
+  box-shadow: 0 6px 14px rgba(168, 124, 25, 0.15);
+}
+
+.teacher-task-page .task-workspace {
+  padding-block: 24px 64px;
+}
+
+.teacher-task-page .task-intro {
+  min-height: 186px;
+  align-items: stretch;
+  padding: 28px 32px;
+  border: 0;
+  border-right: 4px solid #d4ad43;
+  background-color: #071a2b;
+  box-shadow: 0 14px 34px rgba(7, 24, 39, 0.12);
+}
+
+.teacher-task-page .task-intro::after {
+  opacity: 0.58;
+}
+
+.teacher-task-page .task-intro > div:first-child {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.teacher-task-page .task-intro h2 {
+  color: #fff !important;
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+}
+
+.teacher-task-page .task-intro p:last-of-type {
+  font-size: 0.86rem;
+}
+
+.task-flow {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-flow li {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #b9cbc5;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.task-flow li b {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.68rem;
+}
+
+.task-flow li.is-active {
+  border-color: rgba(212, 173, 67, 0.48);
+  color: #efd58d;
+  background: rgba(212, 173, 67, 0.1);
+}
+
+.task-flow li.is-active b {
+  background: #d4ad43;
+  color: #071a2b;
+}
+
+.teacher-task-page .task-intro-stat {
+  display: grid;
+  min-width: 150px;
+  place-content: center;
+  border: 1px solid rgba(239, 213, 141, 0.2);
+  border-inline-start: 1px solid rgba(239, 213, 141, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.teacher-task-page .task-layout {
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.teacher-task-page .task-editor,
+.teacher-task-page .task-preview-panel,
+.teacher-task-page .task-recent-panel {
+  border-top-width: 1px;
+  box-shadow: 0 6px 20px rgba(7, 24, 39, 0.055);
+}
+
+.teacher-task-page .task-editor {
+  padding: 0;
+  overflow: hidden;
+}
+
+.teacher-task-page .task-editor > .task-section-heading {
+  margin: 0;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e0e7ea;
+  background: #fbfcfc;
+}
+
+.teacher-task-page .task-form {
+  gap: 0;
+}
+
+.task-form-section {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid #e4e9eb;
+}
+
+.task-form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.task-form-section-title > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 7px;
+  background: #e9f3ef;
+  color: #0b6a4d;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.task-form-section-title strong,
+.task-form-section-title small {
+  display: block;
+}
+
+.task-form-section-title strong {
+  color: #071827;
+  font-size: 0.9rem;
+}
+
+.task-form-section-title small {
+  margin-top: 3px;
+  color: #74828b;
+  font-size: 0.7rem;
+}
+
+.teacher-task-page .task-field > span,
+.teacher-task-page .task-repeat-box legend {
+  color: #415463;
+  font-size: 0.76rem;
+}
+
+.teacher-task-page .task-field :is(input, select, textarea) {
+  border-color: #cad6dc;
+  background: #fff;
+  font-size: 0.8rem;
+}
+
+.teacher-task-page .task-field :is(input, select, textarea):focus {
+  border-color: #b48b26;
+  box-shadow: 0 0 0 3px rgba(212, 173, 67, 0.12);
+}
+
+.teacher-task-page .task-repeat-box {
+  margin: 0;
+  background: #f7f9f9;
+}
+
+.teacher-task-page .task-form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  padding: 16px 24px;
+  border-top: 1px solid #dce4e7;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -8px 24px rgba(7, 24, 39, 0.045);
+  backdrop-filter: blur(12px);
+}
+
+.teacher-task-page .task-side-column {
+  position: sticky;
+  top: 104px;
+}
+
+.teacher-task-page .task-preview-panel,
+.teacher-task-page .task-recent-panel {
+  padding: 20px;
+}
+
+@media (max-width: 1100px) {
+  .teacher-task-page {
+    --teacher-sidebar-width: 222px;
+  }
+
+  .teacher-task-page .task-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+
+@media (max-width: 860px) {
+  .teacher-task-page,
+  .teacher-unified-shell {
+    padding-bottom: 82px;
+  }
+
+  .teacher-unified-shell:not(.teacher-task-page) {
+    padding-right: 0;
+  }
+
+  .teacher-page {
+    margin-right: 0;
+  }
+
+  .teacher-sidebar {
+    top: auto;
+    right: 10px;
+    bottom: 8px;
+    left: 10px;
+    width: auto;
+    height: 72px;
+    border: 1px solid rgba(212, 173, 67, 0.48);
+    border-radius: 8px;
+    background: rgba(7, 26, 43, 0.97);
+    box-shadow: 0 12px 30px rgba(7, 24, 39, 0.25);
+    backdrop-filter: blur(14px);
+  }
+
+  .teacher-unified-shell.circle-workspace-shell {
+    padding-bottom: 0;
+  }
+
+  .teacher-unified-shell.circle-workspace-shell .teacher-sidebar {
+    display: none;
+  }
+
+  .teacher-unified-shell:not(.teacher-task-page) > header {
+    min-height: 70px;
+    padding-inline: 12px !important;
+  }
+
+  .teacher-unified-shell:not(.teacher-task-page) > header > div {
+    min-height: 70px;
+  }
+
+  .teacher-unified-shell:not(.teacher-task-page) > main {
+    width: calc(100% - 20px) !important;
+    padding-top: 20px !important;
+  }
+
+  .teacher-sidebar-brand,
+  .teacher-sidebar-note {
+    display: none;
+  }
+
+  .teacher-sidebar-nav {
+    height: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    padding: 6px;
+  }
+
+  .teacher-sidebar-nav a {
+    min-height: 58px;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 2px;
+    font-size: 0.62rem;
+  }
+
+  .teacher-sidebar-nav a.is-active {
+    box-shadow: none;
+  }
+
+  .teacher-sidebar-nav svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .teacher-task-page .task-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-task-page .task-side-column {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .teacher-task-page .task-topbar-inner,
+  .teacher-task-page .task-workspace {
+    width: calc(100% - 20px);
+  }
+
+  .teacher-task-page .task-topbar,
+  .teacher-task-page .task-topbar-inner {
+    min-height: 70px;
+  }
+
+  .teacher-task-page .task-brand-block h1 {
+    font-size: 1.28rem;
+  }
+
+  .teacher-task-page .task-intro {
+    min-height: 0;
+    padding: 22px 20px;
+  }
+
+  .teacher-task-page .task-intro h2 {
+    font-size: 1.55rem;
+  }
+
+  .teacher-task-page .task-intro-stat {
+    display: none;
+  }
+
+  .task-flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .task-flow li {
+    min-height: 42px;
+    justify-content: center;
+    padding-inline: 5px;
+    text-align: center;
+  }
+
+  .task-flow li span {
+    line-height: 1.45;
+  }
+
+  .task-flow li b {
+    display: none;
+  }
+
+  .teacher-task-page .task-editor > .task-section-heading,
+  .task-form-section {
+    padding: 18px;
+  }
+
+  .teacher-task-page .task-form-actions {
+    padding: 14px 18px;
+  }
+
+  .teacher-task-page .task-side-column {
+    grid-template-columns: 1fr;
+  }
+}

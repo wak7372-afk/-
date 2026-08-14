@@ -18,6 +18,7 @@ async function initialize() {
   if (!authData) return;
   state.profile = authData.profile;
   state.previewMode = Boolean(authData.preview);
+  document.getElementById('teacher-welcome-name').textContent = firstName(state.profile.full_name || state.profile.username || 'معلمنا');
 
   document.getElementById('logout-btn').addEventListener('click', logoutUser);
   document.getElementById('task-form').addEventListener('submit', publishTasks);
@@ -33,6 +34,7 @@ async function initialize() {
   document.getElementById('repeat-until').value = toDateInput(addDays(new Date(), 28));
 
   await loadHalaqat();
+  renderCommandMetrics();
   if (window.lucide) window.lucide.createIcons();
 }
 
@@ -41,6 +43,7 @@ async function loadHalaqat() {
   if (state.previewMode) {
     state.halaqat = [{ id: 'preview-halaqa', name: 'حلقة الإتقان - معاينة' }];
     select.innerHTML = '<option value="preview-halaqa">حلقة الإتقان - معاينة</option>';
+    renderCommandMetrics();
     await handleHalaqaChange();
     return;
   }
@@ -55,6 +58,7 @@ async function loadHalaqat() {
     return;
   }
   state.halaqat = data || [];
+  renderCommandMetrics();
   select.innerHTML = state.halaqat.length
     ? state.halaqat.map(halaqa => `<option value="${escapeHtml(halaqa.id)}">${escapeHtml(halaqa.name)}</option>`).join('')
     : '<option value="">أنشئ حلقة أولاً</option>';
@@ -72,6 +76,7 @@ async function handleHalaqaChange() {
   if (!halaqaId) {
     state.students = [];
     studentSelect.innerHTML = '<option value="">لا توجد حلقة</option>';
+    renderCommandMetrics();
     return;
   }
 
@@ -81,6 +86,7 @@ async function handleHalaqaChange() {
       { id: 'preview-student-2', full_name: 'أحمد علي', username: 'ahmed.02' },
     ];
     studentSelect.innerHTML = state.students.map(student => `<option value="${student.id}">${student.full_name} (@${student.username})</option>`).join('');
+    renderCommandMetrics();
     await loadRecentTasks();
     return;
   }
@@ -94,6 +100,7 @@ async function handleHalaqaChange() {
     return;
   }
   state.students = (data || []).map(item => item.student).filter(Boolean);
+  renderCommandMetrics();
   studentSelect.innerHTML = state.students.length
     ? state.students.map(student => `<option value="${escapeHtml(student.id)}">${escapeHtml(student.full_name || student.username)} (@${escapeHtml(student.username || '')})</option>`).join('')
     : '<option value="">لا يوجد طلاب في الحلقة</option>';
@@ -118,12 +125,14 @@ function invalidatePreview() {
   document.getElementById('publish-task').disabled = true;
   document.getElementById('preview-count').textContent = '0';
   renderPreviewEmpty();
+  renderCommandMetrics();
 }
 
 function buildPreview() {
   try {
     state.preview = createTaskOccurrences();
     renderPreview();
+    renderCommandMetrics();
     document.getElementById('publish-task').disabled = false;
   } catch (error) {
     state.preview = [];
@@ -252,6 +261,7 @@ async function loadRecentTasks() {
       { id: 'preview-task-2', title: 'مراجعة المحفوظ', content: 'سورة القلم كاملة', type: 'murajaa', assignment_date: toDateInput(addDays(new Date(), -1)), period: 'evening', estimated_minutes: 25, priority: 2 },
     ];
     document.getElementById('published-count').textContent = String(state.recent.length);
+    renderCommandMetrics();
     renderRecentTasks();
     return;
   }
@@ -268,7 +278,21 @@ async function loadRecentTasks() {
   }
   state.recent = data || [];
   document.getElementById('published-count').textContent = String(state.recent.length);
+  renderCommandMetrics();
   renderRecentTasks();
+}
+
+function renderCommandMetrics() {
+  const metrics = {
+    'command-halaqat-count': state.halaqat.length,
+    'command-students-count': state.students.length,
+    'command-published-count': state.recent.length,
+    'command-preview-count': state.preview.length,
+  };
+  Object.entries(metrics).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = String(value);
+  });
 }
 
 function renderRecentTasks() {
@@ -313,6 +337,8 @@ async function handleRecentAction(event) {
   if (!window.confirm(`حذف مهمة «${task.title}» وكل سجلاتها؟`)) return;
   if (state.previewMode) {
     state.recent = state.recent.filter(item => item.id !== task.id);
+    document.getElementById('published-count').textContent = String(state.recent.length);
+    renderCommandMetrics();
     renderRecentTasks();
     showToast('حُذفت المهمة من المعاينة.', 'success');
     return;
@@ -370,4 +396,8 @@ function periodLabel(value) {
 function formatClock(value) {
   if (!value) return 'دون وقت محدد';
   return new Intl.DateTimeFormat('ar-OM', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+}
+
+function firstName(value) {
+  return String(value || '').trim().split(/\s+/)[0] || 'معلمنا';
 }
