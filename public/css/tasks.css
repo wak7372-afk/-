@@ -70,7 +70,9 @@
   place-items: center;
   border: 1px solid var(--task-gold-soft);
   border-radius: 7px;
-  background: var(--task-gold);
+  overflow: hidden;
+  padding: 2px;
+  background: #05090d;
   color: var(--task-navy);
   font-weight: 900;
   font-size: 1.25rem;

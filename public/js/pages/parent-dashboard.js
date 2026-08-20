@@ -30,7 +30,7 @@ function percentage(numerator, denominator) {
 function showEmptyState() {
   grid.innerHTML = `
     <div class="col-span-full rounded-lg border border-dashed border-amber-300 bg-white px-6 py-12 text-center">
-      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 font-amiri text-xl font-bold text-amber-700">ذ</div>
+      <div class="brand-mark-shell mx-auto h-12 w-12" aria-hidden="true"><img class="brand-emblem" src="/assets/brand/zat-khail-emblem.png" alt=""></div>
       <h3 class="mt-4 font-amiri text-2xl font-bold text-emerald-950">لا توجد حسابات أبناء مرتبطة</h3>
       <p class="mx-auto mt-2 max-w-lg text-xs leading-6 text-slate-500">اطلب رمز الربط من الطالب بعد تفعيل حسابه، ثم أدخله في الحقل أعلاه لعرض المتابعة.</p>
     </div>`;

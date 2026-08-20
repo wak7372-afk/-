@@ -56,10 +56,13 @@
   display: grid;
   width: 42px;
   height: 42px;
+  flex: 0 0 42px;
   place-items: center;
   border: 1px solid var(--circle-gold);
   border-radius: 50%;
-  background: var(--circle-gold);
+  overflow: hidden;
+  padding: 2px;
+  background: #05090d;
   color: var(--circle-navy);
   font-family: var(--font-amiri);
   font-size: 1.55rem;

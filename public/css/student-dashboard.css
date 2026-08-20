@@ -59,7 +59,7 @@
 }
 
 .student-brand { display: inline-flex; align-items: center; justify-self: start; gap: 12px; color: #fff; text-decoration: none; }
-.student-brand-mark { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid rgba(247, 219, 134, .8); border-radius: 50%; color: #071827; background: var(--student-gold); font-family: Amiri, serif; font-size: 28px; font-weight: 700; box-shadow: 0 0 0 4px rgba(213, 168, 47, .12); }
+.student-brand-mark { display: grid; width: 44px; height: 44px; flex: 0 0 44px; overflow: hidden; place-items: center; padding: 2px; border: 1px solid rgba(247, 219, 134, .8); border-radius: 8px; color: #071827; background: #05090d; box-shadow: 0 0 0 4px rgba(213, 168, 47, .12); }
 .student-brand strong { display: block; color: #f3cf6b; font-family: Amiri, serif; font-size: 23px; line-height: 1.05; }
 .student-brand small { display: block; margin-top: 4px; color: #b9cbd5; font-size: 9px; }
 .student-welcome { text-align: center; }
@@ -216,7 +216,7 @@
 @media (max-width: 680px) {
   .student-topbar { min-height: 70px; }
   .student-topbar-inner { width: calc(100% - 24px); min-height: 70px; }
-  .student-brand-mark { width: 38px; height: 38px; font-size: 24px; }
+  .student-brand-mark { width: 38px; height: 38px; flex-basis: 38px; font-size: 24px; }
   .student-brand strong { font-size: 20px; }.student-brand small { display: none; }
   .student-actions { gap: 5px; }.icon-command { width: 34px; height: 34px; }.student-actions a[href="./chat.html"] { display: none; }
   .notification-popover { top: 64px; inset-inline-end: 12px; }

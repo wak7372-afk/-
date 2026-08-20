@@ -19,8 +19,8 @@ export function mountTeacherShell(activeSection = 'tasks') {
 
   sidebar.innerHTML = `
     <a class="teacher-sidebar-brand" href="/circles.html" aria-label="مركز ذات خيل">
-      <span class="teacher-sidebar-mark">ذ</span>
-      <span><strong class="font-amiri">مركز ذات خيل</strong><small>مساحة المعلم</small></span>
+      <span class="teacher-sidebar-mark" aria-hidden="true"><img class="brand-emblem" src="/assets/brand/zat-khail-emblem.png" alt=""></span>
+      <span><strong class="font-amiri">مركز ذات خيل</strong><small>تعليم القرآن الكريم وعلومه</small></span>
     </a>
     <nav class="teacher-sidebar-nav">
       ${TEACHER_NAV_ITEMS.map(item => `

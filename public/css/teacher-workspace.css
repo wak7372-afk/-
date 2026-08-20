@@ -55,7 +55,9 @@
   place-items: center;
   border: 1px solid #efd58d;
   border-radius: 8px;
-  background: #d4ad43;
+  overflow: hidden;
+  padding: 2px;
+  background: #05090d;
   color: #071a2b;
   font-family: var(--font-amiri);
   font-size: 1.55rem;

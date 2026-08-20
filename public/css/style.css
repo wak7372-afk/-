@@ -169,6 +169,25 @@ button:disabled,
   font-family: var(--font-amiri);
 }
 
+.brand-emblem {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.brand-mark-shell {
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  padding: 2px;
+  border: 1px solid rgba(239, 213, 141, 0.72);
+  border-radius: 8px;
+  background: #05090d;
+  box-shadow: 0 8px 24px rgba(5, 9, 13, 0.2);
+}
+
 /* A restrained geometric lattice shared by entry screens and dark feature bands. */
 .figma-green-pattern-bg,
 .bg-emerald-gold-gradient,
@@ -385,6 +404,31 @@ main > section.bg-white {
 .auth-login-stage { animation-delay: 90ms; }
 
 .auth-mobile-brand { display: none; }
+
+.auth-brand-emblem {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  overflow: hidden;
+  place-items: center;
+  padding: 2px;
+  border: 1px solid rgba(239, 213, 141, 0.72);
+  border-radius: 8px;
+  background: #05090d;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.auth-official-lockup {
+  display: block;
+  width: min(100%, 620px);
+  aspect-ratio: 11 / 6;
+  object-fit: cover;
+  border: 1px solid rgba(239, 213, 141, 0.55);
+  border-radius: 8px;
+  background: #05090d;
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.32);
+}
 
 .auth-feature-card {
   background: rgba(255, 255, 255, 0.085) !important;
@@ -660,11 +704,10 @@ button:disabled,
     place-items: center;
     border: 1px solid var(--color-gold-dark);
     border-radius: 7px;
-    background: var(--color-gold);
+    overflow: hidden;
+    padding: 2px;
+    background: #05090d;
     color: var(--color-navy-950);
-    font-family: var(--font-amiri);
-    font-size: 1.4rem;
-    font-weight: 700;
     box-shadow: 0 8px 24px rgba(168, 124, 25, 0.18);
   }
 

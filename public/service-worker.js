@@ -1,9 +1,8 @@
-const CACHE_NAME = 'zat-khail-v33';
+const CACHE_NAME = 'zat-khail-v34';
 const ASSETS = [
   '/',
-  '/favicon.svg',
-  '/assets/icons/icon-192.png',
-  '/assets/icons/icon-512.png',
+  '/assets/brand/zat-khail-emblem.png',
+  '/assets/brand/zat-khail-logo-banner.jpg',
   '/index.html',
   '/register.html',
   '/pending-approval.html',
@@ -75,8 +74,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/assets/icons/icon-192.png',
-      badge: '/assets/icons/icon-192.png'
+      icon: '/assets/brand/zat-khail-emblem.png',
+      badge: '/assets/brand/zat-khail-emblem.png'
     })
   );
 });
