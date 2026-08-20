@@ -116,6 +116,14 @@ test('password recovery is server-side and rate-limited', () => {
   assert.match(pageSource, /account-recovery/);
 });
 
+test('login hides raw edge function HTTP errors from users', () => {
+  const auth = fs.readFileSync(path.join(root, 'public/js/lib/auth.js'), 'utf8');
+
+  assert.match(auth, /FunctionsHttpError/);
+  assert.match(auth, /non-2xx status code/);
+  assert.match(auth, /تعذر التحقق من بيانات الحساب/);
+});
+
 test('schedule analysis requires an authenticated owner of the halaqa', () => {
   const functionSource = fs.readFileSync(path.join(root, 'supabase/functions/analyze-schedule/index.ts'), 'utf8');
   const teacherPage = fs.readFileSync(path.join(root, 'public/js/pages/teacher-ai-assistant.js'), 'utf8');
@@ -187,6 +195,23 @@ test('role dashboards escape user-controlled display values', () => {
     const source = fs.readFileSync(path.join(root, relative), 'utf8');
     assert.match(source, /escapeHtml/);
   }
+});
+
+test('direct messaging uses canonical circle contacts and relationship-bound writes', () => {
+  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0027_direct_messaging_hardening.sql'), 'utf8');
+  const chat = fs.readFileSync(path.join(root, 'public/js/pages/chat.js'), 'utf8');
+
+  assert.match(migration, /create or replace function public\.list_my_direct_message_contacts/);
+  assert.match(migration, /create or replace function public\.can_direct_message/);
+  assert.match(migration, /learning_circle_staff/);
+  assert.match(migration, /learning_circle_memberships/);
+  assert.match(migration, /sender_id = auth\.uid\(\)/);
+  assert.match(migration, /can_direct_message\(sender_id, receiver_id\)/);
+  assert.match(migration, /drop policy if exists "Participants send allowed messages"/);
+  assert.match(migration, /revoke all on public\.messages from anon, authenticated/);
+  assert.match(migration, /grant select, insert on public\.messages to authenticated/);
+  assert.match(chat, /rpc\('list_my_direct_message_contacts'/);
+  assert.doesNotMatch(chat, /from\('halaqat'\)|from\('halaqa_students'\)/);
 });
 
 test('classroom assignments enforce enrolled submissions and private files', () => {

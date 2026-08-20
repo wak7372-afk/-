@@ -1,7 +1,6 @@
 const TEACHER_NAV_ITEMS = [
-  { key: 'tasks', href: '/teacher/tasks.html', icon: 'layout-dashboard', label: 'مركز المتابعة' },
   { key: 'circles', href: '/circles.html', icon: 'users-round', label: 'الحلقات' },
-  { key: 'reports', href: '/teacher/ai-assistant.html', icon: 'file-spreadsheet', label: 'التقارير' },
+  { key: 'reports', href: '/circles.html?type=quran', icon: 'file-spreadsheet', label: 'تقارير القرآن' },
   { key: 'messages', href: '/teacher/chat.html', icon: 'messages-square', label: 'الرسائل' },
   { key: 'account', href: '/account-settings.html', icon: 'circle-user-round', label: 'حسابي' },
 ];
@@ -19,7 +18,7 @@ export function mountTeacherShell(activeSection = 'tasks') {
   }
 
   sidebar.innerHTML = `
-    <a class="teacher-sidebar-brand" href="/teacher/tasks.html" aria-label="مركز ذات خيل">
+    <a class="teacher-sidebar-brand" href="/circles.html" aria-label="مركز ذات خيل">
       <span class="teacher-sidebar-mark">ذ</span>
       <span><strong class="font-amiri">مركز ذات خيل</strong><small>مساحة المعلم</small></span>
     </a>

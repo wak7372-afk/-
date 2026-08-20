@@ -9,6 +9,8 @@ const migration = fs.readFileSync(
   'utf8',
 );
 const workspaceCss = fs.readFileSync(path.join(root, 'public/css/circles.css'), 'utf8');
+const workspacePage = fs.readFileSync(path.join(root, 'public/circle.html'), 'utf8');
+const workspaceScript = fs.readFileSync(path.join(root, 'public/js/pages/circle-workspace.js'), 'utf8');
 
 test('circle workspace creates posts, replies, files, and a private bucket', () => {
   for (const table of [
@@ -62,4 +64,10 @@ test('circle workspace keeps hidden controls hidden and collapses safely on mobi
   assert.match(workspaceCss, /@media\s*\(max-width:\s*760px\)[\s\S]*\.people-layout,[\s\S]*\.settings-layout\s*\{[^}]*grid-template-columns:\s*1fr/i);
   assert.match(workspaceCss, /@media\s*\(max-width:\s*760px\)[\s\S]*\.workspace-files-list\s*\{[^}]*grid-template-columns:\s*1fr/i);
   assert.match(workspaceCss, /\.circle-workspace-shell\s*\{[^}]*padding-bottom:\s*88px/i);
+});
+
+test('circle workspace follows direct and in-page tab hashes', () => {
+  assert.match(workspacePage, /circle-workspace\.js\?v=12/);
+  assert.match(workspaceScript, /window\.addEventListener\('hashchange'/);
+  assert.match(workspaceScript, /requestedTab !== state\.activeTab/);
 });

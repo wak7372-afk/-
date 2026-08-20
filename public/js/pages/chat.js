@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase-client.js';
-import { requireAuth } from '../lib/auth.js';
+import { isLocalPreviewMode, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
 
@@ -24,27 +24,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadContacts() {
   const container = document.getElementById('contacts-list');
-
-  let contacts = [];
-  if (currentUser.role === 'teacher') {
-    // Load all students in teacher's halaqat
-    const { data: halaqat } = await supabase.from('halaqat').select('id').eq('teacher_id', currentUser.id);
-    const halaqatIds = halaqat ? halaqat.map(h => h.id) : [];
-
-    if (halaqatIds.length > 0) {
-      const { data: rels } = await supabase.from('halaqa_students').select('student:student_id(id, full_name, username)').in('halaqa_id', halaqatIds);
-      contacts = rels ? rels.map(r => r.student) : [];
-    }
+  let uniqueContacts = [];
+  if (isLocalPreviewMode()) {
+    uniqueContacts = previewContacts(currentUser.role);
   } else {
-    // Load student's teacher
-    const { data: rels } = await supabase.from('halaqa_students').select('halaqa:halaqa_id(teacher:teacher_id(id, full_name, username))').eq('student_id', currentUser.id);
-    if (rels) {
-      contacts = rels.map(r => r.halaqa?.teacher).filter(Boolean);
+    const { data, error } = await supabase.rpc('list_my_direct_message_contacts');
+    if (error) {
+      console.error('Unable to load direct-message contacts:', error);
+      showToast('تعذر تحميل جهات الاتصال.', 'error');
+    } else {
+      uniqueContacts = Array.isArray(data) ? data : [];
     }
   }
-
-  // Remove duplicates
-  const uniqueContacts = Array.from(new Set(contacts.map(c => c.id))).map(id => contacts.find(c => c.id === id));
 
   if (!uniqueContacts || uniqueContacts.length === 0) {
     container.innerHTML = '<p class="text-gray-500 text-xs p-4 text-center">لا يوجد جهات اتصال متاحة للدردشة.</p>';
@@ -59,6 +50,7 @@ async function loadContacts() {
       <div>
         <p class="font-bold text-sm text-gray-800">${escapeHtml(c.full_name || 'بدون اسم')}</p>
         <p class="text-[11px] text-gray-500" dir="ltr">@${escapeHtml(c.username || '')}</p>
+        <p class="text-[10px] text-emerald-700">${escapeHtml(contactCircleLabel(c.circles))}</p>
       </div>
     </button>
   `).join('');
@@ -74,6 +66,26 @@ async function loadContacts() {
   if (uniqueContacts.length > 0) {
     selectContact(uniqueContacts[0].id, uniqueContacts[0].full_name || 'جهة اتصال');
   }
+}
+
+function contactCircleLabel(circles) {
+  const names = (Array.isArray(circles) ? circles : []).map(circle => circle.name).filter(Boolean);
+  if (!names.length) return 'حلقة مرتبطة';
+  if (names.length === 1) return names[0];
+  return `${names[0]} و${names.length - 1} أخرى`;
+}
+
+function previewContacts(role) {
+  if (role === 'student') {
+    return [
+      { id: 'preview-teacher-1', full_name: 'المعلم حمزة', username: 'hamza', circles: [{ name: 'حلقة الإتقان', circle_type: 'quran' }] },
+      { id: 'preview-teacher-2', full_name: 'المعلم سالم', username: 'salem', circles: [{ name: 'فقه العبادات', circle_type: 'educational' }] },
+    ];
+  }
+  return [
+    { id: 'preview-student-1', full_name: 'محمد سعيد', username: 'mohammed.01', circles: [{ name: 'حلقة الإتقان', circle_type: 'quran' }] },
+    { id: 'preview-student-2', full_name: 'أحمد علي', username: 'ahmed.02', circles: [{ name: 'حلقة الإتقان', circle_type: 'quran' }] },
+  ];
 }
 
 window.selectContact = async function(contactId, contactName) {

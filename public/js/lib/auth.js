@@ -114,6 +114,9 @@ function getAuthErrorMessage(error) {
     return 'تعذر التحقق من بيانات الحساب. تأكد من اسم المستخدم وكلمة المرور.';
   }
   const message = (error?.message || '').toLowerCase();
+  if (error?.name === 'FunctionsHttpError' || message.includes('non-2xx status code')) {
+    return 'تعذر التحقق من بيانات الحساب. تأكد من اسم المستخدم وكلمة المرور.';
+  }
   if (message.includes('failed to send a request') || message.includes('failed to fetch') || message.includes('network')) {
     return 'تعذر الاتصال بخدمة تسجيل الدخول. تحقق من اتصالك ثم حاول مرة أخرى.';
   }

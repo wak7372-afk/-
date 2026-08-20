@@ -3,7 +3,7 @@ import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js';
 import { createQuranReportManager } from './quran-report-manager.js?v=5';
-import { mountTeacherShell } from '../lib/teacher-shell.js';
+import { mountTeacherShell } from '../lib/teacher-shell.js?v=2';
 
 const POST_TYPES = {
   announcement: { label: 'إعلان', icon: 'megaphone' },
@@ -76,6 +76,13 @@ function setupStaticControls() {
   document.getElementById('logout-btn').addEventListener('click', logoutUser);
   document.querySelectorAll('[data-workspace-tab]').forEach(button => {
     button.addEventListener('click', () => switchTab(button.dataset.workspaceTab));
+  });
+  window.addEventListener('hashchange', () => {
+    const requestedTab = window.location.hash.replace('#', '');
+    if (['stream', 'work', 'people', 'files', 'performance', 'settings'].includes(requestedTab)
+      && requestedTab !== state.activeTab) {
+      switchTab(requestedTab);
+    }
   });
   document.getElementById('post-composer').addEventListener('submit', handleCreatePost);
   document.getElementById('workspace-feed').addEventListener('click', handleFeedAction);
