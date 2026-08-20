@@ -98,6 +98,7 @@ test('circle workspace pages reference existing elements and protected RPCs', ()
   const migrations = [
     '0012_learning_circles_security.sql',
     '0014_learning_circle_workspace.sql',
+    '0029_quran_circle_performance.sql',
   ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
   const rpcNames = [...scripts.join('\n').matchAll(/supabase\.rpc\('([^']+)'/g)].map(match => match[1]);
   const missingRpcs = [...new Set(rpcNames.filter(name => !migrations.includes(`function public.${name}`)))];
@@ -139,6 +140,7 @@ test('Quran student reports and teacher console use protected report operations'
     '0022_quran_student_plan_adjustments.sql',
     '0023_quran_approved_report_management.sql',
     '0024_quran_student_accounting_analytics.sql',
+    '0030_quran_plan_shift_requests.sql',
   ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
   const requiredRpcs = [
     'get_my_quran_reports',
@@ -154,6 +156,10 @@ test('Quran student reports and teacher console use protected report operations'
     'adjust_quran_student_plan',
     'get_quran_report_management_details',
     'manage_quran_approved_report',
+    'request_quran_plan_shift',
+    'get_my_quran_plan_shift_requests',
+    'get_quran_plan_shift_queue',
+    'decide_quran_plan_shift_request',
   ];
 
   for (const rpc of requiredRpcs) {

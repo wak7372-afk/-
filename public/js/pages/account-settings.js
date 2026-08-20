@@ -14,18 +14,6 @@ function showStatus(message, type = 'info') {
   element.textContent = message;
 }
 
-async function refreshGoogleStatus() {
-  const { data, error } = await supabase.auth.getUserIdentities();
-  if (error) return;
-  const linked = data.identities?.some(identity => identity.provider === 'google');
-  const message = document.getElementById('google-status');
-  const button = document.getElementById('link-google-btn');
-  if (linked) {
-    message.textContent = 'حساب Google مرتبط ويمكن استخدامه للتحقق عند استعادة كلمة المرور.';
-    button.classList.add('hidden');
-  }
-}
-
 async function savePassword(event) {
   event.preventDefault();
   const form = document.getElementById('password-form');
@@ -54,29 +42,12 @@ async function savePassword(event) {
   }
 }
 
-async function linkGoogle() {
-  const button = document.getElementById('link-google-btn');
-  button.disabled = true;
-  button.textContent = 'جاري فتح Google...';
-  const { error } = await supabase.auth.linkIdentity({
-    provider: 'google',
-    options: { redirectTo: window.location.origin + window.location.pathname },
-  });
-  if (error) {
-    showStatus(error.message || 'تعذر بدء ربط حساب Google.', 'error');
-    button.disabled = false;
-    button.textContent = 'ربط حساب Google';
-  }
-}
-
 async function initialize() {
   const authData = await requireAuth();
   if (!authData) return;
   currentProfile = authData.profile;
   document.getElementById('account-summary').textContent = 'الحساب: ' + currentProfile.username + ' - ' + currentProfile.full_name;
-  await refreshGoogleStatus();
   document.getElementById('password-form').addEventListener('submit', savePassword);
-  document.getElementById('link-google-btn').addEventListener('click', linkGoogle);
   document.getElementById('back-btn').addEventListener('click', () => redirectUserByRole(currentProfile.role));
 }
 

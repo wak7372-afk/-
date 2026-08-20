@@ -507,15 +507,16 @@
       <div class="admin-dialog-header">
         <div>
           <p class="admin-section-kicker">عملية غير قابلة للتراجع</p>
-          <h2 id="delete-account-title" class="font-amiri">حذف معلومات الحساب</h2>
+          <h2 id="delete-account-title" class="font-amiri">حذف الحساب نهائياً</h2>
         </div>
         <button type="button" class="admin-icon-button" data-close-dialog="delete-account-dialog" aria-label="إغلاق">×</button>
       </div>
       <div class="admin-dialog-body">
         <div class="admin-operation-warning">
           <strong id="delete-account-name">الحساب</strong>
-          <span>سيُلغى الدخول وتُمحى البيانات الشخصية، بينما تبقى التقارير والسجلات التعليمية باسم «حساب محذوف».</span>
+          <span>سيُحذف تسجيل الدخول وملف الحساب وعضوياته وتقاريره وتسليماته. لا يمكن استعادة هذه البيانات بعد التأكيد.</span>
         </div>
+        <div id="delete-account-impact" class="admin-delete-impact" aria-live="polite">جاري حساب البيانات التي ستُحذف...</div>
         <div class="admin-field">
           <label for="delete-account-confirmation">اكتب اسم المستخدم للتأكيد (مع @ أو بدونها)</label>
           <input id="delete-account-confirmation" type="text" required autocomplete="off" dir="ltr">
@@ -524,7 +525,7 @@
       </div>
       <div class="admin-dialog-footer">
         <button type="button" class="admin-secondary-button" data-close-dialog="delete-account-dialog">إلغاء</button>
-        <button id="delete-account-submit" type="submit" class="admin-danger-button">حذف المعلومات وإلغاء الدخول</button>
+        <button id="delete-account-submit" type="submit" class="admin-danger-button">حذف الحساب نهائياً</button>
       </div>
     </form>
   </dialog>
@@ -638,6 +639,13 @@
             </div>
             <button id="archive-circle" type="button" class="admin-danger-button">أرشفة الحلقة</button>
           </div>
+          <div class="admin-circle-danger-zone is-hard-delete">
+            <div>
+              <strong>حذف الحلقة نهائياً</strong>
+              <span>يحذف الحلقة وبياناتها فقط. سجل أي طالب نُقل إلى حلقة أخرى يبقى محفوظاً في حلقته الجديدة.</span>
+            </div>
+            <button id="open-delete-circle" type="button" class="admin-danger-button">حذف نهائي</button>
+          </div>
         </section>
 
         <section data-circle-tab-panel="team" hidden>
@@ -710,6 +718,36 @@
     </div>
   </dialog>
 
+  <dialog id="delete-circle-dialog" class="admin-dialog admin-compact-dialog" aria-labelledby="delete-circle-title">
+    <form id="delete-circle-form" class="admin-dialog-card">
+      <input id="delete-circle-id" type="hidden">
+      <input id="delete-circle-name" type="hidden">
+      <div class="admin-dialog-header">
+        <div>
+          <p class="admin-section-kicker">عملية غير قابلة للتراجع</p>
+          <h2 id="delete-circle-title" class="font-amiri">حذف الحلقة نهائياً</h2>
+        </div>
+        <button type="button" class="admin-icon-button" data-close-dialog="delete-circle-dialog" aria-label="إغلاق">×</button>
+      </div>
+      <div class="admin-dialog-body">
+        <div class="admin-operation-warning">
+          <strong id="delete-circle-label">الحلقة</strong>
+          <span>ستُحذف عضويات الحلقة وتقاريرها ومنشوراتها وملفاتها. سجلات الطلاب المنقولة سابقاً إلى حلقات أخرى لن تتأثر.</span>
+        </div>
+        <div id="delete-circle-impact" class="admin-delete-impact" aria-live="polite">جاري حساب البيانات التي ستُحذف...</div>
+        <div class="admin-field">
+          <label for="delete-circle-confirmation">اكتب اسم الحلقة كاملاً للتأكيد</label>
+          <input id="delete-circle-confirmation" type="text" required autocomplete="off">
+          <small id="delete-circle-hint"></small>
+        </div>
+      </div>
+      <div class="admin-dialog-footer">
+        <button type="button" class="admin-secondary-button" data-close-dialog="delete-circle-dialog">إلغاء</button>
+        <button id="delete-circle-submit" type="submit" class="admin-danger-button">حذف الحلقة نهائياً</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="transfer-decision-dialog" class="admin-dialog admin-compact-dialog" aria-labelledby="transfer-decision-title">
     <form id="transfer-decision-form" class="admin-dialog-card">
       <input id="transfer-request-id" type="hidden">
@@ -735,6 +773,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="/js/pages/admin-dashboard.js?v=4"></script>
+  <script type="module" src="/js/pages/admin-dashboard.js?v=5"></script>
 </body>
 </html>

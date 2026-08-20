@@ -118,6 +118,13 @@
 .week-day.active { color: #fff; background: var(--student-navy); }
 .week-day.active strong { color: #071827; background: #e1ba4e; box-shadow: none; }
 .week-day.active small { color: #cbd9de; }
+.week-day.has-overdue { color: #8e2525; background: #fff0f0; box-shadow: inset 0 0 0 1px #e6a3a3; }
+.week-day.has-overdue strong { color: #fff; background: #b53d3d; box-shadow: 0 4px 10px rgba(153, 40, 40, .2); }
+.week-day.has-overdue small { display: flex; align-items: center; justify-content: center; gap: 3px; color: #9d2929; font-weight: 700; }
+.week-day.has-overdue small svg { width: 10px; height: 10px; flex: 0 0 10px; }
+.week-day.has-overdue.active { color: #fff; background: #8f2929; box-shadow: inset 0 0 0 1px #8f2929; }
+.week-day.has-overdue.active strong { color: #8f2929; background: #fff; }
+.week-day.has-overdue.active small { color: #fff; }
 
 .student-metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-top: 18px; }
 .student-metric { display: flex; min-height: 88px; align-items: center; gap: 13px; padding: 15px 17px; border: 1px solid var(--student-border); border-top: 3px solid currentColor; border-radius: 7px; background: #fff; box-shadow: 0 6px 16px rgba(7,24,39,.045); }
@@ -226,7 +233,7 @@
   .progress-ring { width: 70px; height: 70px; flex-basis: 70px; }.progress-ring::before { width: 56px; height: 56px; }
   .week-panel { display: block; overflow: hidden; }.week-heading { grid-template-columns: 32px 1fr 32px; border-inline-end: 0; border-bottom: 1px solid #e3e9ec; }
   .week-days { grid-template-columns: repeat(7, minmax(0,1fr)); overflow: hidden; }
-  .week-day { padding-inline: 2px; }.week-day span { font-size: 7px; }.week-day small { display: none; }
+  .week-day { padding-inline: 2px; }.week-day span { font-size: 7px; }.week-day small { display: none; }.week-day.has-overdue small { display: flex; font-size: 0; }.week-day.has-overdue small svg { width: 12px; height: 12px; }
   .student-metric { min-height: 76px; padding: 12px; gap: 9px; }.metric-icon { width: 32px; height: 32px; flex-basis: 32px; }.student-metric strong { font-size: 17px; }
   .student-task-section { padding: 15px; }
   .task-section-heading { display: block; }.period-tabs { min-width: 0; margin-top: 14px; }

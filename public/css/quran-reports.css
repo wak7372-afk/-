@@ -141,6 +141,34 @@
 
 .quran-extension-side { display: grid; gap: 14px; }
 .quran-extension-side[hidden] { display: none; }
+.quran-shift-panel { padding: 18px; border: 1px solid #ced9dd; border-inline-start: 4px solid #b74848; border-radius: 8px; background: #fff; box-shadow: 0 10px 28px rgba(5,20,33,0.07); }
+.quran-shift-panel[hidden] { display: none; }
+.quran-shift-heading { display: flex; align-items: center; gap: 10px; }
+.quran-shift-heading > span { display: grid; width: 39px; height: 39px; place-items: center; border-radius: 6px; background: #faeaea; color: #a43737; }
+.quran-shift-heading svg { width: 19px; }
+.quran-shift-heading small { color: #a43737; font-size: .55rem; font-weight: 900; }
+.quran-shift-heading h2 { margin: 2px 0 0; color: var(--report-navy); font-family: var(--font-amiri); font-size: 1.35rem; }
+.quran-shift-panel > p { margin: 12px 0; color: #71808d; font-size: .59rem; line-height: 1.8; }
+.quran-shift-panel form { display: grid; gap: 9px; }
+.quran-shift-panel form label { display: grid; gap: 5px; color: #4f6170; font-size: .56rem; font-weight: 900; }
+.quran-shift-panel select,
+.quran-shift-panel textarea { width: 100%; padding: 9px 10px; border: 1px solid #d3dde1; border-radius: 6px; background: #fff; color: #243847; font: inherit; resize: vertical; }
+.quran-shift-panel form button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--report-navy); border-radius: 6px; background: var(--report-navy); color: #fff; font-size: .62rem; font-weight: 900; }
+.quran-shift-panel form button svg { width: 16px; }
+.quran-shift-pending { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding: 10px; border: 1px solid #e6d39e; border-radius: 6px; background: #fff9e9; color: #886814; }
+.quran-shift-pending > svg { width: 18px; }
+.quran-shift-pending div { display: grid; gap: 2px; }
+.quran-shift-pending b { font-size: .59rem; }.quran-shift-pending small { font-size: .53rem; }
+.quran-shift-history { display: grid; gap: 6px; margin-top: 13px; padding-top: 11px; border-top: 1px solid #dce3e5; }
+.quran-shift-history > strong { color: #536572; font-size: .57rem; }
+.quran-shift-history article { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 7px; padding: 8px; border-radius: 5px; background: #f6f8f8; }
+.quran-shift-history article > svg { width: 15px; color: #9a7418; }
+.quran-shift-history article.status-approved > svg { color: var(--report-green); }.quran-shift-history article.status-rejected > svg { color: #a43737; }
+.quran-shift-history article div { display: grid; gap: 1px; }.quran-shift-history b { color: #344756; font-size: .55rem; }.quran-shift-history small { color: #75838e; font-size: .5rem; }
+.quran-date-days button.is-overdue { color: #922e2e; background: #fff0f0; box-shadow: inset 0 0 0 1px #dfa0a0; }
+.quran-date-days button.is-overdue strong { color: #fff; background: #b43d3d; }
+.quran-date-days button.is-overdue small { color: #a12f2f; }.quran-date-days button.is-overdue small svg { width: 12px; height: 12px; }
+.quran-date-days button.is-overdue.is-active { color: #fff; background: #8f2929; }.quran-date-days button.is-overdue.is-active strong { color: #8f2929; background: #fff; }.quran-date-days button.is-overdue.is-active small { color: #fff; }
 .quran-extension-form,
 .quran-extension-status { padding: 18px; }
 .quran-extension-heading { display: flex; align-items: center; gap: 10px; }

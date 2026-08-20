@@ -10,6 +10,7 @@ const migration = [
   '0022_quran_student_plan_adjustments.sql',
   '0023_quran_approved_report_management.sql',
   '0024_quran_student_accounting_analytics.sql',
+  '0030_quran_plan_shift_requests.sql',
 ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
 
 test('student completion is server-side, scored, and blocked by older overdue reports', () => {
@@ -61,6 +62,16 @@ test('approved extension starts after the current deadline or decision time', ()
   assert.match(migration, /base_value \+ interval '72 hours'/);
 });
 
+test('student-requested plan shifts are reviewed and applied by the lead teacher', () => {
+  assert.match(migration, /create table if not exists public\.quran_plan_shift_requests/);
+  assert.match(migration, /quran_plan_shift_one_pending_idx/);
+  assert.match(migration, /function public\.request_quran_plan_shift\(/);
+  assert.match(migration, /function public\.get_quran_plan_shift_queue\(/);
+  assert.match(migration, /function public\.decide_quran_plan_shift_request\(/);
+  assert.match(migration, /public\.adjust_quran_student_plan\(/);
+  assert.match(migration, /Only the lead teacher or administrator may decide Quran plan shift requests/);
+});
+
 test('teacher review and exemption require delegated review permission', () => {
   assert.match(migration, /has_learning_circle_permission\(p_circle_id, 'review_submissions'\)/);
   assert.match(migration, /function public\.exempt_quran_report_assignment/);
@@ -83,6 +94,10 @@ test('all report operations revoke public access and grant authenticated executi
     'adjust_quran_student_plan(uuid, uuid, text, date, date, integer, text, boolean)',
     'get_quran_report_management_details(uuid)',
     'manage_quran_approved_report(uuid, text, date, text, integer, text, text, boolean)',
+    'request_quran_plan_shift(date, text)',
+    'get_my_quran_plan_shift_requests()',
+    'get_quran_plan_shift_queue(uuid, text)',
+    'decide_quran_plan_shift_request(uuid, text, date, text)',
   ];
   for (const signature of functions) {
     assert.ok(

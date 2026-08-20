@@ -20,6 +20,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     reviewEndDate: '',
     reviewType: 'all',
     extensionQueue: null,
+    shiftQueue: null,
     history: null,
     historyPeriod: 30,
     historySection: 'summary',
@@ -56,6 +57,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
       views.push({ id: 'review', label: 'مراجعة التقارير', icon: 'calendar-search' });
       views.push({ id: 'accounting', label: 'محاسبة الطلاب', icon: 'users-round' });
       views.push({ id: 'extensions', label: 'طلبات التمديد', icon: 'timer-reset' });
+      if (canManageStudentPlan()) views.push({ id: 'shifts', label: 'طلبات الترحيل', icon: 'calendar-arrow-down' });
     }
     return views;
   }
@@ -66,7 +68,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     container.className = 'quran-manager-root';
     container.innerHTML = `
       <div class="quran-manager-tabs" role="tablist" aria-label="إدارة تقارير القرآن">
-        ${views.map(view => `<button type="button" role="tab" aria-selected="${state.activeView === view.id}" class="${state.activeView === view.id ? 'is-active' : ''}" data-manager-view="${view.id}"><i data-lucide="${view.icon}"></i><span>${view.label}</span>${view.id === 'extensions' && state.extensionQueue ? `<b>${state.extensionQueue.filter(item => item.status === 'pending').length}</b>` : ''}</button>`).join('')}
+        ${views.map(view => `<button type="button" role="tab" aria-selected="${state.activeView === view.id}" class="${state.activeView === view.id ? 'is-active' : ''}" data-manager-view="${view.id}"><i data-lucide="${view.icon}"></i><span>${view.label}</span>${view.id === 'extensions' && state.extensionQueue ? `<b>${state.extensionQueue.filter(item => item.status === 'pending').length}</b>` : view.id === 'shifts' && state.shiftQueue ? `<b>${state.shiftQueue.filter(item => item.status === 'pending').length}</b>` : ''}</button>`).join('')}
       </div>
       <div id="quran-manager-view" class="quran-manager-view"></div>
       ${renderExemptDialog()}
@@ -88,6 +90,10 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     }
     if (state.activeView === 'review') {
       host.innerHTML = renderReviewPlan();
+      return;
+    }
+    if (state.activeView === 'shifts') {
+      host.innerHTML = renderShiftRequests();
       return;
     }
     host.innerHTML = renderExtensions();
@@ -336,6 +342,34 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     </article>`;
   }
 
+  function renderShiftRequests() {
+    if (!state.shiftQueue) return loadingState('جاري تحميل طلبات ترحيل التقارير...');
+    return `<section class="quran-extension-queue-head quran-shift-queue-head"><div><span>إعادة الجدولة الفردية</span><h3>طلبات ترحيل التقارير</h3><p>حدد تاريخ البداية الجديد؛ ستتحرك جميع التقارير المعلقة ابتداءً من اليوم المطلوب للطالب وحده.</p></div><button type="button" data-manager-action="refresh-shifts"><i data-lucide="refresh-cw"></i><span>تحديث</span></button></section>
+      <div class="quran-shift-queue">
+        ${state.shiftQueue.map(shiftRequestCard).join('') || emptyState('calendar-x-2', 'لا توجد طلبات ترحيل حالياً.')}
+      </div>`;
+  }
+
+  function shiftRequestCard(request) {
+    const pending = request.status === 'pending';
+    const earliestTarget = addDateKey(request.requested_from_date, 1);
+    const suggestedTarget = muscatDateKey() > earliestTarget ? muscatDateKey() : earliestTarget;
+    return `<article class="quran-shift-request status-${escapeHtml(request.status)}">
+      <header><div class="quran-accounting-person"><span class="person-avatar">${escapeHtml(firstCharacter(request.full_name))}</span><div><b>${escapeHtml(request.full_name)}</b><small>@${escapeHtml(request.username || '')} · ${relativeTime(request.requested_at)}</small></div></div><span>${shiftRequestStatus(request.status)}</span></header>
+      <div class="quran-shift-request-body">
+        <div class="quran-shift-route"><span><small>بداية التقارير المتأخرة</small><b>${escapeHtml(formatDate(request.requested_from_date))}</b></span><i data-lucide="arrow-left"></i><span><small>${pending ? 'يحدده المعلم' : 'البداية الجديدة'}</small><b>${pending ? 'بانتظار القرار' : escapeHtml(formatDate(request.decision_target_date))}</b></span></div>
+        <blockquote><i data-lucide="message-square-quote"></i><p>${escapeHtml(request.reason)}</p></blockquote>
+        <div class="quran-shift-impact"><span><b>${Number(request.overdue_report_count || 0)}</b> متأخر</span><span><b>${Number(request.pending_report_count || 0)}</b> تقرير سيتحرك</span><span><b>${request.current_start ? `${escapeHtml(formatDate(request.current_start))} - ${escapeHtml(formatDate(request.current_end))}` : 'لا يوجد نطاق'}</b> النطاق الحالي</span></div>
+        ${Number(request.pending_extension_count || 0) ? `<p class="quran-shift-warning"><i data-lucide="timer-off"></i>يوجد ${Number(request.pending_extension_count)} طلب تمديد معلق؛ يجب البت فيه أولاً.</p>` : ''}
+      </div>
+      ${pending ? `<form data-shift-decision-form="${escapeHtml(request.id)}">
+        <label><span>تاريخ البداية الجديد</span><input name="shift-target-date" type="date" min="${escapeHtml(earliestTarget)}" value="${escapeHtml(suggestedTarget)}" required></label>
+        <label><span>ملاحظة القرار</span><input name="shift-decision-note" maxlength="2000" placeholder="اختياري"></label>
+        <div><button type="submit" class="reject" data-shift-decision="reject"><i data-lucide="x"></i><span>رفض الطلب</span></button><button type="submit" class="approve" data-shift-decision="approve" ${Number(request.pending_extension_count || 0) ? 'disabled' : ''}><i data-lucide="badge-check"></i><span>اعتماد الترحيل</span></button></div>
+      </form>` : request.decision_note ? `<p class="quran-shift-decision-note"><b>ملاحظة القرار:</b> ${escapeHtml(request.decision_note)}</p>` : ''}
+    </article>`;
+  }
+
   function renderExemptDialog() {
     return `<dialog id="quran-exempt-dialog" class="quran-exempt-dialog"><form method="dialog" data-exempt-form><div><span><i data-lucide="shield-minus"></i></span><div><small>قرار المعلم</small><h3>إعفاء الطالب من التقرير</h3></div></div><p>الإعفاء يزيل التقرير من قائمة التأخير ويفتح التقارير اللاحقة، ويُحفظ سببه في السجل.</p><label><span>سبب الإعفاء</span><textarea name="exemption-reason" rows="4" maxlength="2000" required></textarea></label><footer><button type="button" data-manager-action="cancel-exempt">إلغاء</button><button type="submit">اعتماد الإعفاء</button></footer></form></dialog>`;
   }
@@ -482,6 +516,8 @@ export function createQuranReportManager({ container, supabase, getContext, refr
       render();
     } else if (action === 'refresh-extensions') {
       await loadExtensions();
+    } else if (action === 'refresh-shifts') {
+      await loadShiftRequests();
     } else if (action === 'cancel-exempt') {
       container.querySelector('#quran-exempt-dialog')?.close();
     } else if (action === 'open-plan-adjustment') {
@@ -550,6 +586,12 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     if (extensionForm) {
       event.preventDefault();
       await decideExtension(extensionForm);
+      return;
+    }
+    const shiftForm = event.target.closest('[data-shift-decision-form]');
+    if (shiftForm) {
+      event.preventDefault();
+      await decideShiftRequest(shiftForm, event.submitter?.dataset.shiftDecision || 'approve');
       return;
     }
     const exemptForm = event.target.closest('[data-exempt-form]');
@@ -850,6 +892,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     if (state.activeView === 'review') await loadReviewPlan();
     if (state.activeView === 'accounting') await loadAccounting();
     if (state.activeView === 'extensions') await loadExtensions();
+    if (state.activeView === 'shifts') await loadShiftRequests();
   }
 
   async function loadReviewPlan() {
@@ -932,6 +975,55 @@ export function createQuranReportManager({ container, supabase, getContext, refr
       showToast(friendlyManagerError(error, 'تعذر اعتماد قرار التمديد.'), 'error');
     } finally {
       state.busy = false;
+    }
+  }
+
+  async function loadShiftRequests() {
+    state.shiftQueue = null;
+    render();
+    try {
+      state.shiftQueue = isLocalPreviewMode() ? previewShiftRequests() : await rpc('get_quran_plan_shift_queue', { p_circle_id: getContext().circle.id, p_status: 'all' });
+      render();
+    } catch (error) {
+      showToast(friendlyManagerError(error, 'تعذر تحميل طلبات ترحيل التقارير.'), 'error');
+    }
+  }
+
+  async function decideShiftRequest(form, decision) {
+    if (state.busy) return;
+    const request = state.shiftQueue?.find(item => item.id === form.dataset.shiftDecisionForm);
+    if (!request || request.status !== 'pending') return;
+    const formData = new FormData(form);
+    const targetDate = String(formData.get('shift-target-date') || '');
+    const note = String(formData.get('shift-decision-note') || '').trim();
+    if (decision === 'approve' && (!targetDate || targetDate <= request.requested_from_date)) {
+      return showToast('حدد تاريخ بداية جديداً بعد تاريخ التقرير المتأخر.', 'error');
+    }
+    state.busy = true;
+    form.querySelectorAll('button').forEach(button => { button.disabled = true; });
+    try {
+      if (isLocalPreviewMode()) {
+        request.status = decision === 'approve' ? 'approved' : 'rejected';
+        request.decision_target_date = decision === 'approve' ? targetDate : null;
+        request.shift_days = decision === 'approve' ? dateDifference(request.requested_from_date, targetDate) : null;
+        request.decision_note = note || null;
+        request.decided_at = new Date().toISOString();
+      } else {
+        await rpc('decide_quran_plan_shift_request', {
+          p_request_id: request.id,
+          p_decision: decision,
+          p_target_date: decision === 'approve' ? targetDate : null,
+          p_note: note || null,
+        });
+        await loadShiftRequests();
+      }
+      showToast(decision === 'approve' ? 'تم ترحيل خطة الطالب وإعادة ضبط التواريخ.' : 'تم رفض طلب الترحيل وإشعار الطالب.', 'success');
+      render();
+    } catch (error) {
+      showToast(friendlyManagerError(error, 'تعذر اعتماد قرار طلب الترحيل.'), 'error');
+    } finally {
+      state.busy = false;
+      if (form.isConnected) form.querySelectorAll('button').forEach(button => { button.disabled = false; });
     }
   }
 
@@ -1305,6 +1397,16 @@ function previewExtensions() {
   }];
 }
 
+function previewShiftRequests() {
+  const fromDate = addDateKey(muscatDateKey(), -2);
+  return [{
+    id: 'shift-request-1', student_id: 'student-2', full_name: 'وارث بن علي الخياري', username: 'warith.student',
+    requested_from_date: fromDate, reason: 'تعذر عليّ إتمام تقارير اليومين السابقين بسبب ظرف عائلي.', status: 'pending',
+    requested_at: new Date(Date.now() - 22 * 60000).toISOString(), pending_report_count: 18, overdue_report_count: 6,
+    current_start: fromDate, current_end: addDateKey(fromDate, 12), pending_extension_count: 0,
+  }];
+}
+
 function metric(icon, label, value, tone = '') {
   return `<article class="${tone ? `is-${tone}` : ''}"><i data-lucide="${icon}"></i><span>${label}</span><strong>${value}</strong></article>`;
 }
@@ -1444,6 +1546,12 @@ function extensionRequestStatus(status) {
   return 'قيد المراجعة';
 }
 
+function shiftRequestStatus(status) {
+  if (status === 'approved') return 'تم الترحيل';
+  if (status === 'rejected') return 'مرفوض';
+  return 'بانتظار القرار';
+}
+
 function emptyState(icon, text) {
   return `<div class="workspace-empty-state"><i data-lucide="${icon}"></i><p>${text}</p></div>`;
 }
@@ -1500,6 +1608,8 @@ function friendlyManagerError(error, fallback) {
   if (/No pending Quran reports/i.test(message)) return 'لا توجد تقارير معلقة ابتداءً من التاريخ المحدد.';
   if (/conflicts with existing/i.test(message)) return 'تتعارض التواريخ الجديدة مع تقارير ثابتة للطالب.';
   if (/pending extension requests/i.test(message)) return 'توجد طلبات تمديد معلقة؛ يجب البت فيها قبل تعديل الخطة.';
+  if (/already been decided/i.test(message)) return 'تم اتخاذ قرار على هذا الطلب مسبقاً؛ حدّث القائمة.';
+  if (/new Quran plan date/i.test(message)) return 'يجب أن يكون تاريخ البداية الجديد بعد أول يوم متأخر.';
   if (/without pending students|has no pending students/i.test(message)) return 'لا يوجد طلاب معلقون يمكن تطبيق هذا الإجراء عليهم.';
   if (/No approved Quran report changes/i.test(message)) return 'لم تُجرَ أي تغييرات على التقرير.';
   if (/edit conflicts with student plans/i.test(message)) return 'يتعارض التاريخ الجديد مع تقارير ثابتة في خطط بعض الطلاب.';

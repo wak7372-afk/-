@@ -1778,6 +1778,41 @@ body.admin-command-shell {
   font-size: 0.53rem;
 }
 
+.admin-circle-danger-zone.is-hard-delete {
+  margin-top: 12px;
+  border-top-color: #d9a8a8;
+  background: #fff8f8;
+}
+
+.admin-delete-impact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e2d8c6;
+  border-radius: 7px;
+  background: #fbfaf7;
+  color: #6d6254;
+  font-size: 0.57rem;
+}
+
+.admin-delete-impact span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid #e5ded2;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.admin-delete-impact b {
+  color: #8f3333;
+  font-size: 0.66rem;
+}
+
 .admin-danger-button {
   min-height: 39px;
   padding: 8px 13px;
@@ -2019,7 +2054,8 @@ body.admin-command-shell {
 
   .admin-circle-filters,
   .admin-checkbox-grid,
-  .admin-permissions-grid {
+  .admin-permissions-grid,
+  .admin-delete-impact {
     grid-template-columns: 1fr;
   }
 

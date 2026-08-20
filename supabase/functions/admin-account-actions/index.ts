@@ -56,6 +56,20 @@ function isMissingAuthUser(error: { status?: number; code?: string; message?: st
     || /user.*not found/i.test(error.message ?? '');
 }
 
+function isUuid(value: unknown) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value ?? ''));
+}
+
+async function removeStoredFiles(admin: ReturnType<typeof createClient>, paths: unknown) {
+  const cleanPaths = Array.isArray(paths)
+    ? [...new Set(paths.map(path => String(path ?? '').trim()).filter(Boolean))]
+    : [];
+  for (let index = 0; index < cleanPaths.length; index += 100) {
+    const { error } = await admin.storage.from('circle-files').remove(cleanPaths.slice(index, index + 100));
+    if (error) throw error;
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(request) });
   if (request.method !== 'POST') return response(request, { error: 'Method not allowed' }, 405);
@@ -86,9 +100,50 @@ Deno.serve(async (request) => {
       return response(request, { error: 'هذه العملية متاحة للمدير فقط.' }, 403);
     }
 
-    const { action, accountId, password, confirmation } = await request.json();
+    const { action, accountId, circleId, password, confirmation } = await request.json();
+
+    if (action === 'delete_circle_impact') {
+      if (!isUuid(circleId)) return response(request, { error: 'الحلقة المحددة غير صالحة.' }, 400);
+      const { data, error } = await callerClient.rpc('get_circle_hard_delete_impact', { p_circle_id: circleId });
+      if (error) return response(request, { error: 'تعذر حساب أثر حذف الحلقة.' }, 400);
+      return response(request, { success: true, impact: data });
+    }
+
+    if (action === 'delete_circle') {
+      if (!isUuid(circleId)) return response(request, { error: 'الحلقة المحددة غير صالحة.' }, 400);
+      const { data: prepared, error: prepareError } = await admin.rpc('hard_delete_learning_circle', {
+        p_circle_id: circleId,
+        p_actor_id: userData.user.id,
+        p_confirmation: String(confirmation ?? '').trim(),
+      });
+      if (prepareError || !prepared?.job_id) {
+        console.error('Circle hard deletion preparation failed:', prepareError);
+        return response(request, { error: 'تعذر حذف الحلقة. تأكد من اسم الحلقة ثم أعد المحاولة.' }, 400);
+      }
+      try {
+        await removeStoredFiles(admin, prepared.storage_paths);
+        await admin.rpc('complete_platform_deletion_job', {
+          p_job_id: prepared.job_id, p_actor_id: userData.user.id, p_success: true, p_error: null,
+        });
+        return response(request, { success: true, deleted: true, impact: prepared.impact });
+      } catch (cleanupError) {
+        await admin.rpc('complete_platform_deletion_job', {
+          p_job_id: prepared.job_id,
+          p_actor_id: userData.user.id,
+          p_success: false,
+          p_error: cleanupError instanceof Error ? cleanupError.message : 'Storage cleanup failed',
+        });
+        return response(request, {
+          success: true,
+          deleted: true,
+          cleanupPending: true,
+          warning: 'حُذفت الحلقة، وتعذر حذف بعض ملفاتها الآن. سُجلت العملية لاستكمال التنظيف.',
+        });
+      }
+    }
+
     const targetId = String(accountId ?? '');
-    if (!/^[0-9a-f-]{36}$/i.test(targetId)) return response(request, { error: 'الحساب المحدد غير صالح.' }, 400);
+    if (!isUuid(targetId)) return response(request, { error: 'الحساب المحدد غير صالح.' }, 400);
     if (targetId === userData.user.id) return response(request, { error: 'لا يمكنك تنفيذ هذه العملية على حسابك الحالي.' }, 403);
 
     const { data: target } = await admin
@@ -98,6 +153,12 @@ Deno.serve(async (request) => {
       .maybeSingle();
     if (!target) return response(request, { error: 'الحساب غير موجود.' }, 404);
     if (target.role === 'admin') return response(request, { error: 'الحسابات الإدارية محمية من هذه العملية.' }, 403);
+
+    if (action === 'delete_account_impact') {
+      const { data, error } = await callerClient.rpc('get_account_hard_delete_impact', { p_target_id: targetId });
+      if (error) return response(request, { error: 'تعذر حساب أثر حذف الحساب.' }, 400);
+      return response(request, { success: true, impact: data });
+    }
 
     if (action === 'reset_password') {
       if (!validPassword(password)) {
@@ -126,41 +187,58 @@ Deno.serve(async (request) => {
         return response(request, { error: 'اكتب اسم المستخدم كما هو لتأكيد الحذف.' }, 400);
       }
 
-      const { data: authTarget, error: authLookupError } = await admin.auth.admin.getUserById(targetId);
-      if (authLookupError && !isMissingAuthUser(authLookupError)) {
-        return response(request, { error: 'تعذر التحقق من سجل الدخول المرتبط بالحساب.' }, 500);
+      const { data: prepared, error: prepareError } = await admin.rpc('prepare_account_hard_delete', {
+        p_target_id: targetId,
+        p_actor_id: userData.user.id,
+        p_confirmation: confirmation,
+      });
+      if (prepareError || !prepared?.job_id) {
+        console.error('Account hard deletion preparation failed:', prepareError);
+        return response(request, { error: 'تعذر تجهيز الحساب للحذف. أعد المحاولة.' }, 500);
       }
 
-      if (authTarget?.user) {
-        const anonymousUsername = `deleted-${targetId.replaceAll('-', '').slice(0, 20)}`;
-        const anonymousEmail = `${anonymousUsername}@deleted.zatkhail.invalid`;
-        const randomPassword = `${crypto.randomUUID()}${crypto.randomUUID()}A7!`;
-        const { error: authScrubError } = await admin.auth.admin.updateUserById(targetId, {
-          email: anonymousEmail,
-          password: randomPassword,
-          email_confirm: true,
-          ban_duration: '876000h',
-          user_metadata: {
-            full_name: 'حساب محذوف',
-            username: anonymousUsername,
-            phone: null,
-            deleted: true,
-          },
+      let cleanupError: unknown = null;
+      try {
+        await removeStoredFiles(admin, prepared.storage_paths);
+      } catch (error) {
+        cleanupError = error;
+      }
+
+      const { error: authDeleteError } = await admin.auth.admin.deleteUser(targetId, false);
+      if (authDeleteError && !isMissingAuthUser(authDeleteError)) {
+        await admin.rpc('complete_platform_deletion_job', {
+          p_job_id: prepared.job_id,
+          p_actor_id: userData.user.id,
+          p_success: false,
+          p_error: authDeleteError.message,
         });
-        if (authScrubError) {
-          return response(request, { error: 'تعذر إلغاء بيانات الدخول للحساب.' }, 500);
+        return response(request, { error: 'حُذف سجل الطالب وتعذر حذف بيانات الدخول. أعد المحاولة لإكمال العملية.' }, 500);
+      }
+      if (authDeleteError && isMissingAuthUser(authDeleteError)) {
+        const { error: profileDeleteError } = await admin.from('users').delete().eq('id', targetId);
+        if (profileDeleteError) {
+          await admin.rpc('complete_platform_deletion_job', {
+            p_job_id: prepared.job_id,
+            p_actor_id: userData.user.id,
+            p_success: false,
+            p_error: profileDeleteError.message,
+          });
+          return response(request, { error: 'تعذر حذف ملف الحساب النهائي.' }, 500);
         }
       }
 
-      const { data: anonymized, error: anonymizeError } = await admin.rpc('admin_anonymize_user_account', {
-        p_target_id: targetId,
+      await admin.rpc('complete_platform_deletion_job', {
+        p_job_id: prepared.job_id,
         p_actor_id: userData.user.id,
+        p_success: !cleanupError,
+        p_error: cleanupError instanceof Error ? cleanupError.message : cleanupError ? 'Storage cleanup failed' : null,
       });
-      if (anonymizeError) {
-        console.error('Account anonymization failed:', anonymizeError);
-        return response(request, { error: 'تم إلغاء الدخول وتعذر إكمال محو معلومات الحساب. أعد المحاولة.' }, 500);
-      }
-      return response(request, { success: true, anonymized });
+      return response(request, {
+        success: true,
+        deleted: true,
+        cleanupPending: Boolean(cleanupError),
+        warning: cleanupError ? 'حُذف الحساب، وتعذر حذف بعض ملفاته الآن. سُجلت لاستكمال التنظيف.' : null,
+      });
     }
 
     return response(request, { error: 'العملية المطلوبة غير مدعومة.' }, 400);

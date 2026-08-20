@@ -89,6 +89,8 @@ export function createAdminCirclesController({
     document.getElementById('add-circle-student-button').addEventListener('click', handleAddStudent);
     document.getElementById('circle-students-list').addEventListener('click', handleStudentAction);
     document.getElementById('archive-circle').addEventListener('click', handleArchiveCircle);
+    document.getElementById('open-delete-circle').addEventListener('click', openDeleteCircleDialog);
+    document.getElementById('delete-circle-form').addEventListener('submit', handleDeleteCircle);
     document.getElementById('transfer-decision-form').addEventListener('submit', handleTransferDecision);
   }
 
@@ -949,6 +951,110 @@ export function createAdminCirclesController({
     }
     addPreviewAudit(request.to_circle_id, approve ? 'circle.transfer_approved' : 'circle.transfer_rejected');
     savePreviewState();
+  }
+
+  async function invokeCircleDeletionAction(body) {
+    const { data, error } = await supabase.functions.invoke('admin-account-actions', { body });
+    if (error) {
+      let message = data?.error || error.message;
+      try {
+        const payload = await error.context?.json();
+        if (payload?.error) message = payload.error;
+      } catch {
+        // Keep the SDK message when the response has no JSON body.
+      }
+      throw new Error(message || 'تعذر تنفيذ العملية.');
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
+  }
+
+  function renderCircleDeleteImpact(impact) {
+    const fields = [
+      ['active_students', 'طلاب نشطون'],
+      ['staff', 'تكليفات المعلمين'],
+      ['quran_assignments', 'تقارير القرآن'],
+      ['completed_quran_assignments', 'تقارير منجزة'],
+      ['posts', 'المنشورات'],
+      ['files', 'الملفات'],
+      ['pending_transfers', 'طلبات نقل معلقة'],
+    ];
+    document.getElementById('delete-circle-impact').innerHTML = fields.map(([key, label]) => `
+      <span>${escapeHtml(label)} <b>${Number(impact?.[key] || 0).toLocaleString('ar')}</b></span>
+    `).join('');
+  }
+
+  async function openDeleteCircleDialog() {
+    const circle = getSelectedCircle();
+    if (!circle) return;
+    const form = document.getElementById('delete-circle-form');
+    form.reset();
+    document.getElementById('delete-circle-id').value = circle.id;
+    document.getElementById('delete-circle-name').value = circle.name;
+    document.getElementById('delete-circle-label').textContent = circle.name;
+    document.getElementById('delete-circle-hint').textContent = `اكتب «${circle.name}» كما يظهر تماماً.`;
+    const impactContainer = document.getElementById('delete-circle-impact');
+    impactContainer.textContent = 'جاري حساب البيانات التي ستُحذف...';
+    document.getElementById('delete-circle-dialog').showModal();
+    requestAnimationFrame(() => document.getElementById('delete-circle-confirmation').focus());
+
+    try {
+      if (isLocalPreviewMode()) {
+        renderCircleDeleteImpact({
+          active_students: state.memberships.filter(row => row.circle_id === circle.id && row.status === 'active').length,
+          staff: state.staff.filter(row => row.circle_id === circle.id).length,
+          pending_transfers: state.transfers.filter(row => row.status === 'pending' && [row.from_circle_id, row.to_circle_id].includes(circle.id)).length,
+        });
+      } else {
+        const result = await invokeCircleDeletionAction({ action: 'delete_circle_impact', circleId: circle.id });
+        renderCircleDeleteImpact(result.impact);
+      }
+    } catch (error) {
+      impactContainer.textContent = error.message || 'تعذر حساب أثر حذف الحلقة.';
+    }
+  }
+
+  async function handleDeleteCircle(event) {
+    event.preventDefault();
+    if (!event.currentTarget.reportValidity()) return;
+    const circleId = document.getElementById('delete-circle-id').value;
+    const circle = state.circles.find(item => item.id === circleId);
+    const confirmation = document.getElementById('delete-circle-confirmation').value.trim();
+    if (!circle) return;
+    if (confirmation !== circle.name.trim()) {
+      showToast('اسم الحلقة المكتوب غير مطابق.', 'error');
+      return;
+    }
+
+    const button = document.getElementById('delete-circle-submit');
+    setButtonLoading(button, true, 'جاري الحذف النهائي...');
+    try {
+      let result = null;
+      if (isLocalPreviewMode()) {
+        state.circles = state.circles.filter(row => row.id !== circleId);
+        state.circleSubjects = state.circleSubjects.filter(row => row.circle_id !== circleId);
+        state.staff = state.staff.filter(row => row.circle_id !== circleId);
+        state.memberships = state.memberships.filter(row => row.circle_id !== circleId);
+        state.transfers = state.transfers.filter(row => row.from_circle_id !== circleId && row.to_circle_id !== circleId);
+        state.activities = state.activities.filter(row => row.circle_id !== circleId);
+        savePreviewState();
+      } else {
+        result = await invokeCircleDeletionAction({
+          action: 'delete_circle', circleId, confirmation,
+        });
+      }
+      document.getElementById('delete-circle-dialog').close();
+      document.getElementById('manage-circle-dialog').close();
+      state.selectedCircleId = null;
+      await refresh();
+      showToast('تم حذف الحلقة وبياناتها نهائياً.', 'success');
+      if (result?.warning) showToast(result.warning, 'warning');
+    } catch (error) {
+      console.error('Circle hard deletion failed:', error);
+      showToast(friendlyError(error, 'تعذر حذف الحلقة نهائياً.'), 'error');
+    } finally {
+      setButtonLoading(button, false, 'حذف الحلقة نهائياً');
+    }
   }
 
   async function handleArchiveCircle() {

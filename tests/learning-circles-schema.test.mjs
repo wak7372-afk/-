@@ -8,6 +8,10 @@ const migration = fs.readFileSync(
   path.join(root, 'supabase/migrations/0011_learning_circles_core.sql'),
   'utf8',
 );
+const securityMigration = fs.readFileSync(
+  path.join(root, 'supabase/migrations/0012_learning_circles_security.sql'),
+  'utf8',
+);
 
 test('learning circle migration preserves legacy tables and backfills them', () => {
   assert.match(migration, /create table if not exists public\.learning_circles/i);
@@ -42,4 +46,12 @@ test('new domain tables enable RLS before they are used by pages', () => {
     assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`, 'i'));
     assert.match(migration, new RegExp(`revoke all on public\\.${table} from anon`, 'i'));
   }
+});
+
+test('learning circles do not impose a fixed member capacity', () => {
+  const membershipTable = migration.match(/create table if not exists public\.learning_circle_memberships[\s\S]*?\n\);/i)?.[0] || '';
+  const addStudentFunction = securityMigration.match(/create or replace function public\.add_student_to_learning_circle[\s\S]*?\n\$\$;/i)?.[0] || '';
+  assert.doesNotMatch(membershipTable, /capacity|max_members|member_limit|student_limit/i);
+  assert.doesNotMatch(addStudentFunction, /capacity|max_members|member_limit|student_limit/i);
+  assert.match(addStudentFunction, /insert into public\.learning_circle_memberships/i);
 });

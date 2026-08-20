@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js';
-import { createQuranReportManager } from './quran-report-manager.js?v=5';
+import { createQuranReportManager } from './quran-report-manager.js?v=7';
 import { mountTeacherShell } from '../lib/teacher-shell.js?v=2';
 
 const POST_TYPES = {
@@ -24,6 +24,9 @@ const state = {
   profile: null,
   circleId: null,
   workspace: null,
+  performance: null,
+  performanceLoading: false,
+  performanceLoaded: false,
   selectedPostType: null,
   activeTab: 'stream',
 };
@@ -144,6 +147,9 @@ function renderHeader() {
   document.getElementById('work-heading').textContent = quran ? 'تقارير الحلقة' : 'مهام الحلقة';
   document.getElementById('workspace-subjects').innerHTML = (circle.subjects || []).map(subject => `<span>${escapeHtml(subject.name)}</span>`).join('');
 
+  const performanceTab = document.querySelector('[data-workspace-tab="performance"]');
+  performanceTab.hidden = !canViewPerformance();
+
   const meetLink = document.getElementById('top-meet-link');
   const safeMeetLink = getSafeExternalUrl(circle.meet_link);
   meetLink.hidden = !safeMeetLink;
@@ -159,6 +165,7 @@ function renderCircleSidebarContext(circle, participantRole, quran) {
 }
 
 function switchTab(tab) {
+  if (tab === 'performance' && !canViewPerformance()) tab = 'stream';
   state.activeTab = tab;
   document.querySelectorAll('[data-workspace-tab]').forEach(button => {
     const active = button.dataset.workspaceTab === tab;
@@ -171,6 +178,11 @@ function switchTab(tab) {
     panel.classList.toggle('is-active', active);
   });
   window.location.hash = tab;
+  if (tab === 'performance') void loadPerformance();
+}
+
+function canViewPerformance() {
+  return Boolean(state.workspace?.permissions?.is_admin || state.workspace?.permissions?.is_staff);
 }
 
 function allowedPostTypes() {
@@ -601,15 +613,167 @@ async function handleFileAction(event) {
   }
 }
 
+async function loadPerformance() {
+  if (!canViewPerformance() || state.performanceLoading || state.performanceLoaded) return;
+  if (state.workspace.circle.circle_type !== 'quran') {
+    state.performanceLoaded = true;
+    renderPerformance();
+    return;
+  }
+  state.performanceLoading = true;
+  renderPerformance();
+  try {
+    if (isLocalPreviewMode()) {
+      state.performance = buildPreviewPerformance();
+    } else {
+      const { data, error } = await supabase.rpc('get_quran_circle_performance', {
+        p_circle_id: state.circleId,
+        p_as_of: null,
+      });
+      if (error) throw error;
+      state.performance = data;
+    }
+    state.performanceLoaded = true;
+  } catch (error) {
+    console.error('Unable to load circle performance:', error);
+    showToast('تعذر تحميل مؤشرات أداء الحلقة.', 'error');
+  } finally {
+    state.performanceLoading = false;
+    renderPerformance();
+    refreshIcons();
+  }
+}
+
 function renderPerformance() {
-  const activePosts = (state.workspace.posts || []).filter(post => post.status === 'published').length;
-  const activeFiles = (state.workspace.files || []).filter(file => file.status === 'active').length;
-  const replies = (state.workspace.posts || []).reduce((total, post) => total + (post.replies || []).filter(reply => reply.status === 'published').length, 0);
-  document.getElementById('workspace-performance').innerHTML = `
-    <article class="performance-metric"><span>الطلاب النشطون</span><strong>${Number(state.workspace.people.students_count || 0)}</strong></article>
-    <article class="performance-metric is-gold"><span>منشورات الساحة</span><strong>${activePosts}</strong></article>
-    <article class="performance-metric is-blue"><span>ملفات الحلقة</span><strong>${activeFiles}</strong></article>
-    <article class="performance-metric is-red"><span>الردود المنشورة</span><strong>${replies}</strong></article>`;
+  const container = document.getElementById('workspace-performance');
+  if (!canViewPerformance()) {
+    container.innerHTML = '<div class="workspace-empty-state"><p>مؤشرات الأداء متاحة لفريق التعليم والإدارة.</p></div>';
+    return;
+  }
+  if (state.workspace.circle.circle_type !== 'quran') {
+    const activePosts = (state.workspace.posts || []).filter(post => post.status === 'published').length;
+    const activeFiles = (state.workspace.files || []).filter(file => file.status === 'active').length;
+    const replies = (state.workspace.posts || []).reduce((total, post) => total + (post.replies || []).filter(reply => reply.status === 'published').length, 0);
+    container.innerHTML = `<div class="performance-summary-grid">
+      <article class="performance-metric"><span>الطلاب النشطون</span><strong>${Number(state.workspace.people.students_count || 0)}</strong></article>
+      <article class="performance-metric is-gold"><span>منشورات الساحة</span><strong>${activePosts}</strong></article>
+      <article class="performance-metric is-blue"><span>ملفات الحلقة</span><strong>${activeFiles}</strong></article>
+      <article class="performance-metric is-red"><span>الردود المنشورة</span><strong>${replies}</strong></article>
+    </div>`;
+    return;
+  }
+  if (state.performanceLoading) {
+    container.innerHTML = '<div class="performance-loading" role="status"><i data-lucide="loader-circle"></i><span>جاري تحليل أداء الحلقة...</span></div>';
+    return;
+  }
+  if (!state.performance) {
+    container.innerHTML = '<div class="workspace-empty-state"><i data-lucide="chart-no-axes-combined"></i><p>افتح قسم الأداء لعرض التحليل.</p></div>';
+    return;
+  }
+
+  const performance = state.performance;
+  const today = performance.comparisons?.today?.current || {};
+  const taskDistribution = performance.task_distribution || {};
+  const taskCounts = ['hifz', 'tathbit', 'murajaa'].map(type => Number(taskDistribution[type]?.completed_count || 0));
+  const totalTasks = taskCounts.reduce((sum, count) => sum + count, 0);
+  const hifzStop = totalTasks ? (taskCounts[0] / totalTasks) * 100 : 0;
+  const tathbitStop = totalTasks ? hifzStop + (taskCounts[1] / totalTasks) * 100 : 0;
+  const pieStyle = totalTasks
+    ? `background: conic-gradient(#d5ab36 0 ${hifzStop.toFixed(2)}%, #0b7654 ${hifzStop.toFixed(2)}% ${tathbitStop.toFixed(2)}%, #24739a ${tathbitStop.toFixed(2)}% 100%)`
+    : 'background: #e4e9eb';
+
+  container.innerHTML = `
+    <section class="performance-summary-grid" aria-label="ملخص اليوم">
+      ${performanceMetric('users', 'الطلاب النشطون', performance.active_students, 'في الحلقة الآن', '')}
+      ${performanceMetric('circle-check-big', 'أنجزوا اليوم', `${Number(today.completed_student_days || 0)} / ${Number(today.expected_student_days || 0)}`, comparisonDelta(performance.comparisons?.today?.completed_delta, 'عن الأمس'), 'is-green')}
+      ${performanceMetric('chart-spline', 'نسبة إنجاز اليوم', `${Number(today.completion_rate || 0)}%`, comparisonDelta(performance.comparisons?.today?.completion_rate_delta, 'عن الأمس'), 'is-gold')}
+      ${performanceMetric('timer-reset', 'الإنجاز في الوقت', `${Number(today.on_time_rate || 0)}%`, `${Number(today.overdue_student_days || 0)} يحتاجون متابعة`, Number(today.overdue_student_days || 0) ? 'is-red' : 'is-blue')}
+    </section>
+    <section class="performance-comparisons" aria-label="المقارنات الزمنية">
+      ${performanceComparisonCard('اليوم', 'مقابل الأمس', performance.comparisons?.today)}
+      ${performanceComparisonCard('آخر 7 أيام', 'مقابل 7 أيام سابقة', performance.comparisons?.week)}
+      ${performanceComparisonCard('آخر 30 يوماً', 'مقابل 30 يوماً سابقة', performance.comparisons?.month)}
+    </section>
+    <section class="performance-visual-grid">
+      <article class="performance-chart-panel">
+        <header><div><span>اتجاه الإنجاز</span><h3>آخر 14 يوماً</h3></div><small>النسبة اليومية لاكتمال جميع التقارير المطلوبة</small></header>
+        <div class="performance-bar-chart">${(performance.daily_chart || []).map(day => performanceDayBar(day)).join('')}</div>
+      </article>
+      <article class="performance-chart-panel performance-task-panel">
+        <header><div><span>توزيع المنجز</span><h3>أنواع التقارير</h3></div><small>آخر 30 يوماً</small></header>
+        <div class="performance-pie-layout">
+          <div class="performance-pie" style="${pieStyle}"><span><b>${totalTasks}</b><small>مهمة</small></span></div>
+          <div class="performance-pie-legend">
+            ${performanceTaskLegend('is-hifz', 'الحفظ', taskCounts[0])}
+            ${performanceTaskLegend('is-tathbit', 'التثبيت', taskCounts[1])}
+            ${performanceTaskLegend('is-murajaa', 'المراجعة', taskCounts[2])}
+          </div>
+        </div>
+      </article>
+    </section>
+    <section class="performance-students-panel">
+      <header><div><span>قراءة المستوى</span><h3>تقدم الطلاب ونقاط التدخل</h3></div><small>مرتبة حسب التقارير المتأخرة ثم الاسم</small></header>
+      <div class="performance-student-table">
+        <div class="performance-student-head"><span>الطالب</span><span>آخر تقدم</span><span>إنجاز 7 أيام</span><span>الالتزام بالوقت</span><span>المتأخر</span><span>الاتجاه</span></div>
+        ${(performance.students || []).map(student => performanceStudentRow(student)).join('') || '<div class="workspace-empty-state"><p>لا يوجد طلاب نشطون في الحلقة.</p></div>'}
+      </div>
+    </section>`;
+}
+
+function performanceMetric(icon, label, value, detail, tone) {
+  return `<article class="performance-metric ${tone}"><i data-lucide="${icon}"></i><span>${escapeHtml(label)}</span><strong dir="ltr">${escapeHtml(String(value))}</strong><small>${escapeHtml(detail)}</small></article>`;
+}
+
+function comparisonDelta(value, suffix) {
+  const amount = Number(value || 0);
+  const prefix = amount > 0 ? '+' : '';
+  return `${prefix}${amount.toFixed(amount % 1 ? 1 : 0)} ${suffix}`;
+}
+
+function performanceComparisonCard(title, subtitle, comparison = {}) {
+  const current = comparison.current || {};
+  const delta = Number(comparison.completion_rate_delta || 0);
+  const tone = delta > 0 ? 'is-up' : delta < 0 ? 'is-down' : 'is-flat';
+  return `<article class="performance-comparison-card ${tone}">
+    <div><span>${escapeHtml(title)}</span><small>${escapeHtml(subtitle)}</small></div>
+    <strong>${Number(current.completion_rate || 0)}%</strong>
+    <b><i data-lucide="${delta > 0 ? 'trending-up' : delta < 0 ? 'trending-down' : 'minus'}"></i>${escapeHtml(comparisonDelta(delta, 'نقطة'))}</b>
+    <dl><div><dt>أيام مكتملة</dt><dd>${Number(current.completed_student_days || 0)}</dd></div><div><dt>في الوقت</dt><dd>${Number(current.on_time_rate || 0)}%</dd></div></dl>
+  </article>`;
+}
+
+function performanceDayBar(day) {
+  const rate = Math.max(0, Math.min(100, Number(day.completion_rate || 0)));
+  const date = new Date(`${day.report_date}T12:00:00`);
+  const dayLabel = new Intl.DateTimeFormat('ar-OM', { weekday: 'short' }).format(date);
+  const dateLabel = new Intl.DateTimeFormat('ar-OM', { day: 'numeric', month: 'numeric' }).format(date);
+  return `<div class="performance-bar-item" title="${escapeHtml(`${dateLabel}: ${rate}%`)}"><b>${rate}%</b><span><i style="height:${rate}%"></i></span><small>${escapeHtml(dayLabel)}</small></div>`;
+}
+
+function performanceTaskLegend(tone, label, count) {
+  return `<span class="${tone}"><i></i><b>${escapeHtml(label)}</b><small>${Number(count || 0)}</small></span>`;
+}
+
+function performanceStudentRow(student) {
+  const hifz = student.latest_progress?.hifz;
+  const latest = hifz || student.latest_progress?.tathbit || student.latest_progress?.murajaa;
+  const current = Number(student.completion_rate_7 || 0);
+  const previous = Number(student.previous_completion_rate_7 || 0);
+  const trend = current - previous;
+  const overdue = Number(student.overdue_count || 0);
+  return `<article class="performance-student-row ${overdue ? 'needs-attention' : ''}">
+    <div class="performance-student-person"><span>${escapeHtml(firstCharacter(student.full_name))}</span><div><b>${escapeHtml(student.full_name)}</b><small>@${escapeHtml(student.username || '')}</small></div></div>
+    <div class="performance-latest"><b>${escapeHtml(latest?.content || 'لا يوجد إنجاز بعد')}</b><small>${escapeHtml(formatPerformanceDate(student.last_report_date))}</small></div>
+    <strong>${current}%</strong>
+    <strong>${Number(student.on_time_rate_7 || 0)}%</strong>
+    <strong class="${overdue ? 'is-overdue' : ''}">${overdue}</strong>
+    <span class="performance-trend ${trend > 0 ? 'is-up' : trend < 0 ? 'is-down' : 'is-flat'}"><i data-lucide="${trend > 0 ? 'trending-up' : trend < 0 ? 'trending-down' : 'minus'}"></i>${escapeHtml(comparisonDelta(trend, 'نقطة'))}</span>
+  </article>`;
+}
+
+function formatPerformanceDate(value) {
+  if (!value) return 'لم يبدأ بعد';
+  return new Intl.DateTimeFormat('ar-OM', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
 }
 
 function renderSettings() {
@@ -820,6 +984,48 @@ function previewWorkspace(role, circleId) {
       storage_path: '', original_name: educational ? 'lesson-01.pdf' : 'weekly-plan.pdf', mime_type: 'application/pdf', size_bytes: 842000,
       status: 'active', created_at: now.toISOString(), uploader: { id: 'teacher-1', full_name: 'المعلم حمزة' },
     }],
+  };
+}
+
+function buildPreviewPerformance() {
+  const toDate = offset => {
+    const date = new Date();
+    date.setDate(date.getDate() + offset);
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Muscat', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(date);
+  };
+  const rates = [61, 72, 78, 67, 83, 89, 76, 82, 88, 91, 86, 94, 89, 92];
+  const metric = (rate, completed, expected, onTime = 86, overdue = 1) => ({
+    expected_student_days: expected,
+    completed_student_days: completed,
+    on_time_student_days: Math.round(completed * onTime / 100),
+    late_student_days: Math.max(0, completed - Math.round(completed * onTime / 100)),
+    overdue_student_days: overdue,
+    earned_points: completed * 7.8,
+    completed_max_points: completed * 10,
+    completion_rate: rate,
+    on_time_rate: onTime,
+  });
+  return {
+    active_students: 18,
+    as_of: toDate(0),
+    comparisons: {
+      today: { current: metric(92, 16, 18, 88, 1), previous: metric(83, 15, 18, 80, 2), completion_rate_delta: 9, on_time_rate_delta: 8, completed_delta: 1 },
+      week: { current: metric(87, 108, 124, 84, 7), previous: metric(79, 96, 121, 77, 11), completion_rate_delta: 8, on_time_rate_delta: 7, completed_delta: 12 },
+      month: { current: metric(84, 430, 512, 81, 24), previous: metric(78, 390, 500, 76, 31), completion_rate_delta: 6, on_time_rate_delta: 5, completed_delta: 40 },
+    },
+    daily_chart: rates.map((rate, index) => ({ report_date: toDate(index - 13), completion_rate: rate })),
+    task_distribution: {
+      hifz: { completed_count: 152 },
+      tathbit: { completed_count: 118 },
+      murajaa: { completed_count: 160 },
+    },
+    students: [
+      { student_id: 'student-3', full_name: 'يحيى بن عبدالله', username: 'yahya.a', last_report_date: toDate(-2), overdue_count: 2, completion_rate_7: 71, previous_completion_rate_7: 82, on_time_rate_7: 68, completion_rate_30: 79, latest_progress: { hifz: { content: 'سورة البقرة، الآيات 40-45' } } },
+      { student_id: 'student-2', full_name: 'محمد بن علي', username: 'mohammed.a', last_report_date: toDate(0), overdue_count: 0, completion_rate_7: 93, previous_completion_rate_7: 86, on_time_rate_7: 89, completion_rate_30: 88, latest_progress: { hifz: { content: 'سورة البقرة، الآيات 66-71' } } },
+      { student_id: 'student-1', full_name: 'أحمد بن خالد', username: 'ahmad.k', last_report_date: toDate(0), overdue_count: 0, completion_rate_7: 100, previous_completion_rate_7: 93, on_time_rate_7: 94, completion_rate_30: 96, latest_progress: { hifz: { content: 'سورة البقرة، الآيات 72-76' } } },
+    ],
   };
 }
 

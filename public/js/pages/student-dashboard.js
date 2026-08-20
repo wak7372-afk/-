@@ -265,12 +265,15 @@ function renderWeek() {
   document.getElementById('week-days').innerHTML = Array.from({ length: 7 }, (_, index) => {
     const date = addDays(state.weekStart, index);
     const key = toDateKey(date);
-    const taskCount = state.tasks.filter(task => task.task_date === key).length;
+    const dayTasks = state.tasks.filter(task => task.task_date === key);
+    const taskCount = dayTasks.length;
+    const overdueCount = dayTasks.filter(task => task.status === 'overdue').length;
+    const dayStatus = overdueCount ? `يوجد ${overdueCount} ${overdueCount === 1 ? 'تقرير متأخر' : 'تقارير متأخرة'}` : taskCount ? `${taskCount} مهام` : 'متاح';
     return `
-      <button type="button" data-date="${key}" class="week-day ${key === state.selectedDate ? 'active' : ''} ${key === todayKey ? 'today' : ''}" aria-pressed="${key === state.selectedDate}">
+      <button type="button" data-date="${key}" class="week-day ${key === state.selectedDate ? 'active' : ''} ${key === todayKey ? 'today' : ''} ${overdueCount ? 'has-overdue' : ''}" aria-pressed="${key === state.selectedDate}" aria-label="${escapeHtml(`${arabicDays[date.getDay()]} ${date.getDate()}، ${dayStatus}`)}">
         <span>${escapeHtml(arabicDays[date.getDay()])}</span>
         <strong>${date.getDate()}</strong>
-        <small>${taskCount ? `${taskCount} مهام` : 'متاح'}</small>
+        <small>${overdueCount ? '<i data-lucide="circle-alert" aria-hidden="true"></i> تقرير متأخر' : escapeHtml(dayStatus)}</small>
       </button>
     `;
   }).join('');
@@ -460,8 +463,10 @@ function dailyMessage(total, completed, overdue) {
 
 function buildPreviewTasks() {
   const today = toDateKey(new Date());
+  const yesterday = toDateKey(addDays(new Date(), -1));
   const tomorrow = toDateKey(addDays(new Date(), 1));
   return [
+    { source: 'quran', task_id: 'q0', submission_id: 'preview-q0', title: 'مراجعة المحفوظ', content: 'مراجعة الورد السابق', category: 'murajaa', task_date: yesterday, period: 'flexible', due_at: localIso(yesterday, '23:00'), estimated_minutes: 20, priority: 3, status: 'overdue', points: 0, context_name: 'حلقة الإتقان' },
     { source: 'quran', task_id: 'q1', submission_id: 'preview-q1', title: 'الحفظ الجديد', content: 'سورة الملك من الآية 1 إلى الآية 8', category: 'hifz', task_date: today, period: 'morning', due_at: localIso(today, '11:30'), estimated_minutes: 35, priority: 3, status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
     { source: 'quran', task_id: 'q2', submission_id: 'preview-q2', title: 'مراجعة المحفوظ', content: 'سورة القلم كاملة مع ضبط مواضع التشابه', category: 'murajaa', task_date: today, period: 'evening', due_at: localIso(today, '19:00'), estimated_minutes: 25, priority: 2, status: 'pending', points: 0, context_name: 'حلقة الإتقان', teacher_notes: 'ركّز على الآيات من 17 إلى 24.' },
     { source: 'classroom', task_id: 'c1', submission_id: 'preview-c1', title: 'تطبيق أحكام النون الساكنة', content: 'استخرج خمسة أمثلة من سورة الملك وحدد الحكم.', category: 'classroom', task_date: today, period: 'flexible', due_at: localIso(today, '20:00'), estimated_minutes: 20, priority: 2, status: 'done', points: 15, classroom_id: 'preview', context_name: 'التجويد التطبيقي' },

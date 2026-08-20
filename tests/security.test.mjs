@@ -103,17 +103,18 @@ test('parent preview stays outside Supabase reads and writes', () => {
   assert.match(script, /previewChildLinked = false/);
 });
 
-test('password recovery is server-side and rate-limited', () => {
-  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0006_password_recovery_codes.sql'), 'utf8');
+test('Google identity linking and self-service recovery stay disabled', () => {
   const functionSource = fs.readFileSync(path.join(root, 'supabase/functions/account-recovery/index.ts'), 'utf8');
-  const pageSource = fs.readFileSync(path.join(root, 'public/js/pages/reset-password.js'), 'utf8');
+  const settingsHtml = fs.readFileSync(path.join(root, 'public/account-settings.html'), 'utf8');
+  const settingsScript = fs.readFileSync(path.join(root, 'public/js/pages/account-settings.js'), 'utf8');
+  const resetHtml = fs.readFileSync(path.join(root, 'public/reset-password.html'), 'utf8');
 
-  assert.match(migration, /password_recovery_codes/);
-  assert.match(migration, /revoke all on public\.password_recovery_codes/);
-  assert.match(functionSource, /SHA-256/);
-  assert.match(functionSource, /attempts.*5/);
-  assert.match(functionSource, /RESEND_API_KEY/);
-  assert.match(pageSource, /account-recovery/);
+  assert.doesNotMatch(settingsHtml, /ربط حساب Google/);
+  assert.doesNotMatch(settingsScript, /linkIdentity|getUserIdentities|provider:\s*['"]google/);
+  assert.doesNotMatch(resetHtml, /رمز التحقق|recovery-request-form|otp-recovery-form/);
+  assert.match(resetHtml, /راجع إدارة المركز|تواصل مع إدارة المركز/);
+  assert.match(functionSource, /RECOVERY_DISABLED/);
+  assert.doesNotMatch(functionSource, /SERVICE_ROLE|RESEND|password_recovery_codes|getUserById/);
 });
 
 test('login hides raw edge function HTTP errors from users', () => {
@@ -150,30 +151,42 @@ test('administrator actions have an immutable server audit contract', () => {
 
 test('administrator account deletion and password reset stay server-controlled', () => {
   const operation = fs.readFileSync(path.join(root, 'supabase/functions/admin-account-actions/index.ts'), 'utf8');
-  const anonymization = fs.readFileSync(path.join(root, 'supabase/migrations/0025_account_anonymization.sql'), 'utf8');
+  const hardDeletion = fs.readFileSync(path.join(root, 'supabase/migrations/0028_transfer_ownership_and_hard_deletion.sql'), 'utf8');
   const dashboard = fs.readFileSync(path.join(root, 'public/js/pages/admin-dashboard.js'), 'utf8');
+  const circles = fs.readFileSync(path.join(root, 'public/js/pages/admin-circles.js'), 'utf8');
 
   assert.match(operation, /callerProfile\?\.role !== 'admin'/);
   assert.match(operation, /target\.role === 'admin'/);
   assert.match(operation, /targetId === userData\.user\.id/);
-  assert.doesNotMatch(operation, /ACCOUNT_HAS_HISTORY/);
-  assert.match(operation, /admin\.auth\.admin\.getUserById/);
-  assert.match(operation, /ban_duration: '876000h'/);
   assert.match(operation, /normalizeUsernameConfirmation/);
-  assert.match(operation, /admin_anonymize_user_account/);
+  assert.match(operation, /prepare_account_hard_delete/);
+  assert.match(operation, /admin\.auth\.admin\.deleteUser\(targetId, false\)/);
+  assert.match(operation, /complete_platform_deletion_job/);
+  assert.match(operation, /storage\.from\('circle-files'\)\.remove/);
   assert.match(operation, /admin\.auth\.admin\.updateUserById/);
   assert.match(operation, /must_change_password: true/);
   assert.doesNotMatch(operation, /metadata:\s*\{[^}]*password/s);
-  assert.match(anonymization, /add column if not exists deleted_at/);
-  assert.match(anonymization, /full_name = 'حساب محذوف'/);
-  assert.match(anonymization, /learning_circle_memberships[\s\S]*status = 'ended'/);
-  assert.match(anonymization, /learning_circle_staff[\s\S]*status = 'ended'/);
-  assert.match(anonymization, /metadata - 'username' - 'full_name' - 'phone' - 'email'/);
-  assert.match(anonymization, /revoke all on function public\.admin_anonymize_user_account/);
-  assert.match(anonymization, /grant execute on function public\.admin_anonymize_user_account\(uuid, uuid\) to service_role/);
+  assert.match(hardDeletion, /create table if not exists public\.platform_deletion_jobs/);
+  assert.match(hardDeletion, /create or replace function public\.prepare_account_hard_delete/);
+  assert.match(hardDeletion, /create or replace function public\.hard_delete_learning_circle/);
+  assert.match(hardDeletion, /grant execute on function public\.prepare_account_hard_delete\(uuid, uuid, text\) to service_role/);
+  assert.match(hardDeletion, /grant execute on function public\.hard_delete_learning_circle\(uuid, uuid, text\) to service_role/);
   assert.match(dashboard, /admin-account-actions/);
   assert.match(dashboard, /normalizeUsernameConfirmation/);
   assert.match(dashboard, /\.is\('deleted_at', null\)/);
+  assert.match(circles, /delete_circle_impact/);
+  assert.match(circles, /action: 'delete_circle'/);
+});
+
+test('Quran transfer owns student history before an old circle can be deleted', () => {
+  const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0028_transfer_ownership_and_hard_deletion.sql'), 'utf8');
+
+  assert.match(migration, /create or replace function public\.move_quran_student_history/);
+  assert.match(migration, /update public\.quran_report_assignments[\s\S]*circle_id = p_to_circle_id/);
+  assert.match(migration, /history_result := public\.move_quran_student_history/);
+  assert.match(migration, /perform pg_catalog\.set_config\('app\.quran_circle_transfer', 'on', true\)/);
+  assert.match(migration, /delete from public\.learning_circles where id = p_circle_id/);
+  assert.match(migration, /Platform audit events are immutable/);
 });
 
 test('edge function secret examples use placeholders', () => {

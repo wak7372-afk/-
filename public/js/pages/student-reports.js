@@ -17,6 +17,7 @@ const state = {
   overdueCount: 0,
   earnedPoints: 0,
   selectedForExtension: new Set(),
+  shiftData: null,
   confirmingReportId: null,
   busy: false,
 };
@@ -36,15 +37,35 @@ async function initialize() {
   document.getElementById('quran-plan-notice').addEventListener('click', selectDate);
   document.getElementById('quran-student-report-list').addEventListener('click', handleReportAction);
   document.getElementById('quran-extension-form').addEventListener('submit', submitExtensionRequest);
+  document.getElementById('quran-shift-panel').addEventListener('submit', submitShiftRequest);
   document.getElementById('quran-complete-form').addEventListener('submit', submitConfirmedReport);
   document.getElementById('cancel-quran-complete').addEventListener('click', closeCompleteDialog);
   const requestedDate = new URL(window.location.href).searchParams.get('date');
   if (isDateKey(requestedDate)) state.selectedDate = requestedDate;
-  await loadOverview();
+  await Promise.all([loadOverview(), loadShiftRequests()]);
   if (!isDateKey(requestedDate) && state.overview?.focus_date) state.selectedDate = state.overview.focus_date;
   await loadReports();
   setInterval(() => renderPage(), 60000);
   refreshIcons();
+}
+
+async function loadShiftRequests() {
+  if (state.preview) {
+    state.shiftData = {
+      circle_id: 'preview-circle',
+      circle_name: 'حلقة الإتقان',
+      eligible_dates: [{ report_date: addDateKey(muscatDateKey(), -1), overdue_count: 1 }],
+      requests: [],
+    };
+    return;
+  }
+  const { data, error } = await supabase.rpc('get_my_quran_plan_shift_requests');
+  if (error) {
+    console.error('Loading Quran plan shift requests failed:', error);
+    state.shiftData = null;
+    return;
+  }
+  state.shiftData = data || null;
 }
 
 async function loadOverview() {
@@ -115,6 +136,7 @@ function renderPage() {
   renderPlanNotice();
   renderReports();
   renderExtensionStatus();
+  renderShiftPanel();
   refreshIcons();
 }
 
@@ -147,9 +169,11 @@ function renderDateStrip() {
   document.getElementById('quran-date-days').innerHTML = Array.from({ length: 7 }, (_, index) => {
     const date = addDays(start, index);
     const dateKey = toDateKey(date);
-    const count = state.assignments.filter(item => item.report_date === dateKey).length;
-    return `<button type="button" data-report-date="${dateKey}" class="${dateKey === state.selectedDate ? 'is-active' : ''} ${dateKey === muscatDateKey() ? 'is-today' : ''}" aria-pressed="${dateKey === state.selectedDate}">
-      <span>${ARABIC_DAYS[date.getDay()]}</span><strong>${date.getDate()}</strong><small>${count || 'ـ'}</small>
+    const dayReports = state.assignments.filter(item => item.report_date === dateKey);
+    const count = dayReports.length;
+    const overdue = dayReports.some(item => item.is_overdue);
+    return `<button type="button" data-report-date="${dateKey}" class="${dateKey === state.selectedDate ? 'is-active' : ''} ${dateKey === muscatDateKey() ? 'is-today' : ''} ${overdue ? 'is-overdue' : ''}" aria-pressed="${dateKey === state.selectedDate}" aria-label="${escapeHtml(`${ARABIC_DAYS[date.getDay()]} ${date.getDate()}، ${overdue ? 'يوجد تقرير متأخر' : count ? `${count} تقارير` : 'لا توجد تقارير'}`)}">
+      <span>${ARABIC_DAYS[date.getDay()]}</span><strong>${date.getDate()}</strong><small>${overdue ? '<i data-lucide="circle-alert" aria-hidden="true"></i>' : count || 'ـ'}</small>
     </button>`;
   }).join('');
   const selectedDate = parseDateKey(state.selectedDate);
@@ -245,6 +269,62 @@ function renderExtensionStatus() {
     <i data-lucide="${extensionIcon(item.extension_status)}"></i>
     <div><b>${TYPE_META[item.task_type]?.label || item.task_type} · ${formatDate(item.report_date)}</b><small>${extensionStatusLabel(item.extension_status)}${item.extension_requested_minutes ? ` · ${formatDuration(item.extension_requested_minutes)}` : ''}</small></div>
   </article>`).join('') : '<p>لا توجد طلبات تمديد بعد.</p>';
+}
+
+function renderShiftPanel() {
+  const panel = document.getElementById('quran-shift-panel');
+  const data = state.shiftData;
+  const requests = Array.isArray(data?.requests) ? data.requests : [];
+  const eligibleDates = Array.isArray(data?.eligible_dates) ? data.eligible_dates : [];
+  const pending = requests.find(item => item.status === 'pending');
+  if (!pending && !eligibleDates.length && !requests.length) {
+    panel.hidden = true;
+    panel.innerHTML = '';
+    return;
+  }
+  panel.hidden = false;
+  panel.innerHTML = `
+    <div class="quran-shift-heading"><span><i data-lucide="calendar-arrow-down"></i></span><div><small>إعادة ترتيب الخطة</small><h2>ترحيل التقارير</h2></div></div>
+    ${pending ? `<div class="quran-shift-pending"><i data-lucide="hourglass"></i><div><b>طلبك قيد مراجعة المعلم</b><small>ابتداءً من ${escapeHtml(formatDate(pending.requested_from_date))}</small></div></div>` : eligibleDates.length ? `
+      <p>اطلب من المعلم نقل التقارير المعلقة ابتداءً من يوم متأخر. المعلم هو من يحدد تاريخ البداية الجديد بعد مراجعة الأثر.</p>
+      <form data-shift-request-form>
+        <label><span>أول يوم متأخر</span><select name="shift-from-date" required>${eligibleDates.map(item => `<option value="${escapeHtml(item.report_date)}">${escapeHtml(formatDate(item.report_date))} · ${Number(item.overdue_count)} متأخر</option>`).join('')}</select></label>
+        <label><span>سبب طلب الترحيل</span><textarea name="shift-reason" rows="3" maxlength="2000" required placeholder="اشرح سبب تعذر إنجاز التقارير في وقتها..."></textarea></label>
+        <button type="submit"><i data-lucide="send"></i><span>إرسال طلب الترحيل</span></button>
+      </form>` : ''}
+    ${requests.length ? `<div class="quran-shift-history"><strong>آخر الطلبات</strong>${requests.slice(0, 3).map(item => `<article class="status-${escapeHtml(item.status)}"><i data-lucide="${shiftRequestIcon(item.status)}"></i><div><b>${escapeHtml(shiftRequestStatus(item.status))}</b><small>${escapeHtml(formatDate(item.requested_from_date))}${item.decision_target_date ? ` ← ${escapeHtml(formatDate(item.decision_target_date))}` : ''}</small></div></article>`).join('')}</div>` : ''}`;
+}
+
+async function submitShiftRequest(event) {
+  const form = event.target.closest('[data-shift-request-form]');
+  if (!form) return;
+  event.preventDefault();
+  if (state.busy) return;
+  const formData = new FormData(form);
+  const fromDate = String(formData.get('shift-from-date') || '');
+  const reason = String(formData.get('shift-reason') || '').trim();
+  if (!isDateKey(fromDate)) return showToast('حدد أول يوم متأخر.', 'error');
+  if (reason.length < 3) return showToast('اكتب سبب طلب الترحيل بوضوح.', 'error');
+  state.busy = true;
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  try {
+    if (state.preview) {
+      state.shiftData.requests.unshift({ id: 'preview-shift', requested_from_date: fromDate, reason, status: 'pending', requested_at: new Date().toISOString() });
+    } else {
+      const { error } = await supabase.rpc('request_quran_plan_shift', { p_from_date: fromDate, p_reason: reason });
+      if (error) throw error;
+      await loadShiftRequests();
+    }
+    showToast('تم إرسال طلب الترحيل إلى المعلم المسؤول.', 'success');
+    renderPage();
+  } catch (error) {
+    console.error('Requesting Quran plan shift failed:', error);
+    showToast(friendlyStudentError(error, 'تعذر إرسال طلب الترحيل.'), 'error');
+  } finally {
+    state.busy = false;
+    if (button.isConnected) button.disabled = false;
+  }
 }
 
 async function handleReportAction(event) {
@@ -476,6 +556,18 @@ function extensionStatusLabel(status) {
   return 'قيد المراجعة';
 }
 
+function shiftRequestIcon(status) {
+  if (status === 'approved') return 'badge-check';
+  if (status === 'rejected') return 'circle-x';
+  return 'hourglass';
+}
+
+function shiftRequestStatus(status) {
+  if (status === 'approved') return 'تم ترحيل الخطة';
+  if (status === 'rejected') return 'لم يُعتمد الطلب';
+  return 'قيد المراجعة';
+}
+
 function completionBandLabel(band) {
   if (band === 'early') return 'منجز مبكراً';
   if (band === 'middle') return 'منجز في الوقت';
@@ -489,6 +581,9 @@ function friendlyStudentError(error, fallback) {
   if (/has not started/i.test(message)) return 'لا يمكن إنهاء التقرير قبل بداية وقته.';
   if (/overdue Quran reports/i.test(message)) return 'أكمل التقرير المتأخر السابق أولاً.';
   if (/pending extension request/i.test(message)) return 'يوجد طلب تمديد قيد المراجعة لهذا التقرير.';
+  if (/already pending/i.test(message)) return 'لديك طلب ترحيل قيد المراجعة بالفعل.';
+  if (/Resolve pending Quran extension/i.test(message)) return 'عالج طلبات التمديد المعلقة أولاً قبل طلب الترحيل.';
+  if (/does not contain an overdue/i.test(message)) return 'اليوم المحدد لم يعد يحتوي تقريراً متأخراً.';
   if (/not belong|Only active students|permission|42501/i.test(message)) return 'لا تملك صلاحية تنفيذ هذه العملية.';
   return fallback;
 }

@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, requireAuth, logoutUser } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
-import { createAdminCirclesController } from './admin-circles.js';
+import { createAdminCirclesController } from './admin-circles.js?v=2';
 
 const PREVIEW_ACCOUNTS_KEY = 'zat_khail_preview_accounts';
 const ADMIN_ACTIVITY_KEY = 'zat_khail_admin_activity';
@@ -616,15 +616,42 @@ async function copyTemporaryPassword() {
   }
 }
 
-function openDeleteAccountDialog(account) {
+async function openDeleteAccountDialog(account) {
   const form = document.getElementById('delete-account-form');
   form.reset();
   document.getElementById('delete-account-id').value = account.id;
   document.getElementById('delete-account-username').value = account.username;
   document.getElementById('delete-account-name').textContent = `${account.full_name} (@${account.username})`;
   document.getElementById('delete-account-hint').textContent = `اكتب ${account.username} أو @${account.username} للمتابعة.`;
+  const impactContainer = document.getElementById('delete-account-impact');
+  impactContainer.textContent = 'جاري حساب البيانات التي ستُحذف...';
   document.getElementById('delete-account-dialog').showModal();
   requestAnimationFrame(() => document.getElementById('delete-account-confirmation').focus());
+  if (isLocalPreviewMode()) {
+    impactContainer.textContent = 'وضع المعاينة لا يحتوي سجلات سحابية لحساب أثر الحذف.';
+    return;
+  }
+  try {
+    const result = await invokeAdminAccountAction({ action: 'delete_account_impact', accountId: account.id });
+    renderDeleteImpact(impactContainer, result.impact, [
+      ['memberships', 'عضويات الحلقات'],
+      ['staff_roles', 'تكليفات التعليم'],
+      ['quran_assignments', 'تقارير القرآن'],
+      ['completed_quran_assignments', 'تقارير منجزة'],
+      ['messages', 'الرسائل'],
+      ['uploaded_files', 'الملفات المرفوعة'],
+      ['classroom_submissions', 'تسليمات المهام'],
+      ['quiz_submissions', 'إجابات الاختبارات'],
+    ]);
+  } catch (error) {
+    impactContainer.textContent = error.message || 'تعذر حساب أثر الحذف.';
+  }
+}
+
+function renderDeleteImpact(container, impact, fields) {
+  container.innerHTML = fields.map(([key, label]) => `
+    <span>${escapeHtml(label)} <b>${Number(impact?.[key] || 0).toLocaleString('ar')}</b></span>
+  `).join('');
 }
 
 async function invokeAdminAccountAction(body) {
@@ -699,20 +726,21 @@ async function handleDeleteAccount(event) {
       state.accounts = state.accounts.filter(item => item.id !== accountId);
       savePreviewAccounts();
     } else {
-      await invokeAdminAccountAction({ action: 'delete_account', accountId, confirmation });
+      const result = await invokeAdminAccountAction({ action: 'delete_account', accountId, confirmation });
       await Promise.all([loadAccounts(), loadAuditActivities()]);
+      if (result.warning) showToast(result.warning, 'warning');
     }
     state.selectedAccountIds.delete(accountId);
     document.getElementById('delete-account-dialog').close();
     renderDashboard();
     renderAccountsTable();
     circleController.render();
-    showToast('تم حذف معلومات الحساب وإلغاء دخوله مع حفظ سجله التعليمي.', 'success');
+    showToast('تم حذف الحساب وجميع بياناته المرتبطة نهائياً.', 'success');
   } catch (error) {
     console.error('Permanent account deletion failed:', error);
     showToast(error.message || 'تعذر حذف الحساب نهائياً.', 'error');
   } finally {
-    setButtonLoading(submitButton, false, 'حذف المعلومات وإلغاء الدخول');
+    setButtonLoading(submitButton, false, 'حذف الحساب نهائياً');
   }
 }
 
