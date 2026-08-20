@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="مركز ذات خيل لتعليم القرآن الكريم وعلومه، وإدارة الحلقات والفصول الشرعية ومتابعة الطلاب.">
   <meta name="theme-color" content="#061421">
@@ -15,6 +16,7 @@
   <link rel="manifest" href="./manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css?v=2">
+  <link rel="stylesheet" href="./css/calm-ui.css?v=3">
 </head>
 <body class="bg-slate-50 min-h-screen">
   <main class="grid min-h-screen grid-cols-1 lg:grid-cols-2">
@@ -72,7 +74,7 @@
           <form id="login-form" class="space-y-5" novalidate>
             <div>
               <label for="login-username" class="mb-2 block text-xs font-bold text-slate-700">اسم المستخدم</label>
-              <input id="login-username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="ahmed.ali" dir="ltr">
+              <input id="login-username" name="username" type="text" autocomplete="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._\-]{3,32}" class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="ahmed.ali" dir="ltr">
             </div>
 
             <div>

@@ -14,6 +14,10 @@ const ROLE_LABELS = {
   parent: 'ولي أمر',
 };
 
+function normalizeUsernameConfirmation(value) {
+  return String(value ?? '').trim().toLowerCase().replace(/^@+/, '');
+}
+
 const state = {
   profile: null,
   accounts: [],
@@ -250,6 +254,7 @@ async function loadAccounts() {
   const { data, error } = await supabase
     .from('users')
     .select('id, full_name, username, phone, role, is_active, must_change_password, created_at, updated_at')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -617,7 +622,7 @@ function openDeleteAccountDialog(account) {
   document.getElementById('delete-account-id').value = account.id;
   document.getElementById('delete-account-username').value = account.username;
   document.getElementById('delete-account-name').textContent = `${account.full_name} (@${account.username})`;
-  document.getElementById('delete-account-hint').textContent = `اكتب ${account.username} للمتابعة.`;
+  document.getElementById('delete-account-hint').textContent = `اكتب ${account.username} أو @${account.username} للمتابعة.`;
   document.getElementById('delete-account-dialog').showModal();
   requestAnimationFrame(() => document.getElementById('delete-account-confirmation').focus());
 }
@@ -680,9 +685,9 @@ async function handleDeleteAccount(event) {
 
   const accountId = document.getElementById('delete-account-id').value;
   const account = state.accounts.find(item => item.id === accountId);
-  const confirmation = document.getElementById('delete-account-confirmation').value.trim().toLowerCase();
+  const confirmation = normalizeUsernameConfirmation(document.getElementById('delete-account-confirmation').value);
   if (!account || isProtectedAccount(account)) return;
-  if (confirmation !== account.username) {
+  if (confirmation !== normalizeUsernameConfirmation(account.username)) {
     showToast('اسم المستخدم المكتوب لا يطابق الحساب.', 'error');
     return;
   }
@@ -702,12 +707,12 @@ async function handleDeleteAccount(event) {
     renderDashboard();
     renderAccountsTable();
     circleController.render();
-    showToast('تم حذف الحساب نهائياً.', 'success');
+    showToast('تم حذف معلومات الحساب وإلغاء دخوله مع حفظ سجله التعليمي.', 'success');
   } catch (error) {
     console.error('Permanent account deletion failed:', error);
     showToast(error.message || 'تعذر حذف الحساب نهائياً.', 'error');
   } finally {
-    setButtonLoading(submitButton, false, 'حذف نهائي');
+    setButtonLoading(submitButton, false, 'حذف المعلومات وإلغاء الدخول');
   }
 }
 

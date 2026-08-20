@@ -16,10 +16,18 @@
   --zk-radius: 8px;
   --zk-shadow-sm: 0 5px 18px rgba(7, 24, 39, 0.055);
   --zk-shadow-md: 0 12px 34px rgba(7, 24, 39, 0.09);
-  --zk-motion: 180ms ease;
+  --zk-duration-fast: 140ms;
+  --zk-duration-base: 220ms;
+  --zk-duration-enter: 320ms;
+  --zk-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --zk-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --zk-motion-fast: var(--zk-duration-fast) var(--zk-ease-standard);
+  --zk-motion: var(--zk-duration-base) var(--zk-ease-standard);
+  --zk-motion-enter: var(--zk-duration-enter) var(--zk-ease-enter);
+  --zk-shadow-hover: 0 16px 38px rgba(7, 24, 39, 0.12);
 }
 
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) {
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) {
   color: var(--zk-ink);
   background-color: var(--zk-paper) !important;
   background-image:
@@ -29,28 +37,161 @@
   font-family: var(--zk-font-ui);
 }
 
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
   :is(button, a, input, select, textarea, summary) {
-  transition-duration: var(--zk-motion);
+  transition-duration: var(--zk-duration-base);
+  transition-timing-function: var(--zk-ease-standard);
 }
 
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
   :is(button, input, select, textarea):focus-visible,
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
   a:focus-visible {
   outline: 3px solid rgba(212, 173, 67, 0.42);
   outline-offset: 3px;
 }
 
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
   :is(input, select, textarea) {
   color: var(--zk-ink);
   background: var(--zk-surface);
 }
 
-:where(.student-shell, .admin-command-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
   :is(input, select):not([type='checkbox']):not([type='radio']) {
   min-height: 44px;
+}
+
+/* Premium motion system */
+@keyframes zk-content-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zk-dialog-enter {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes zk-popover-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zk-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, [role='button'], .admin-primary-button, .admin-secondary-button, .circle-primary-command, .circle-secondary-command, .task-button) {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: var(--zk-duration-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, [role='button'], .admin-primary-button, .admin-secondary-button, .circle-primary-command, .circle-secondary-command, .task-button):active:not(:disabled):not([aria-disabled='true']) {
+  transform: translateY(1px) scale(0.985);
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, [role='button'], .admin-primary-button, .admin-secondary-button, .circle-primary-command, .circle-secondary-command, .task-button):disabled,
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(button, [role='button'], .admin-primary-button, .admin-secondary-button, .circle-primary-command, .circle-secondary-command, .task-button)[aria-disabled='true'] {
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+  opacity: 0.58;
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  button[aria-busy='true'] {
+  position: relative;
+  cursor: wait;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  button[aria-busy='true']::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 17px;
+  height: 17px;
+  margin: -8.5px 0 0 -8.5px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  color: var(--zk-gold);
+  content: '';
+  animation: zk-button-spin 700ms linear infinite;
+}
+
+@keyframes zk-button-spin {
+  to { transform: rotate(360deg); }
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+  :is(.admin-sidebar, .teacher-sidebar, .student-mobile-nav, .workspace-tabs, .quran-manager-tabs) {
+  transition: transform var(--zk-motion), opacity var(--zk-motion), box-shadow var(--zk-motion);
+}
+
+:where(.admin-nav-item, .teacher-sidebar-nav a, .student-mobile-nav a, .student-mobile-nav button, .workspace-tabs button, .quran-manager-tabs button) {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: var(--zk-duration-base);
+  transition-timing-function: var(--zk-ease-standard);
+}
+
+:where(.admin-view.is-active, .workspace-panel:not([hidden]), .student-main, .task-page, .teacher-page > main) {
+  animation: zk-content-enter var(--zk-motion-enter) both;
+}
+
+:where(.student-metrics, .quran-report-metrics, .teacher-command-metrics, .admin-metrics-grid)
+  > :is(article, .student-metric, .admin-metric) {
+  animation: zk-content-enter var(--zk-motion-enter) both;
+}
+
+:where(.student-metrics, .quran-report-metrics, .teacher-command-metrics, .admin-metrics-grid)
+  > :is(article, .student-metric, .admin-metric):nth-child(2) { animation-delay: 35ms; }
+:where(.student-metrics, .quran-report-metrics, .teacher-command-metrics, .admin-metrics-grid)
+  > :is(article, .student-metric, .admin-metric):nth-child(3) { animation-delay: 70ms; }
+:where(.student-metrics, .quran-report-metrics, .teacher-command-metrics, .admin-metrics-grid)
+  > :is(article, .student-metric, .admin-metric):nth-child(4) { animation-delay: 105ms; }
+
+:where(dialog.admin-dialog, dialog.quran-complete-dialog, dialog.quran-exempt-dialog, dialog.quran-plan-dialog, dialog.quran-report-management-dialog):modal {
+  animation: zk-dialog-enter var(--zk-motion-enter) both;
+}
+
+:where(dialog.admin-dialog, dialog.quran-complete-dialog, dialog.quran-exempt-dialog, dialog.quran-plan-dialog, dialog.quran-report-management-dialog):modal::backdrop {
+  animation: zk-backdrop-enter var(--zk-motion) both;
+}
+
+:where(.notification-popover:not([hidden]), [role='menu']:not([hidden]), .dropdown-menu:not([hidden]), .toast, #toast-container > div, [role='alert']) {
+  animation: zk-popover-enter var(--zk-motion) both;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell)
+    :is(.admin-primary-button, .circle-primary-command, .task-button, .task-command button, .task-command a):hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(7, 24, 39, 0.16);
+  }
+
+  :where(.student-metric, .quran-report-metrics article, .performance-metric, .teacher-command-metrics article, .admin-metric, .circle-card, .student-task, .workspace-post, .task-preview-panel, .task-recent-panel) {
+    transition: border-color var(--zk-motion), box-shadow var(--zk-motion), transform var(--zk-motion);
+  }
+
+  :where(.student-metric, .quran-report-metrics article, .performance-metric, .teacher-command-metrics article, .admin-metric, .circle-card, .student-task, .workspace-post, .task-preview-panel, .task-recent-panel):hover {
+    border-color: color-mix(in srgb, var(--zk-gold) 52%, var(--zk-border));
+    box-shadow: var(--zk-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  :where(.admin-nav-item, .teacher-sidebar-nav a):hover {
+    transform: translateX(-2px);
+  }
 }
 
 /* Student experience */

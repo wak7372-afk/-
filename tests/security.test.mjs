@@ -95,6 +95,14 @@ test('preview classroom and halaqa creation stays outside Supabase', () => {
   assert.doesNotMatch(previewStore, /supabase/);
 });
 
+test('parent preview stays outside Supabase reads and writes', () => {
+  const script = fs.readFileSync(path.join(root, 'public/js/pages/parent-dashboard.js'), 'utf8');
+  assert.match(script, /if \(isLocalPreviewMode\(\)\) \{/);
+  assert.match(script, /previewParentRecords\(\)/);
+  assert.match(script, /previewChildLinked = true/);
+  assert.match(script, /previewChildLinked = false/);
+});
+
 test('password recovery is server-side and rate-limited', () => {
   const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0006_password_recovery_codes.sql'), 'utf8');
   const functionSource = fs.readFileSync(path.join(root, 'supabase/functions/account-recovery/index.ts'), 'utf8');
@@ -134,19 +142,30 @@ test('administrator actions have an immutable server audit contract', () => {
 
 test('administrator account deletion and password reset stay server-controlled', () => {
   const operation = fs.readFileSync(path.join(root, 'supabase/functions/admin-account-actions/index.ts'), 'utf8');
+  const anonymization = fs.readFileSync(path.join(root, 'supabase/migrations/0025_account_anonymization.sql'), 'utf8');
   const dashboard = fs.readFileSync(path.join(root, 'public/js/pages/admin-dashboard.js'), 'utf8');
 
   assert.match(operation, /callerProfile\?\.role !== 'admin'/);
   assert.match(operation, /target\.role === 'admin'/);
   assert.match(operation, /targetId === userData\.user\.id/);
-  assert.match(operation, /historyChecks/);
-  assert.match(operation, /ACCOUNT_HAS_HISTORY/);
-  assert.match(operation, /admin\.auth\.admin\.deleteUser/);
+  assert.doesNotMatch(operation, /ACCOUNT_HAS_HISTORY/);
+  assert.match(operation, /admin\.auth\.admin\.getUserById/);
+  assert.match(operation, /ban_duration: '876000h'/);
+  assert.match(operation, /normalizeUsernameConfirmation/);
+  assert.match(operation, /admin_anonymize_user_account/);
   assert.match(operation, /admin\.auth\.admin\.updateUserById/);
   assert.match(operation, /must_change_password: true/);
   assert.doesNotMatch(operation, /metadata:\s*\{[^}]*password/s);
+  assert.match(anonymization, /add column if not exists deleted_at/);
+  assert.match(anonymization, /full_name = 'حساب محذوف'/);
+  assert.match(anonymization, /learning_circle_memberships[\s\S]*status = 'ended'/);
+  assert.match(anonymization, /learning_circle_staff[\s\S]*status = 'ended'/);
+  assert.match(anonymization, /metadata - 'username' - 'full_name' - 'phone' - 'email'/);
+  assert.match(anonymization, /revoke all on function public\.admin_anonymize_user_account/);
+  assert.match(anonymization, /grant execute on function public\.admin_anonymize_user_account\(uuid, uuid\) to service_role/);
   assert.match(dashboard, /admin-account-actions/);
-  assert.match(dashboard, /confirmation !== account\.username/);
+  assert.match(dashboard, /normalizeUsernameConfirmation/);
+  assert.match(dashboard, /\.is\('deleted_at', null\)/);
 });
 
 test('edge function secret examples use placeholders', () => {

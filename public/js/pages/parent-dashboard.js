@@ -1,10 +1,11 @@
 import { supabase } from '../lib/supabase-client.js';
-import { requireAuth, logoutUser } from '../lib/auth.js';
+import { isLocalPreviewMode, requireAuth, logoutUser } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
 
 let currentParent = null;
 let isLoading = false;
+let previewChildLinked = true;
 
 const grid = document.getElementById('children-dashboard-grid');
 const linkForm = document.getElementById('link-child-form');
@@ -186,6 +187,20 @@ async function loadLinkedChildren() {
   grid.innerHTML = '<div class="col-span-full rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">جاري تحميل بيانات الأبناء...</div>';
 
   try {
+    if (isLocalPreviewMode()) {
+      const students = previewChildLinked ? [{ id: 'preview-child', full_name: 'عبدالله بن محمد', username: 'student.preview' }] : [];
+      const records = previewParentRecords();
+      updateOverallStats(students, records);
+      grid.innerHTML = students.length ? students.map(student => renderChildCard(student, {
+        dailySubmissions: records.daily,
+        quizSubmissions: records.quizzes,
+        attendance: records.attendance,
+        extraSubmissions: records.extras,
+      })).join('') : '';
+      if (!students.length) showEmptyState();
+      return;
+    }
+
     const { data: relations, error } = await supabase
       .from('parent_student')
       .select('student:student_id(id, full_name, username)')
@@ -228,12 +243,16 @@ async function handleLinkChild(event) {
   linkButton.textContent = 'جاري الربط...';
 
   try {
-    const { error } = await supabase.rpc('link_child_by_code', { p_code: code });
-    if (error) {
-      if ((error.message || '').includes('Invalid child link code')) {
-        throw new Error('رمز الربط غير صحيح أو أن حساب الطالب غير مفعّل.');
+    if (isLocalPreviewMode()) {
+      previewChildLinked = true;
+    } else {
+      const { error } = await supabase.rpc('link_child_by_code', { p_code: code });
+      if (error) {
+        if ((error.message || '').includes('Invalid child link code')) {
+          throw new Error('رمز الربط غير صحيح أو أن حساب الطالب غير مفعّل.');
+        }
+        throw error;
       }
-      throw error;
     }
 
     input.value = '';
@@ -250,6 +269,13 @@ async function handleLinkChild(event) {
 
 async function unlinkChild(studentId) {
   if (!window.confirm('هل تريد إلغاء ربط هذا الحساب؟ يمكن إعادة الربط لاحقاً باستخدام الرمز الخاص.')) return;
+
+  if (isLocalPreviewMode()) {
+    previewChildLinked = false;
+    showToast('تم إلغاء ربط الحساب.', 'success');
+    await loadLinkedChildren();
+    return;
+  }
 
   const { error } = await supabase
     .from('parent_student')
@@ -286,3 +312,21 @@ async function initialize() {
 }
 
 document.addEventListener('DOMContentLoaded', initialize);
+
+function previewParentRecords() {
+  const now = new Date().toISOString();
+  return {
+    daily: [{
+      id: 'preview-daily', student_id: 'preview-child', status: 'done', created_at: now,
+      teacher_notes: 'أداء متقن، بارك الله فيك.',
+      assignment: { content: 'حفظ سورة الملك من الآية 1 إلى 8', type: 'hifz', assignment_date: now },
+    }],
+    quizzes: [{ id: 'preview-quiz', student_id: 'preview-child', score: 92, submitted_at: now, quiz: { title: 'أحكام النون الساكنة' } }],
+    attendance: [
+      { id: 'preview-attendance-1', student_id: 'preview-child', status: 'present', attendance_date: now },
+      { id: 'preview-attendance-2', student_id: 'preview-child', status: 'present', attendance_date: now },
+      { id: 'preview-attendance-3', student_id: 'preview-child', status: 'excused', attendance_date: now },
+    ],
+    extras: [{ id: 'preview-extra', student_id: 'preview-child', grade: 88, graded_at: now }],
+  };
+}

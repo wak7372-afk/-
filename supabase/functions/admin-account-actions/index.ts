@@ -11,27 +11,6 @@ const trustedOrigins = new Set([
   'https://thatkail.vercel.app',
 ].filter(Boolean));
 
-const historyChecks = [
-  ['learning_circle_memberships', 'student_id', 'عضويات الحلقات'],
-  ['learning_circle_staff', 'teacher_id', 'فريق الحلقات'],
-  ['quran_report_assignments', 'student_id', 'التقارير القرآنية'],
-  ['daily_assignments', 'student_id', 'المهام اليومية'],
-  ['daily_assignments', 'teacher_id', 'المهام المنشأة'],
-  ['assignment_submissions', 'student_id', 'تسليمات المهام'],
-  ['assignment_extra_submissions', 'student_id', 'تسليمات الفصول'],
-  ['quiz_submissions', 'student_id', 'نتائج الاختبارات'],
-  ['attendance', 'student_id', 'سجل الحضور'],
-  ['attendance', 'recorded_by', 'سجلات حضور أنشأها الحساب'],
-  ['classroom_students', 'student_id', 'عضويات الفصول'],
-  ['classrooms', 'teacher_id', 'فصول أنشأها الحساب'],
-  ['halaqa_students', 'student_id', 'عضويات الحلقات القديمة'],
-  ['halaqat', 'teacher_id', 'حلقات أنشأها الحساب'],
-  ['parent_student', 'student_id', 'روابط ولي الأمر'],
-  ['parent_student', 'parent_id', 'روابط الأبناء'],
-  ['messages', 'sender_id', 'رسائل مرسلة'],
-  ['messages', 'receiver_id', 'رسائل مستلمة'],
-] as const;
-
 function isTrustedOrigin(origin: string) {
   if (trustedOrigins.has(origin)) return true;
   try {
@@ -64,6 +43,17 @@ function validPassword(password: unknown) {
     && password.length >= 8
     && /\p{L}/u.test(password)
     && /\p{N}/u.test(password);
+}
+
+function normalizeUsernameConfirmation(value: unknown) {
+  return String(value ?? '').trim().toLowerCase().replace(/^@+/, '');
+}
+
+function isMissingAuthUser(error: { status?: number; code?: string; message?: string } | null) {
+  if (!error) return false;
+  return error.status === 404
+    || error.code === 'user_not_found'
+    || /user.*not found/i.test(error.message ?? '');
 }
 
 Deno.serve(async (request) => {
@@ -132,36 +122,45 @@ Deno.serve(async (request) => {
     }
 
     if (action === 'delete_account') {
-      if (String(confirmation ?? '').trim().toLowerCase() !== target.username) {
+      if (normalizeUsernameConfirmation(confirmation) !== normalizeUsernameConfirmation(target.username)) {
         return response(request, { error: 'اكتب اسم المستخدم كما هو لتأكيد الحذف.' }, 400);
       }
 
-      const history: string[] = [];
-      for (const [table, column, label] of historyChecks) {
-        const { count, error } = await admin
-          .from(table)
-          .select('*', { count: 'exact', head: true })
-          .eq(column, targetId);
-        if (error) throw error;
-        if ((count ?? 0) > 0) history.push(label);
-      }
-      if (history.length) {
-        return response(request, {
-          error: `لا يمكن حذف الحساب نهائياً لارتباطه بـ: ${history.slice(0, 4).join('، ')}. أوقف الحساب بدلاً من ذلك.`,
-          code: 'ACCOUNT_HAS_HISTORY',
-        }, 409);
+      const { data: authTarget, error: authLookupError } = await admin.auth.admin.getUserById(targetId);
+      if (authLookupError && !isMissingAuthUser(authLookupError)) {
+        return response(request, { error: 'تعذر التحقق من سجل الدخول المرتبط بالحساب.' }, 500);
       }
 
-      const { error: deleteError } = await admin.auth.admin.deleteUser(targetId);
-      if (deleteError) {
-        return response(request, { error: 'تعذر حذف الحساب لوجود بيانات مرتبطة به. أوقف الحساب بدلاً من ذلك.' }, 409);
+      if (authTarget?.user) {
+        const anonymousUsername = `deleted-${targetId.replaceAll('-', '').slice(0, 20)}`;
+        const anonymousEmail = `${anonymousUsername}@deleted.zatkhail.invalid`;
+        const randomPassword = `${crypto.randomUUID()}${crypto.randomUUID()}A7!`;
+        const { error: authScrubError } = await admin.auth.admin.updateUserById(targetId, {
+          email: anonymousEmail,
+          password: randomPassword,
+          email_confirm: true,
+          ban_duration: '876000h',
+          user_metadata: {
+            full_name: 'حساب محذوف',
+            username: anonymousUsername,
+            phone: null,
+            deleted: true,
+          },
+        });
+        if (authScrubError) {
+          return response(request, { error: 'تعذر إلغاء بيانات الدخول للحساب.' }, 500);
+        }
       }
-      await admin.from('admin_audit_logs').insert({
-        actor_id: userData.user.id,
-        action: 'account.permanently_deleted',
-        metadata: { target_id: targetId, username: target.username, role: target.role, full_name: target.full_name },
+
+      const { data: anonymized, error: anonymizeError } = await admin.rpc('admin_anonymize_user_account', {
+        p_target_id: targetId,
+        p_actor_id: userData.user.id,
       });
-      return response(request, { success: true });
+      if (anonymizeError) {
+        console.error('Account anonymization failed:', anonymizeError);
+        return response(request, { error: 'تم إلغاء الدخول وتعذر إكمال محو معلومات الحساب. أعد المحاولة.' }, 500);
+      }
+      return response(request, { success: true, anonymized });
     }
 
     return response(request, { error: 'العملية المطلوبة غير مدعومة.' }, 400);

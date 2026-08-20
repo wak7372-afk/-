@@ -8,7 +8,8 @@ let activeRecipientId = null;
 let activeChannel = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const authData = await requireAuth(['teacher', 'student']);
+  const isStudentChat = window.location.pathname.includes('/student/');
+  const authData = await requireAuth(isStudentChat ? ['student', 'teacher'] : ['teacher', 'student']);
   if (!authData) return;
 
   currentUser = authData.profile;

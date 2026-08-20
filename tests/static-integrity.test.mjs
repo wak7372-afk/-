@@ -36,6 +36,22 @@ test('HTML documents do not contain duplicate ids', () => {
   assert.deepEqual(failures, []);
 });
 
+test('HTML pattern attributes compile with the browser Unicode Sets flag', () => {
+  const failures = [];
+  const pages = walk(publicRoot).filter(file => file.endsWith('.html'));
+  for (const page of pages) {
+    const html = fs.readFileSync(page, 'utf8');
+    for (const match of html.matchAll(/\spattern="([^"]+)"/g)) {
+      try {
+        new RegExp(match[1], 'v');
+      } catch (error) {
+        failures.push(`${path.relative(root, page)}: ${error.message}`);
+      }
+    }
+  }
+  assert.deepEqual(failures, []);
+});
+
 test('admin dashboard JavaScript references existing elements', () => {
   const html = fs.readFileSync(path.join(publicRoot, 'admin/dashboard.html'), 'utf8');
   const script = [
@@ -187,6 +203,16 @@ test('service worker cache entries point to real public files', () => {
   const assets = [...assetBlock.matchAll(/'([^']+)'/g)].map(match => match[1]);
   const missing = assets
     .filter(asset => asset !== '/')
+    .filter(asset => !fs.existsSync(path.join(publicRoot, asset.replace(/^\//, ''))));
+  assert.deepEqual(missing, []);
+});
+
+test('manifest and push notification icons point to real files', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(publicRoot, 'manifest.json'), 'utf8'));
+  const worker = fs.readFileSync(path.join(publicRoot, 'service-worker.js'), 'utf8');
+  const manifestIcons = manifest.icons.map(icon => icon.src);
+  const notificationIcons = [...worker.matchAll(/(?:icon|badge):\s*'([^']+)'/g)].map(match => match[1]);
+  const missing = [...manifestIcons, ...notificationIcons]
     .filter(asset => !fs.existsSync(path.join(publicRoot, asset.replace(/^\//, ''))));
   assert.deepEqual(missing, []);
 });

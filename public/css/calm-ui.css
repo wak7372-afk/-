@@ -1,0 +1,455 @@
+/* Zat Khail Calm UI: restrained, content-first visual layer. */
+:root {
+  --calm-canvas: #f5f5f7;
+  --calm-surface: #ffffff;
+  --calm-surface-muted: #f1f3f5;
+  --calm-line: #e1e4e8;
+  --calm-line-strong: #cfd5da;
+  --calm-ink: #101820;
+  --calm-muted: #68737d;
+  --calm-navy: #071a2b;
+  --calm-navy-soft: #102d42;
+  --calm-green: #0b6a4d;
+  --calm-green-hover: #08553e;
+  --calm-gold: #c5a049;
+  --calm-gold-soft: #f5e8bd;
+  --calm-blue: #2d6f98;
+  --calm-red: #b44348;
+  --calm-radius: 8px;
+  --calm-shadow-1: 0 1px 2px rgba(7, 24, 39, 0.04), 0 5px 16px rgba(7, 24, 39, 0.035);
+  --calm-shadow-2: 0 10px 30px rgba(7, 24, 39, 0.08);
+}
+
+html {
+  background: var(--calm-canvas);
+}
+
+body {
+  background-color: var(--calm-canvas) !important;
+  color: var(--calm-ink);
+}
+
+/* Keep accessible labels available to assistive technology without adding visual clutter. */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+:where(.student-shell, .admin-command-shell, .teacher-unified-shell, .circle-portal-shell, .circle-workspace-shell, .task-app-shell) {
+  background-color: var(--calm-canvas) !important;
+  background-image: none !important;
+  color: var(--calm-ink);
+}
+
+/* Typography */
+:where(main, .admin-main, .task-workspace, .circle-workspace-main) :is(h1, h2, h3, h4) {
+  color: var(--calm-ink) !important;
+  text-wrap: balance;
+}
+
+:where(main, .admin-main, .task-workspace, .circle-workspace-main) :is(p, small) {
+  color: var(--calm-muted);
+}
+
+:where(.admin-section-kicker, .admin-eyebrow, .task-kicker, .task-eyebrow, .circle-kicker, .section-kicker) {
+  color: #876a23 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Surfaces */
+:where(
+  .glass-card,
+  .admin-panel,
+  .admin-filter-panel,
+  .admin-table-panel,
+  .admin-metric,
+  .student-metric,
+  .student-task-section,
+  .side-section,
+  .week-panel,
+  .quran-reports-panel,
+  .quran-extension-panel,
+  .workspace-panel,
+  .workspace-composer,
+  .workspace-file-uploader,
+  .workspace-settings-block,
+  .workspace-post,
+  .task-editor,
+  .task-preview-panel,
+  .task-recent-panel,
+  .import-results,
+  .auth-panel,
+  .settings-panel
+) {
+  border: 1px solid var(--calm-line) !important;
+  border-top-width: 1px !important;
+  border-radius: var(--calm-radius) !important;
+  background: var(--calm-surface) !important;
+  box-shadow: var(--calm-shadow-1) !important;
+  backdrop-filter: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(.glass-card, .admin-panel, .admin-metric, .student-metric, .circle-card, .student-task, .workspace-post, .task-preview-panel, .task-recent-panel):hover {
+    border-color: var(--calm-line-strong) !important;
+    box-shadow: var(--calm-shadow-1) !important;
+    transform: none !important;
+  }
+}
+
+/* Navigation chrome */
+.admin-command-shell {
+  --admin-sidebar-width: 260px;
+}
+
+:where(.admin-sidebar, .teacher-sidebar) {
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: var(--calm-navy) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+:where(.admin-brand, .teacher-sidebar-brand) {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:where(.admin-brand-mark, .teacher-sidebar-mark, .student-brand-mark, .task-brand-mark) {
+  border: 1px solid rgba(197, 160, 73, 0.72) !important;
+  background: var(--calm-gold) !important;
+  box-shadow: none !important;
+  color: var(--calm-navy) !important;
+}
+
+:where(.admin-nav-item, .teacher-sidebar-nav a) {
+  min-height: 44px;
+  border: 0 !important;
+  border-radius: 7px !important;
+  color: #c5ced5 !important;
+}
+
+:where(.admin-nav-item, .teacher-sidebar-nav a):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+  transform: none !important;
+}
+
+:where(.admin-nav-item.is-active, .teacher-sidebar-nav a.is-active) {
+  background: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: inset -3px 0 0 var(--calm-gold) !important;
+  color: #ffffff !important;
+}
+
+:where(.admin-topbar, .teacher-unified-shell:not(.teacher-task-page) > header, .teacher-task-page .task-topbar) {
+  border-bottom: 1px solid var(--calm-line) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  background-image: none !important;
+  box-shadow: 0 1px 0 rgba(7, 24, 39, 0.03) !important;
+  backdrop-filter: blur(18px) saturate(1.1) !important;
+}
+
+:where(.admin-topbar, .teacher-unified-shell:not(.teacher-task-page) > header, .teacher-task-page .task-topbar)::after {
+  display: none !important;
+}
+
+.admin-topbar {
+  gap: 18px;
+}
+
+.admin-topbar-actions {
+  gap: 8px;
+}
+
+.admin-global-search input {
+  width: min(24vw, 260px);
+  font-size: 0.76rem;
+}
+
+.admin-global-search button,
+.admin-alert-button {
+  font-size: 0.72rem;
+}
+
+/* Hero bands retain identity without decorative noise. */
+:where(.admin-welcome-band, .day-command, .quran-day-hero, .circle-workspace-hero, .circle-portal-command, .task-intro) {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--calm-radius) !important;
+  background-color: var(--calm-navy) !important;
+  background-image: none !important;
+  box-shadow: var(--calm-shadow-2) !important;
+}
+
+:where(.admin-welcome-band, .day-command, .quran-day-hero, .circle-workspace-hero, .circle-portal-command, .task-intro)::after {
+  opacity: 0.05 !important;
+}
+
+.admin-welcome-band {
+  min-height: 124px;
+  padding: 24px 26px;
+}
+
+.admin-welcome-band::after {
+  width: 3px;
+  background: var(--calm-gold);
+  opacity: 1 !important;
+}
+
+:where(.admin-welcome-band, .day-command, .quran-day-hero, .circle-workspace-hero, .circle-portal-command, .task-intro) :is(h1, h2, h3) {
+  color: #ffffff !important;
+}
+
+:where(.admin-welcome-band, .day-command, .quran-day-hero, .circle-workspace-hero, .circle-portal-command, .task-intro) p {
+  color: #c8d2d9 !important;
+}
+
+/* Controls */
+:where(input, select, textarea):not([type='checkbox']):not([type='radio']) {
+  min-height: 44px;
+  border: 1px solid var(--calm-line-strong) !important;
+  border-radius: 7px !important;
+  background: var(--calm-surface) !important;
+  box-shadow: none !important;
+  color: var(--calm-ink) !important;
+}
+
+:where(input, select, textarea):not([type='checkbox']):not([type='radio']):focus {
+  border-color: var(--calm-blue) !important;
+  box-shadow: 0 0 0 3px rgba(45, 111, 152, 0.14) !important;
+  outline: 0 !important;
+}
+
+:where(.btn-emerald, .admin-primary-button, .circle-primary-command, .task-button-dark, .teacher-unified-shell .btn-emerald) {
+  border: 1px solid var(--calm-green) !important;
+  border-radius: 7px !important;
+  background: var(--calm-green) !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+:where(.btn-emerald, .admin-primary-button, .circle-primary-command, .task-button-dark, .teacher-unified-shell .btn-emerald):hover {
+  border-color: var(--calm-green-hover) !important;
+  background: var(--calm-green-hover) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+:where(.btn-gold, .btn-figma-gold, .task-button-gold) {
+  border-color: #ae8730 !important;
+  background: var(--calm-gold) !important;
+  box-shadow: none !important;
+  color: var(--calm-navy) !important;
+}
+
+:where(.admin-secondary-button, .circle-secondary-command, .task-button-quiet) {
+  border: 1px solid var(--calm-line-strong) !important;
+  background: var(--calm-surface) !important;
+  box-shadow: none !important;
+  color: var(--calm-ink) !important;
+}
+
+:where(button, [role='button'], a):active {
+  transform: scale(0.985);
+}
+
+/* Metrics and data-heavy areas */
+.admin-metrics-grid {
+  gap: 12px;
+}
+
+.admin-metric {
+  min-height: 108px;
+  padding: 16px 18px !important;
+}
+
+.admin-metric::before {
+  display: none !important;
+}
+
+.admin-metric strong {
+  margin-block: 7px 3px;
+  font-size: 1.8rem;
+}
+
+/* Arabic operational copy needs a little more size than Latin UI microcopy. */
+:where(.task-app-shell, .teacher-unified-shell) :is(.task-eyebrow, .task-kicker, .task-field > span, .task-repeat-box legend) {
+  font-size: 0.78rem;
+}
+
+.task-intro p:last-child {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+:where(.task-preview-copy span, .task-recent-item span, .task-preview-date span, .task-kind-badge, .task-draft-badge, .task-count-badge) {
+  font-size: 0.72rem;
+}
+
+:where(.task-preview-copy strong, .task-recent-item strong) {
+  font-size: 0.84rem;
+}
+
+:where(.task-empty-state p, .task-loading, .import-summary-bar p) {
+  font-size: 0.8rem;
+}
+
+/* The command center formerly compressed Arabic copy below a comfortable reading size. */
+.teacher-command-center .task-eyebrow,
+.teacher-command-center .task-kicker,
+.teacher-command-center .task-intro .task-kicker {
+  font-size: 12px !important;
+}
+
+.teacher-command-center .task-intro p:last-of-type {
+  font-size: 13px !important;
+  line-height: 1.8;
+}
+
+.teacher-command-center .task-flow li,
+.teacher-command-center .task-intro-stat span,
+.teacher-command-metrics small,
+.teacher-command-center .task-form-section-title small {
+  font-size: 11px !important;
+}
+
+.teacher-command-metrics article > div > span {
+  font-size: 10px !important;
+}
+
+.teacher-command-center .task-section-heading h2 {
+  font-size: 20px !important;
+}
+
+.teacher-command-center .task-draft-badge,
+.teacher-command-center .task-form-section-title strong,
+.teacher-command-center .task-field > span,
+.teacher-command-center .task-repeat-box legend,
+.teacher-command-center .task-form-actions .task-button {
+  font-size: 12px !important;
+}
+
+.teacher-command-center .task-field :is(input, select, textarea) {
+  font-size: 13px !important;
+}
+
+:where(.admin-panel-heading, .workspace-panel-heading, .task-section-heading) {
+  border-bottom-color: var(--calm-line) !important;
+  background: var(--calm-surface) !important;
+}
+
+:where(table) {
+  border-radius: var(--calm-radius);
+}
+
+:where(table thead tr, .teacher-unified-shell table thead tr) {
+  border-color: var(--calm-line) !important;
+  background: var(--calm-surface-muted) !important;
+  color: #39444e !important;
+}
+
+:where(table thead th, .teacher-unified-shell table thead th) {
+  color: #39444e !important;
+  font-weight: 800;
+}
+
+table tbody tr:nth-child(even) {
+  background: #fafafb;
+}
+
+table tbody tr:hover {
+  background: #f3f5f6;
+}
+
+/* Tabs behave as a quiet segmented control. */
+:where(.workspace-tabs, .quran-manager-tabs, .period-tabs, .admin-circle-tabs) {
+  border: 1px solid var(--calm-line) !important;
+  border-radius: var(--calm-radius) !important;
+  background: var(--calm-surface-muted) !important;
+  box-shadow: none !important;
+}
+
+:where(.workspace-tabs, .quran-manager-tabs, .period-tabs, .admin-circle-tabs) button {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: #5c6872 !important;
+}
+
+:where(.workspace-tabs, .quran-manager-tabs, .period-tabs, .admin-circle-tabs) button:is(.is-active, .active, [aria-selected='true']) {
+  background: var(--calm-surface) !important;
+  box-shadow: 0 1px 4px rgba(7, 24, 39, 0.1) !important;
+  color: var(--calm-green) !important;
+}
+
+/* Entry screens */
+.auth-login-stage {
+  background: var(--calm-canvas);
+}
+
+.auth-panel,
+.settings-panel {
+  padding: clamp(24px, 4vw, 34px) !important;
+}
+
+.auth-panel::before {
+  display: none;
+}
+
+.auth-feature-card {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: none !important;
+}
+
+/* Mobile tab bars use a quiet translucent surface. */
+@media (max-width: 860px) {
+  :where(.student-mobile-nav, .teacher-sidebar, .circle-dashboard-theme .workspace-tabs) {
+    border: 1px solid rgba(207, 213, 218, 0.9) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    box-shadow: 0 10px 30px rgba(7, 24, 39, 0.14) !important;
+    backdrop-filter: blur(18px) saturate(1.1) !important;
+  }
+
+  :where(.student-mobile-nav a, .student-mobile-nav button, .teacher-sidebar-nav a, .circle-dashboard-theme .workspace-tabs button) {
+    color: #66727c !important;
+  }
+
+  :where(.student-mobile-nav a.active, .student-mobile-nav button.active, .teacher-sidebar-nav a.is-active, .circle-dashboard-theme .workspace-tabs button.is-active) {
+    background: var(--calm-surface-muted) !important;
+    box-shadow: inset 0 3px 0 var(--calm-gold) !important;
+    color: var(--calm-green) !important;
+  }
+
+  .admin-command-shell {
+    --admin-sidebar-width: 274px;
+  }
+}
+
+@media (max-width: 680px) {
+  :where(.admin-main, .task-workspace, .circle-workspace-main, .student-main) {
+    padding-inline: 10px !important;
+  }
+
+  .admin-welcome-band {
+    padding: 20px;
+  }
+
+  .task-intro p:last-child {
+    font-size: 0.82rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

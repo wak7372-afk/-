@@ -1,11 +1,14 @@
 export function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('PWA Service Worker registered:', reg.scope))
-        .catch(err => console.error('PWA Service Worker registration failed:', err));
-    });
-  }
+  const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
+  if (!('serviceWorker' in navigator) || localHosts.has(window.location.hostname)) return;
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        if (registration?.scope) console.info('PWA Service Worker registered:', registration.scope);
+      })
+      .catch(err => console.error('PWA Service Worker registration failed:', err));
+  });
 }
 
 export function formatDate(dateString) {

@@ -2,12 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061421">
   <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | مركز قيادة المدير</title>
   <link rel="stylesheet" href="/css/style.css?v=2">
   <link rel="stylesheet" href="/css/admin.css?v=3">
-  <link rel="stylesheet" href="/css/design-system.css?v=1">
+  <link rel="stylesheet" href="/css/design-system.css?v=3">
+  <link rel="stylesheet" href="/css/calm-ui.css?v=3">
 </head>
 <body class="admin-command-shell">
   <div id="sidebar-overlay" class="admin-sidebar-overlay" hidden></div>
@@ -386,7 +388,7 @@
           </div>
           <div class="admin-field">
             <label for="account-username">اسم المستخدم</label>
-            <input id="account-username" name="username" type="text" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" placeholder="ahmed.ali" dir="ltr">
+            <input id="account-username" name="username" type="text" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._\-]{3,32}" placeholder="ahmed.ali" dir="ltr">
             <small>أحرف إنجليزية وأرقام والنقطة والشرطة فقط.</small>
           </div>
           <div class="admin-field">
@@ -436,7 +438,7 @@
           </div>
           <div class="admin-field">
             <label for="edit-account-username">اسم المستخدم</label>
-            <input id="edit-account-username" type="text" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" dir="ltr">
+            <input id="edit-account-username" type="text" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._\-]{3,32}" dir="ltr">
           </div>
           <div class="admin-field">
             <label for="edit-account-phone">رقم الهاتف</label>
@@ -505,24 +507,24 @@
       <div class="admin-dialog-header">
         <div>
           <p class="admin-section-kicker">عملية غير قابلة للتراجع</p>
-          <h2 id="delete-account-title" class="font-amiri">حذف الحساب نهائياً</h2>
+          <h2 id="delete-account-title" class="font-amiri">حذف معلومات الحساب</h2>
         </div>
         <button type="button" class="admin-icon-button" data-close-dialog="delete-account-dialog" aria-label="إغلاق">×</button>
       </div>
       <div class="admin-dialog-body">
         <div class="admin-operation-warning">
           <strong id="delete-account-name">الحساب</strong>
-          <span>لن يسمح النظام بالحذف إذا كان للحساب تقارير أو عضويات أو سجلات تعليمية.</span>
+          <span>سيُلغى الدخول وتُمحى البيانات الشخصية، بينما تبقى التقارير والسجلات التعليمية باسم «حساب محذوف».</span>
         </div>
         <div class="admin-field">
-          <label for="delete-account-confirmation">اكتب اسم المستخدم للتأكيد</label>
+          <label for="delete-account-confirmation">اكتب اسم المستخدم للتأكيد (مع @ أو بدونها)</label>
           <input id="delete-account-confirmation" type="text" required autocomplete="off" dir="ltr">
           <small id="delete-account-hint"></small>
         </div>
       </div>
       <div class="admin-dialog-footer">
         <button type="button" class="admin-secondary-button" data-close-dialog="delete-account-dialog">إلغاء</button>
-        <button id="delete-account-submit" type="submit" class="admin-danger-button">حذف نهائي</button>
+        <button id="delete-account-submit" type="submit" class="admin-danger-button">حذف المعلومات وإلغاء الدخول</button>
       </div>
     </form>
   </dialog>
@@ -733,6 +735,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="/js/pages/admin-dashboard.js?v=2"></script>
+  <script type="module" src="/js/pages/admin-dashboard.js?v=4"></script>
 </body>
 </html>

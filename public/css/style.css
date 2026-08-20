@@ -579,6 +579,42 @@ main code {
   box-shadow: var(--shadow-raised) !important;
 }
 
+button,
+[role='button'],
+.button-primary,
+.button-secondary {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled),
+[role='button']:active:not([aria-disabled='true']),
+.button-primary:active,
+.button-secondary:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+button:disabled,
+[role='button'][aria-disabled='true'] {
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 0.58;
+}
+
+@keyframes ui-feedback-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+[role='alert'],
+.toast,
+#toast-container > div {
+  animation: ui-feedback-enter 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -588,7 +624,10 @@ main code {
   }
 
   .auth-brand-stage,
-  .auth-login-stage {
+  .auth-login-stage,
+  [role='alert'],
+  .toast,
+  #toast-container > div {
     animation: none !important;
   }
 }

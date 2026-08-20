@@ -5,6 +5,7 @@ import test from 'node:test';
 
 const root = path.resolve(import.meta.dirname, '..');
 const migration = fs.readFileSync(path.join(root, 'supabase/migrations/0018_quran_daily_summaries.sql'), 'utf8');
+const volatilityFix = fs.readFileSync(path.join(root, 'supabase/migrations/0026_quran_summary_function_volatility.sql'), 'utf8');
 
 test('daily summary classifies all approved operational states', () => {
   assert.match(migration, /when has_expired_pending then 'incomplete'/);
@@ -39,4 +40,11 @@ test('the cron job runs at 23:05 Asia Muscat using 19:05 UTC', () => {
   assert.match(migration, /'5 19 \* \* \*'/);
   assert.match(migration, /time zone 'Asia\/Muscat'/);
   assert.match(migration, /select public\.publish_quran_daily_summaries\(\);/);
+});
+
+test('daily summary text formatter uses safe function volatility', () => {
+  assert.match(
+    volatilityFix,
+    /alter function public\.quran_daily_summary_group_text\(text, text, jsonb\) stable;/,
+  );
 });

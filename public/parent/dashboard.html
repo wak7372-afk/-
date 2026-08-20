@@ -2,12 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061421">
   <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | لوحة ولي الأمر</title>
   <link rel="manifest" href="../manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/calm-ui.css?v=3">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800">
   <header class="bg-emerald-gold-gradient sticky top-0 z-40 px-4 py-4 text-white shadow-lg sm:px-6">
@@ -54,7 +56,7 @@
         </div>
         <form id="link-child-form" class="flex w-full flex-col gap-3 sm:flex-row lg:max-w-xl" novalidate>
           <label for="child-link-code" class="sr-only">رمز ربط الطالب</label>
-          <input id="child-link-code" type="text" inputmode="text" autocomplete="off" maxlength="16" required pattern="[A-Za-z0-9-]{6,16}" placeholder="مثال: A19F20BC45" class="figma-input min-w-0 flex-1 rounded-xl px-4 py-3 text-center text-sm font-bold uppercase tracking-widest" dir="ltr">
+          <input id="child-link-code" type="text" inputmode="text" autocomplete="off" maxlength="16" required pattern="[A-Za-z0-9\-]{6,16}" placeholder="مثال: A19F20BC45" class="figma-input min-w-0 flex-1 rounded-xl px-4 py-3 text-center text-sm font-bold uppercase tracking-widest" dir="ltr">
           <button id="link-child-btn" type="submit" class="btn-figma-gold whitespace-nowrap rounded-xl px-7 py-3 text-xs font-bold">ربط الحساب</button>
         </form>
       </div>
