@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zat-khail-v37';
+const CACHE_NAME = 'zat-khail-v38';
 const ASSETS = [
   '/',
   '/favicon.ico',
@@ -23,6 +23,7 @@ const ASSETS = [
   '/student/reports.html',
   '/css/style.css',
   '/css/calm-ui.css',
+  '/css/chat.css',
   '/css/admin.css',
   '/css/tasks.css',
   '/css/student-dashboard.css',

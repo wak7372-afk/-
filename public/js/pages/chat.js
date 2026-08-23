@@ -43,14 +43,14 @@ async function loadContacts() {
   }
 
   container.innerHTML = uniqueContacts.map(c => `
-    <button type="button" data-contact-id="${escapeHtml(c.id)}" class="w-full text-right p-3 rounded-xl hover:bg-slate-100 transition border border-gray-100 flex items-center space-x-3 space-x-reverse mb-2">
+    <button type="button" data-contact-id="${escapeHtml(c.id)}" class="chat-contact-button w-full text-right p-3 rounded-xl hover:bg-slate-100 transition border border-gray-100 flex items-center space-x-3 space-x-reverse mb-2">
       <div class="w-9 h-9 rounded-full bg-emerald-700 text-amber-300 flex items-center justify-center font-bold text-sm">
         ${escapeHtml((c.full_name || '?').charAt(0))}
       </div>
       <div>
-        <p class="font-bold text-sm text-gray-800">${escapeHtml(c.full_name || 'بدون اسم')}</p>
-        <p class="text-[11px] text-gray-500" dir="ltr">@${escapeHtml(c.username || '')}</p>
-        <p class="text-[10px] text-emerald-700">${escapeHtml(contactCircleLabel(c.circles))}</p>
+        <p class="chat-contact-name">${escapeHtml(c.full_name || 'بدون اسم')}</p>
+        <p class="chat-contact-username" dir="ltr">@${escapeHtml(c.username || '')}</p>
+        <p class="chat-contact-circle">${escapeHtml(contactCircleLabel(c.circles))}</p>
       </div>
     </button>
   `).join('');
@@ -118,9 +118,9 @@ async function loadMessages() {
     const isMine = m.sender_id === currentUser.id;
     return `
       <div class="flex ${isMine ? 'justify-start' : 'justify-end'} mb-3">
-        <div class="max-w-xs md:max-w-md p-3.5 rounded-2xl text-sm ${isMine ? 'bg-emerald-800 text-white rounded-br-none' : 'bg-amber-100 text-emerald-950 border border-amber-300 rounded-bl-none'} shadow">
-          <p class="leading-relaxed">${escapeHtml(m.content)}</p>
-          <span class="text-[10px] ${isMine ? 'text-emerald-200' : 'text-gray-500'} block text-left mt-1">${new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span>
+        <div class="chat-message-bubble ${isMine ? 'is-mine' : 'is-other'}">
+          <p class="chat-message-text">${escapeHtml(m.content)}</p>
+          <time class="chat-message-time" datetime="${escapeHtml(m.created_at)}">${new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</time>
         </div>
       </div>
     `;
