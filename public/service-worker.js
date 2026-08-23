@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zat-khail-v38';
+const CACHE_NAME = 'zat-khail-v39';
 const ASSETS = [
   '/',
   '/favicon.ico',
@@ -12,6 +12,7 @@ const ASSETS = [
   '/assets/icons/icon-maskable-512.png',
   '/index.html',
   '/register.html',
+  '/account-settings.html',
   '/pending-approval.html',
   '/circles.html',
   '/circle.html',
@@ -24,6 +25,7 @@ const ASSETS = [
   '/css/style.css',
   '/css/calm-ui.css',
   '/css/chat.css',
+  '/css/account-settings.css',
   '/css/admin.css',
   '/css/tasks.css',
   '/css/student-dashboard.css',
@@ -35,11 +37,14 @@ const ASSETS = [
   '/css/teacher-command-center.css',
   '/css/teacher-students.css',
   '/js/lib/teacher-shell.js',
+  '/js/lib/teacher-student-analytics.js',
+  '/js/lib/push-notifications.js',
   '/js/lib/quran-report-excel.js',
   '/js/pages/quran-report-manager.js',
   '/js/pages/quran-report-importer.js',
   '/js/pages/student-reports.js',
   '/js/pages/teacher-students.js',
+  '/js/pages/account-settings.js',
   '/js/vendor/xlsx.full.min.js',
   '/locales/ar.json',
   '/locales/en.json'
@@ -81,12 +86,42 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'إشعار جديد', body: 'لديك إشعار جديد في مركز ذات خيل لتعليم القرآن الكريم وعلومه' };
+  let data = { title: 'إشعار جديد', body: 'لديك إشعار جديد في مركز ذات خيل لتعليم القرآن الكريم وعلومه', url: '/' };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch (_) {
+    // Keep the privacy-safe generic notification when a payload is malformed.
+  }
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: '/assets/icons/icon-192.png',
-      badge: '/assets/icons/favicon-32.png'
+      badge: '/assets/icons/favicon-32.png',
+      tag: data.type || 'zat-khail-notification',
+      renotify: true,
+      data: { url: data.url || '/' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  let destination = new URL('/', self.location.origin);
+  try {
+    const requested = new URL(event.notification.data?.url || '/', self.location.origin);
+    if (requested.origin === self.location.origin) destination = requested;
+  } catch (_) {
+    destination = new URL('/', self.location.origin);
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async windows => {
+      const existing = windows.find(client => new URL(client.url).origin === self.location.origin);
+      if (existing) {
+        await existing.navigate(destination.href);
+        return existing.focus();
+      }
+      return clients.openWindow(destination.href);
     })
   );
 });

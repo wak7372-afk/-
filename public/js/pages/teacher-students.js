@@ -2,6 +2,15 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
+import {
+  TASK_META,
+  buildInterventions,
+  buildPeriodCards,
+  buildTaskMetrics,
+  performanceByStudent,
+  studentTrend,
+  taskState,
+} from '../lib/teacher-student-analytics.js';
 import '../lib/teacher-shell.js?v=3';
 
 const STATUS_META = {
@@ -70,6 +79,12 @@ function bindControls() {
   document.getElementById('students-sort').addEventListener('change', event => {
     state.sort = event.target.value;
     renderStudents();
+  });
+  document.getElementById('students-show-attention').addEventListener('click', () => {
+    state.status = 'attention';
+    document.getElementById('students-status-filter').value = 'attention';
+    renderStudents();
+    document.getElementById('students-list-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
@@ -155,11 +170,72 @@ async function loadDashboard() {
 }
 
 function renderDashboard() {
+  renderPriorityCenter();
   renderMetrics();
   renderDonut();
   renderTrend();
+  renderComparisons();
+  renderTaskDistribution();
   renderStudents();
   refreshIcons();
+}
+
+function renderPriorityCenter() {
+  const container = document.getElementById('students-priority-list');
+  const interventions = buildInterventions(state.consoleData?.students || [], state.performance?.students || []);
+  const urgentCount = interventions.filter(item => item.overdue > 0 || item.daily_state === 'overdue').length;
+  document.getElementById('students-action-title').textContent = interventions.length
+    ? `${interventions.length} ${interventions.length === 1 ? 'حالة تحتاج' : 'حالات تحتاج'} تدخلك`
+    : 'لا توجد حالات عاجلة';
+
+  if (!interventions.length) {
+    container.innerHTML = `<div class="students-priority-empty"><i data-lucide="badge-check"></i><div><strong>المتابعة مستقرة اليوم</strong><p>لا توجد تقارير متأخرة أو مؤشرات تراجع تستلزم تدخلاً الآن.</p></div></div>`;
+    return;
+  }
+
+  container.innerHTML = interventions.slice(0, 4).map((student, index) => priorityCard(student, index)).join('')
+    + (interventions.length > 4 ? `<button class="students-priority-more" type="button" data-show-all-attention><strong>+${interventions.length - 4}</strong><span>حالات أخرى</span></button>` : '');
+  container.querySelector('[data-show-all-attention]')?.addEventListener('click', () => document.getElementById('students-show-attention').click());
+  document.querySelector('.students-action-center')?.classList.toggle('has-urgent', urgentCount > 0);
+}
+
+function priorityCard(student, index) {
+  const primaryReason = student.reasons[0] || { label: 'يحتاج مراجعة', tone: 'is-neutral' };
+  const workspace = workspaceUrl(state.circleId, 'work');
+  return `<article class="students-priority-card ${primaryReason.tone}">
+    <div class="students-priority-rank" aria-label="الأولوية ${index + 1}">${index + 1}</div>
+    <div class="students-priority-person"><span class="students-avatar">${escapeHtml(initials(student.full_name))}</span><div><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>@${escapeHtml(student.username || '')}</small></div></div>
+    <div class="students-priority-reasons">${student.reasons.map(reason => `<span class="${reason.tone}">${escapeHtml(reason.label)}</span>`).join('')}</div>
+    <div class="students-priority-rate"><span>التزام 7 أيام</span><strong>${formatPercent(student.completionRate)}%</strong><i><b style="width:${clamp(student.completionRate, 0, 100)}%"></b></i></div>
+    <a href="${escapeHtml(workspace)}"><span>فتح التقارير</span><i data-lucide="arrow-left"></i></a>
+  </article>`;
+}
+
+function renderComparisons() {
+  const container = document.getElementById('students-comparison-cards');
+  const cards = buildPeriodCards(state.performance?.comparisons || {});
+  container.innerHTML = cards.map(card => {
+    const deltaTone = card.completionDelta > 0 ? 'is-up' : card.completionDelta < 0 ? 'is-down' : 'is-steady';
+    const deltaLabel = card.completionDelta === 0 ? 'مستقر' : `${card.completionDelta > 0 ? '+' : ''}${formatPercent(card.completionDelta)} نقطة`;
+    return `<article class="students-comparison-card">
+      <div class="students-rate-ring" style="--rate:${card.completionRate}" role="img" aria-label="نسبة إكمال ${escapeHtml(card.label)} ${formatPercent(card.completionRate)} بالمئة"><span><strong>${formatPercent(card.completionRate)}%</strong><small>إكمال</small></span></div>
+      <div><strong>${escapeHtml(card.label)}</strong><span>${card.completedCount} من ${card.expectedCount} يوماً طلابياً</span><em class="${deltaTone}"><i data-lucide="${card.completionDelta > 0 ? 'trending-up' : card.completionDelta < 0 ? 'trending-down' : 'minus'}"></i>${escapeHtml(deltaLabel)}</em><small>${escapeHtml(card.description)}</small></div>
+    </article>`;
+  }).join('');
+}
+
+function renderTaskDistribution() {
+  const container = document.getElementById('students-task-chart');
+  const tasks = buildTaskMetrics(state.performance?.task_distribution || {});
+  if (!tasks.some(task => task.assigned > 0)) {
+    container.innerHTML = '<div class="students-chart-empty"><i data-lucide="chart-bar-decreasing"></i><p>لا توجد تقارير كافية لتحليل توازن الخطة.</p></div>';
+    return;
+  }
+  container.innerHTML = tasks.map(task => `<article class="students-task-row" style="--task-color:${task.color}">
+    <div><span>${escapeHtml(task.label)}</span><strong>${formatPercent(task.completionRate)}%</strong></div>
+    <span class="students-task-track"><i style="width:${task.completionRate}%"></i></span>
+    <small><b>${task.completed}</b> من ${task.assigned} تقريراً منجزاً</small>
+  </article>`).join('');
 }
 
 function renderMetrics() {
@@ -212,14 +288,50 @@ function renderTrend() {
   const chart = document.getElementById('students-trend-chart');
   const days = state.performance?.daily_chart || [];
   if (!days.length) {
-    chart.innerHTML = '<p>لا تتوفر بيانات كافية لرسم اتجاه الإنجاز.</p>';
+    chart.innerHTML = '<div class="students-chart-empty"><i data-lucide="chart-no-axes-column-decreasing"></i><p>لا تتوفر بيانات كافية لرسم اتجاه الإنجاز.</p></div>';
     return;
   }
-  chart.innerHTML = days.map(day => {
+  const width = 760;
+  const height = 220;
+  const plot = { top: 16, right: 18, bottom: 40, left: 28 };
+  const usableWidth = width - plot.left - plot.right;
+  const usableHeight = height - plot.top - plot.bottom;
+  const points = days.map((day, index) => {
     const rate = clamp(Number(day.completion_rate || 0), 0, 100);
-    const tone = rate < 40 ? 'is-low' : rate < 75 ? 'is-mid' : '';
-    return `<div class="students-trend-day ${tone}" title="${escapeHtml(`${formatDate(day.report_date)}: ${formatPercent(rate)}%`)}"><b>${formatPercent(rate)}%</b><span><i style="height:${Math.max(3, rate)}%"></i></span><small>${escapeHtml(shortDate(day.report_date))}</small></div>`;
+    return {
+      ...day,
+      rate,
+      x: plot.left + (days.length === 1 ? usableWidth / 2 : (index / (days.length - 1)) * usableWidth),
+      y: plot.top + ((100 - rate) / 100) * usableHeight,
+    };
+  });
+  const linePath = points.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L ${points.at(-1).x.toFixed(1)} ${(plot.top + usableHeight).toFixed(1)} L ${points[0].x.toFixed(1)} ${(plot.top + usableHeight).toFixed(1)} Z`;
+  const averageRate = average(points.map(point => point.rate));
+  const currentRate = points.at(-1).rate;
+  const change = currentRate - points[0].rate;
+  const changeTone = change > 0 ? 'is-up' : change < 0 ? 'is-down' : 'is-steady';
+  const grid = [0, 25, 50, 75, 100].map(value => {
+    const y = plot.top + ((100 - value) / 100) * usableHeight;
+    return `<g><line x1="${plot.left}" y1="${y}" x2="${width - plot.right}" y2="${y}"/><text x="${plot.left - 6}" y="${y + 3}">${value}</text></g>`;
   }).join('');
+  const labels = points.map((point, index) => index % 2 === 0 || index === points.length - 1
+    ? `<text x="${point.x}" y="${height - 12}">${escapeHtml(shortDate(point.report_date))}</text>` : '').join('');
+  const dots = points.map(point => `<circle cx="${point.x}" cy="${point.y}" r="4"><title>${escapeHtml(`${formatDate(point.report_date)}: ${formatPercent(point.rate)}%`)}</title></circle>`).join('');
+
+  chart.innerHTML = `<div class="students-trend-summary">
+      <span><small>اليوم</small><strong>${formatPercent(currentRate)}%</strong></span>
+      <span><small>متوسط الفترة</small><strong>${formatPercent(averageRate)}%</strong></span>
+      <span class="${changeTone}"><small>منذ بداية الرسم</small><strong>${change > 0 ? '+' : ''}${formatPercent(change)} نقطة</strong></span>
+    </div>
+    <svg class="students-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="خط زمني لنسبة إكمال تقارير الحلقة خلال آخر أربعة عشر يوماً">
+      <defs><linearGradient id="students-trend-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b7654" stop-opacity=".24"/><stop offset="1" stop-color="#0b7654" stop-opacity=".02"/></linearGradient></defs>
+      <g class="students-chart-grid">${grid}</g>
+      <path class="students-chart-area" d="${areaPath}"/>
+      <path class="students-chart-line" d="${linePath}"/>
+      <g class="students-chart-dots">${dots}</g>
+      <g class="students-chart-labels">${labels}</g>
+    </svg>`;
 }
 
 function renderStudents() {
@@ -243,10 +355,10 @@ function renderStudents() {
 }
 
 function filteredStudents() {
-  const performanceByStudent = new Map((state.performance?.students || []).map(student => [student.student_id, student]));
+  const performanceIndex = performanceByStudent(state.performance);
   const rows = (state.consoleData?.students || []).map(student => ({
     ...student,
-    performance: performanceByStudent.get(student.student_id) || null,
+    performance: performanceIndex.get(student.student_id) || null,
   })).filter(student => {
     const matchesQuery = !state.query || `${student.full_name || ''} ${student.username || ''}`.toLocaleLowerCase('ar').includes(state.query);
     const status = student.daily_state || 'no_reports';
@@ -275,23 +387,27 @@ function comparePriority(a, b) {
 
 function studentRow(student) {
   const meta = STATUS_META[student.daily_state] || STATUS_META.no_reports;
-  const completed = Number(student.completed_count || 0);
-  const total = Number(student.report_count || 0);
   const overdue = Number(student.overdue_count || 0);
   const rate = clamp(Number(student.performance?.completion_rate_7 || 0), 0, 100);
+  const trend = studentTrend(student.performance || {});
   const latest = latestProgress(student.performance?.latest_progress);
   const needsAttention = overdue > 0 || ['overdue', 'partial', 'pending'].includes(student.daily_state);
   const workspace = workspaceUrl(state.circleId, 'work');
+  const chat = `/teacher/chat.html?contact=${encodeURIComponent(student.student_id)}`;
   const nextDue = student.next_due_at ? formatTime(student.next_due_at) : 'لا يوجد';
+  const tasks = Object.entries(TASK_META).map(([taskType, taskMeta]) => {
+    const task = taskState(student.assignments || [], taskType);
+    return `<span class="students-task-pill is-${task.key}" title="${escapeHtml(`${taskMeta.label}: ${task.label}`)}"><b>${escapeHtml(taskMeta.shortLabel)}</b><i></i></span>`;
+  }).join('');
   return `<article class="students-table-row ${needsAttention ? 'needs-attention' : ''}">
     <div class="students-person"><span class="students-avatar">${escapeHtml(initials(student.full_name))}</span><div><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>@${escapeHtml(student.username || '')}</small></div></div>
     <span class="students-state ${meta.tone}" data-label="حالة اليوم">${escapeHtml(meta.label)}</span>
-    <span class="students-count-cell" data-label="إنجاز اليوم"><b dir="ltr">${completed} / ${total}</b><small>${Number(student.exempted_count || 0) ? `${Number(student.exempted_count)} معفى` : 'تقارير اليوم'}</small></span>
+    <span class="students-task-pills" data-label="مهام اليوم">${tasks}</span>
     <strong class="students-overdue ${overdue ? 'has-overdue' : ''}" data-label="المهام المتأخرة">${overdue || '0'}</strong>
     <span class="students-count-cell" data-label="الموعد القادم">${escapeHtml(nextDue)}<small>${student.has_extension ? 'موعد ممدد' : 'الموعد الفعلي'}</small></span>
-    <span class="students-week-rate" data-label="إنجاز 7 أيام"><strong>${formatPercent(rate)}%</strong><span><i style="width:${rate}%"></i></span></span>
+    <span class="students-week-rate" data-label="الأداء الأسبوعي"><span class="students-week-value"><strong>${formatPercent(rate)}%</strong><em class="${trend.tone}">${escapeHtml(trend.label)}</em></span><span><i style="width:${rate}%"></i></span></span>
     <span class="students-progress" data-label="آخر تقدم"><strong>${escapeHtml(latest.content)}</strong><small>${escapeHtml(latest.detail)}</small></span>
-    <a class="students-row-action" href="${escapeHtml(workspace)}" title="فتح مركز تقارير الحلقة"><span>فتح السجل</span><i data-lucide="panel-left-open"></i></a>
+    <span class="students-row-actions"><a href="${escapeHtml(workspace)}" title="فتح مركز تقارير الحلقة"><i data-lucide="panel-left-open"></i><span>السجل</span></a><a href="${escapeHtml(chat)}" title="مراسلة الطالب"><i data-lucide="message-square"></i><span class="sr-only">مراسلة الطالب</span></a></span>
   </article>`;
 }
 
@@ -316,9 +432,12 @@ function setFeedback(type, message) {
 function renderEmptyPage(message, error = false) {
   state.consoleData = null;
   state.performance = null;
+  renderPriorityCenter();
   renderMetrics();
   renderDonut();
   renderTrend();
+  renderComparisons();
+  renderTaskDistribution();
   document.getElementById('students-table-wrap').hidden = true;
   setFeedback(error ? 'error' : 'empty', message);
 }
@@ -452,6 +571,8 @@ function buildPreviewDashboard(date) {
     student_id: student.student_id,
     completion_rate_7: [100, 57, 86, 28, 72, 45, 0, 93][index],
     previous_completion_rate_7: [86, 64, 72, 42, 65, 52, 0, 88][index],
+    on_time_rate_7: [94, 42, 88, 25, 55, 48, 0, 91][index],
+    completion_rate_30: [96, 68, 84, 46, 75, 61, 12, 89][index],
     overdue_count: student.overdue_count,
     latest_progress: index === 6 ? {} : {
       hifz: { report_date: date, content: `سورة البقرة، الآيات ${index * 5 + 1}-${index * 5 + 5}` },
@@ -467,7 +588,16 @@ function buildPreviewDashboard(date) {
     performance: {
       students: performanceStudents,
       daily_chart: dailyChart,
-      comparisons: { week: { current: { completion_rate: 74.5 }, completion_rate_delta: 6.5 } },
+      comparisons: {
+        today: { current: { completion_rate: 50, on_time_rate: 75, completed_student_days: 4, expected_student_days: 8 }, completion_rate_delta: -12.5 },
+        week: { current: { completion_rate: 74.5, on_time_rate: 81, completed_student_days: 38, expected_student_days: 51 }, completion_rate_delta: 6.5 },
+        month: { current: { completion_rate: 78, on_time_rate: 76, completed_student_days: 159, expected_student_days: 204 }, completion_rate_delta: 4 },
+      },
+      task_distribution: {
+        hifz: { assigned_count: 162, completed_count: 132, earned_points: 408 },
+        tathbit: { assigned_count: 151, completed_count: 108, earned_points: 270 },
+        murajaa: { assigned_count: 158, completed_count: 121, earned_points: 303 },
+      },
     },
   };
 }
@@ -488,7 +618,22 @@ function previewStudent(fullName, username, dailyState, index, date) {
     overdue_count: overdueCount,
     next_due_at: ['pending', 'partial'].includes(dailyState) ? `${date}T23:00:00+04:00` : null,
     has_extension: index === 1,
+    assignments: previewAssignments(dailyState, date),
   };
+}
+
+function previewAssignments(dailyState, date) {
+  if (dailyState === 'no_reports') return [];
+  const completedTypes = dailyState === 'completed' || dailyState === 'completed_late'
+    ? ['hifz', 'tathbit', 'murajaa']
+    : dailyState === 'partial' ? ['hifz'] : [];
+  return Object.keys(TASK_META).map(taskType => ({
+    id: `preview-${taskType}`,
+    task_type: taskType,
+    report_date: date,
+    status: completedTypes.includes(taskType) ? 'completed' : dailyState === 'exempted' ? 'exempted' : 'pending',
+    is_overdue: dailyState === 'overdue',
+  }));
 }
 
 function addDays(dateKey, days) {

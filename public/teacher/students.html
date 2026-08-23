@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="/css/design-system.css?v=3">
   <link rel="stylesheet" href="/css/teacher-workspace.css?v=36">
   <link rel="stylesheet" href="/css/calm-ui.css?v=4">
-  <link rel="stylesheet" href="/css/teacher-students.css?v=5">
+  <link rel="stylesheet" href="/css/teacher-students.css?v=6">
 </head>
 <body class="teacher-unified-shell teacher-students-page" data-teacher-section="students">
   <header class="teacher-students-topbar">
@@ -57,6 +57,17 @@
       <button id="students-refresh" class="students-refresh" type="button"><i data-lucide="refresh-cw"></i><span>تحديث البيانات</span></button>
     </section>
 
+    <section class="students-action-center" aria-labelledby="students-action-title">
+      <header>
+        <div class="students-section-title">
+          <span class="students-section-icon"><i data-lucide="scan-heart"></i></span>
+          <div><span>أولوية المتابعة</span><h2 id="students-action-title">يحتاجون تدخلك</h2><p>رتبنا الحالات حسب أثرها على استمرارية الطالب.</p></div>
+        </div>
+        <button id="students-show-attention" type="button"><span>عرض كل حالات المتابعة</span><i data-lucide="list-filter"></i></button>
+      </header>
+      <div id="students-priority-list" class="students-priority-list" aria-live="polite"></div>
+    </section>
+
     <section class="students-metrics" aria-label="ملخص الطلاب">
       <article class="student-metric is-navy"><span><i data-lucide="users"></i></span><div><small>إجمالي الطلاب</small><strong id="metric-students">0</strong><em>طالب نشط في الحلقة</em></div></article>
       <article class="student-metric is-green"><span><i data-lucide="circle-check-big"></i></span><div><small>أنجزوا اليوم</small><strong id="metric-completed">0</strong><em id="metric-completed-note">حتى الآن</em></div></article>
@@ -65,7 +76,18 @@
       <article class="student-metric is-gold"><span><i data-lucide="chart-no-axes-combined"></i></span><div><small>إكمال آخر 7 أيام</small><strong id="metric-weekly">0%</strong><em id="metric-weekly-note">متوسط الحلقة</em></div></article>
     </section>
 
-    <section class="students-insights" aria-label="تحليل حالة الحلقة">
+    <section class="students-insights students-insights-primary" aria-label="اتجاه أداء الحلقة">
+      <article class="students-panel students-trend-panel">
+        <header><div><span>اتجاه الإنجاز</span><h3>آخر 14 يوماً</h3><p>نسبة الطلاب الذين أكملوا جميع تقارير اليوم.</p></div><i data-lucide="chart-spline"></i></header>
+        <div id="students-trend-chart" class="students-trend-chart" aria-label="اتجاه إنجاز الحلقة"><p>جاري تحميل الاتجاه...</p></div>
+      </article>
+      <article class="students-panel students-comparison-panel">
+        <header><div><span>مقارنة زمنية</span><h3>هل تتحسن الحلقة؟</h3><p>مقارنة عادلة مع الفترة السابقة المماثلة.</p></div><i data-lucide="calendar-range"></i></header>
+        <div id="students-comparison-cards" class="students-comparison-cards"></div>
+      </article>
+    </section>
+
+    <section class="students-insights students-insights-secondary" aria-label="تفاصيل أداء الحلقة">
       <article class="students-panel students-status-panel">
         <header><div><span>حالة اليوم</span><h3>توزيع الطلاب حسب الإنجاز</h3></div><i data-lucide="chart-pie"></i></header>
         <div class="students-status-content">
@@ -73,9 +95,9 @@
           <div id="students-status-legend" class="students-status-legend"></div>
         </div>
       </article>
-      <article class="students-panel students-trend-panel">
-        <header><div><span>اتجاه الإنجاز</span><h3>آخر 14 يوماً</h3></div><i data-lucide="chart-column-big"></i></header>
-        <div id="students-trend-chart" class="students-trend-chart" aria-label="اتجاه إنجاز الحلقة"><p>جاري تحميل الاتجاه...</p></div>
+      <article class="students-panel students-task-panel">
+        <header><div><span>توازن الخطة</span><h3>الحفظ والتثبيت والمراجعة</h3><p>نسبة الإنجاز لكل نوع خلال آخر 30 يوماً.</p></div><i data-lucide="library-big"></i></header>
+        <div id="students-task-chart" class="students-task-chart"></div>
       </article>
     </section>
 
@@ -96,12 +118,12 @@
       </div>
 
       <div id="students-table-wrap" class="students-table-wrap" hidden>
-        <div class="students-table-head" aria-hidden="true"><span>الطالب</span><span>حالة اليوم</span><span>إنجاز التقارير</span><span>المتأخر</span><span>الموعد القادم</span><span>آخر 7 أيام</span><span>آخر تقدم</span><span></span></div>
+        <div class="students-table-head" aria-hidden="true"><span>الطالب</span><span>حالة اليوم</span><span>مهام اليوم</span><span>المتأخر</span><span>الموعد القادم</span><span>الأداء الأسبوعي</span><span>آخر تقدم</span><span></span></div>
         <div id="students-table-body" class="students-table-body"></div>
       </div>
     </section>
   </main>
 
-  <script type="module" src="/js/pages/teacher-students.js?v=3"></script>
+  <script type="module" src="/js/pages/teacher-students.js?v=4"></script>
 </body>
 </html>

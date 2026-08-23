@@ -62,10 +62,10 @@ async function loadContacts() {
     });
   });
 
-  // Auto select first contact
-  if (uniqueContacts.length > 0) {
-    selectContact(uniqueContacts[0].id, uniqueContacts[0].full_name || 'جهة اتصال');
-  }
+  const requestedContactId = new URLSearchParams(window.location.search).get('contact');
+  const requestedContact = uniqueContacts.find(contact => contact.id === requestedContactId);
+  const initialContact = requestedContact || uniqueContacts[0];
+  if (initialContact) selectContact(initialContact.id, initialContact.full_name || 'جهة اتصال');
 }
 
 function contactCircleLabel(circles) {

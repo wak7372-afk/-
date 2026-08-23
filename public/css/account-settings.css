@@ -1,0 +1,103 @@
+.account-settings-page {
+  --account-navy: #071a2b;
+  --account-green: #0b7654;
+  --account-gold: #d4ad43;
+  --account-red: #b53d45;
+  --account-line: #dbe3e6;
+  min-height: 100vh;
+  color: #1f3442;
+  background-color: #f5f7f7;
+  background-image: linear-gradient(rgba(7, 26, 43, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(7, 26, 43, .025) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.account-settings-main { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0; }
+.account-settings-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--account-line); }
+.account-settings-header > div { display: grid; gap: 2px; }
+.account-settings-header span { color: #a77a12; font-size: .7rem; font-weight: 900; }
+.account-settings-header h1 { margin: 0; color: var(--account-navy); font-family: var(--font-amiri); font-size: 2rem; }
+.account-settings-header p { margin: 0; color: #74838c; font-size: .7rem; }
+.account-settings-header button { display: inline-flex; min-height: 42px; align-items: center; gap: 7px; padding: 9px 13px; border: 1px solid #cdd8dc; border-radius: 7px; background: #fff; color: #526773; font: inherit; font-size: .66rem; font-weight: 900; cursor: pointer; }
+.account-settings-header button svg { width: 16px; }
+.account-message { margin-bottom: 16px; padding: 12px 15px; border: 1px solid #b7cedb; border-radius: 7px; background: #f0f8fc; color: #245e7a; font-size: .66rem; line-height: 1.8; }
+.account-message[hidden] { display: none; }
+.account-message.is-success { border-color: #b7d9cb; background: #edf8f3; color: var(--account-green); }
+.account-message.is-error { border-color: #ebc2c5; background: #fff3f3; color: var(--account-red); }
+
+.account-settings-grid { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: 18px; align-items: start; }
+.account-settings-card { overflow: hidden; border: 1px solid var(--account-line); border-radius: 8px; background: #fff; box-shadow: 0 10px 30px rgba(7, 26, 43, .06); }
+.account-settings-card > header { display: flex; align-items: flex-start; gap: 12px; padding: 20px; border-bottom: 1px solid #e4e9eb; background: #fafcfc; }
+.account-settings-card > header > span { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 7px; background: #e7f3ee; color: var(--account-green); }
+.account-settings-card > header svg { width: 20px; }
+.account-settings-card > header > div { display: grid; gap: 1px; }
+.account-settings-card > header small { color: #a77a12; font-size: .54rem; font-weight: 900; }
+.account-settings-card > header h2 { margin: 0; color: var(--account-navy); font-family: var(--font-amiri); font-size: 1.25rem; }
+.account-settings-card > header p { margin: 0; color: #7b8a92; font-size: .55rem; line-height: 1.7; }
+
+.account-form { display: grid; gap: 14px; padding: 20px; }
+.account-form label { display: grid; gap: 7px; }
+.account-form label > span { color: #536772; font-size: .62rem; font-weight: 900; }
+.account-form input,
+.notification-time-row input { width: 100%; min-height: 44px; border: 1px solid #ced8dc; border-radius: 7px; background: #fbfcfc; padding: 10px 12px; color: var(--account-navy); font: inherit; font-size: .72rem; outline: none; }
+.account-form input:focus,
+.notification-time-row input:focus { border-color: var(--account-gold); box-shadow: 0 0 0 3px rgba(212, 173, 67, .13); }
+.account-primary-button,
+.account-secondary-button { min-height: 44px; border-radius: 7px; font: inherit; font-size: .68rem; font-weight: 900; cursor: pointer; }
+.account-primary-button { border: 1px solid #aa7f19; background: var(--account-gold); color: var(--account-navy); }
+.account-secondary-button { margin: 4px 20px 20px; border: 1px solid var(--account-green); background: var(--account-green); color: #fff; }
+.account-card-note { margin: 0 20px 20px; padding-top: 14px; border-top: 1px solid #e7ebed; color: #7a8991; font-size: .55rem; line-height: 1.8; }
+
+.notification-device-status { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 11px; margin: 20px; padding: 13px; border: 1px solid #d8e2e4; border-radius: 7px; background: #f7faf9; }
+.notification-device-status > span { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 7px; background: #e7f3ee; color: var(--account-green); }
+.notification-device-status > span svg { width: 19px; }
+.notification-device-status > div { display: grid; min-width: 0; gap: 2px; }
+.notification-device-status strong { color: var(--account-navy); font-size: .66rem; }
+.notification-device-status p { margin: 0; color: #76868e; font-size: .5rem; line-height: 1.6; }
+.notification-device-status > button { min-height: 36px; padding: 7px 11px; border: 1px solid var(--account-green); border-radius: 6px; background: #fff; color: var(--account-green); font: inherit; font-size: .58rem; font-weight: 900; cursor: pointer; }
+.notification-device-status.is-enabled { border-color: #b9d8cc; background: #f0f8f5; }
+.notification-device-status.is-enabled > button { border-color: #ddb9bb; color: var(--account-red); }
+.notification-device-status.is-unsupported > span { background: #f0f2f3; color: #7b898f; }
+.notification-device-status.is-unsupported > button { display: none; }
+
+.notification-form { display: grid; gap: 0; }
+.notification-option { position: relative; display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 10px; padding: 14px 20px; border-top: 1px solid #e8ecee; cursor: pointer; }
+.notification-option[hidden],
+.notification-time-row[hidden] { display: none; }
+.notification-option > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 6px; background: #eef3f3; color: #546a76; }
+.notification-option > span svg { width: 17px; }
+.notification-option > div { display: grid; gap: 2px; }
+.notification-option strong { color: var(--account-navy); font-size: .63rem; }
+.notification-option small { color: #7c8b93; font-size: .49rem; line-height: 1.6; }
+.notification-option > input { position: absolute; opacity: 0; pointer-events: none; }
+.notification-switch { position: relative; width: 38px; height: 22px; border-radius: 999px; background: #c7d0d3; transition: background .2s ease; }
+.notification-switch::after { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(7, 26, 43, .2); content: ''; transition: transform .2s ease; }
+.notification-option > input:checked + .notification-switch { background: var(--account-green); }
+.notification-option > input:checked + .notification-switch::after { transform: translateX(-16px); }
+.notification-option > input:focus-visible + .notification-switch { outline: 3px solid rgba(36, 115, 154, .2); outline-offset: 2px; }
+.notification-time-row { display: grid; grid-template-columns: 1fr 130px; align-items: center; gap: 12px; margin: 0 20px 12px; padding: 11px 13px; border-radius: 6px; background: #f6f8f8; }
+.notification-time-row span { color: #5e717b; font-size: .56rem; font-weight: 800; }
+.notification-time-row input { min-height: 38px; padding: 6px 9px; }
+.notification-form.is-disabled { opacity: .55; }
+.notification-form.is-disabled :is(input, button) { pointer-events: none; }
+
+@media (max-width: 780px) {
+  .account-settings-main { width: min(100% - 24px, 620px); padding: 24px 0; }
+  .account-settings-header { align-items: flex-start; flex-direction: column; }
+  .account-settings-header button { width: 100%; justify-content: center; }
+  .account-settings-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .account-settings-header h1 { font-size: 1.7rem; }
+  .account-settings-card > header { padding: 17px; }
+  .notification-device-status { grid-template-columns: 38px 1fr; margin: 14px; }
+  .notification-device-status > button { grid-column: 1 / -1; width: 100%; }
+  .notification-option { grid-template-columns: 34px 1fr auto; padding: 13px 14px; }
+  .notification-time-row { grid-template-columns: 1fr; margin: 0 14px 10px; }
+  .account-secondary-button { margin: 4px 14px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-switch,
+  .notification-switch::after { transition: none; }
+}

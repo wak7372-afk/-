@@ -9,34 +9,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#061421">
   <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | إعدادات الحساب</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="./css/style.css?v=34">
   <link rel="stylesheet" href="./css/calm-ui.css?v=4">
+  <link rel="stylesheet" href="./css/account-settings.css?v=1">
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-  <main class="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-8">
-    <section class="settings-panel w-full rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-emerald-950/5 sm:p-8">
-      <p class="text-xs font-bold text-amber-700">الحساب المحلي</p>
-      <h1 class="mt-2 font-amiri text-3xl font-bold text-emerald-950">إعدادات الحساب</h1>
-      <p id="account-summary" class="mt-2 text-xs leading-6 text-slate-500"></p>
-      <div id="account-status" class="mt-5 hidden rounded-xl border px-4 py-3 text-xs leading-6" role="status" aria-live="polite"></div>
+<body class="account-settings-page">
+  <main class="account-settings-main">
+    <header class="account-settings-header">
+      <div><span>الحساب المحلي</span><h1>إعدادات الحساب</h1><p id="account-summary"></p></div>
+      <button id="back-btn" type="button"><i data-lucide="arrow-right"></i><span>العودة إلى اللوحة</span></button>
+    </header>
 
-      <form id="password-form" class="mt-6 space-y-4" novalidate>
-        <div>
-          <label for="new-password" class="mb-2 block text-xs font-bold text-slate-700">كلمة المرور الجديدة</label>
-          <input id="new-password" type="password" autocomplete="new-password" minlength="8" required class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="8 أحرف على الأقل" dir="ltr">
-        </div>
-        <div>
-          <label for="confirm-password" class="mb-2 block text-xs font-bold text-slate-700">تأكيد كلمة المرور</label>
-          <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required class="figma-input w-full rounded-xl px-4 py-3 text-sm" placeholder="أعد كتابة كلمة المرور" dir="ltr">
-        </div>
-        <button id="save-password-btn" type="submit" class="btn-figma-gold w-full rounded-xl py-3 text-sm">حفظ كلمة المرور</button>
-      </form>
+    <div id="account-status" class="account-message" role="status" aria-live="polite" hidden></div>
 
-      <p class="mt-6 border-t border-slate-100 pt-5 text-center text-xs leading-6 text-slate-500">عند فقدان كلمة المرور، راجع إدارة المركز لتعيين كلمة مؤقتة آمنة.</p>
-      <button id="back-btn" type="button" class="mt-4 w-full text-xs font-bold text-slate-500 hover:text-emerald-800">العودة إلى اللوحة</button>
-    </section>
+    <div class="account-settings-grid">
+      <section class="account-settings-card" aria-labelledby="password-settings-title">
+        <header><span><i data-lucide="key-round"></i></span><div><small>الأمان</small><h2 id="password-settings-title">تغيير كلمة المرور</h2><p>استخدم كلمة يسهل عليك تذكرها ويصعب على غيرك تخمينها.</p></div></header>
+        <form id="password-form" class="account-form" novalidate>
+          <label><span>كلمة المرور الجديدة</span><input id="new-password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 أحرف على الأقل" dir="ltr"></label>
+          <label><span>تأكيد كلمة المرور</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required placeholder="أعد كتابة كلمة المرور" dir="ltr"></label>
+          <button id="save-password-btn" type="submit" class="account-primary-button">حفظ كلمة المرور</button>
+        </form>
+        <p class="account-card-note">عند فقدان كلمة المرور، راجع إدارة المركز لتعيين كلمة مؤقتة آمنة.</p>
+      </section>
+
+      <section class="account-settings-card notification-settings-card" aria-labelledby="notification-settings-title">
+        <header><span><i data-lucide="bell-ring"></i></span><div><small>إشعارات الهاتف</small><h2 id="notification-settings-title">ابقَ على اطلاع</h2><p>اختر التنبيهات المهمة لك، ويمكنك إيقافها في أي وقت.</p></div></header>
+
+        <div id="notification-status" class="notification-device-status" aria-live="polite">
+          <span><i data-lucide="smartphone"></i></span><div><strong id="push-master-state">جاري التحقق...</strong><p id="push-support-note">نتحقق من دعم هذا الجهاز للإشعارات.</p></div>
+          <button id="push-enable-btn" type="button">تفعيل</button>
+        </div>
+
+        <form id="notification-form" class="notification-form">
+          <label class="notification-option" id="report-reminder-option">
+            <span><i data-lucide="file-clock"></i></span><div><strong>تذكير التقرير اليومي</strong><small>تنبيه الطالب بوجود تقرير قرآن ينتظر الإنجاز.</small></div>
+            <input id="notify-report-reminders" type="checkbox"><i class="notification-switch" aria-hidden="true"></i>
+          </label>
+          <label id="report-time-row" class="notification-time-row"><span>وقت التذكير بتوقيت مسقط</span><input id="notification-report-time" type="time" value="08:00"></label>
+          <label class="notification-option">
+            <span><i data-lucide="message-square-more"></i></span><div><strong>الرسائل الخاصة</strong><small>إشعار عام عند وصول رسالة جديدة دون إظهار محتواها.</small></div>
+            <input id="notify-direct-messages" type="checkbox"><i class="notification-switch" aria-hidden="true"></i>
+          </label>
+          <label class="notification-option">
+            <span><i data-lucide="megaphone"></i></span><div><strong>منشورات الحلقة</strong><small>الإعلانات واللقاءات والتحديثات الجديدة في حلقاتك.</small></div>
+            <input id="notify-circle-updates" type="checkbox"><i class="notification-switch" aria-hidden="true"></i>
+          </label>
+          <button id="save-notifications-btn" type="submit" class="account-secondary-button">حفظ تفضيلات الإشعارات</button>
+        </form>
+      </section>
+    </div>
   </main>
-  <script type="module" src="./js/pages/account-settings.js"></script>
+  <script type="module" src="./js/pages/account-settings.js?v=2"></script>
 </body>
 </html>
