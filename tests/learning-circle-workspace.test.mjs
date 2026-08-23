@@ -67,7 +67,7 @@ test('circle workspace keeps hidden controls hidden and collapses safely on mobi
 });
 
 test('circle workspace follows direct and in-page tab hashes', () => {
-  assert.match(workspacePage, /circle-workspace\.js\?v=15/);
+  assert.match(workspacePage, /circle-workspace\.js\?v=17/);
   assert.match(workspaceScript, /window\.addEventListener\('hashchange'/);
   assert.match(workspaceScript, /requestedTab !== state\.activeTab/);
 });

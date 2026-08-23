@@ -623,6 +623,55 @@ main code {
   box-shadow: var(--shadow-raised) !important;
 }
 
+.app-alert-stack {
+  position: fixed;
+  z-index: 2147483000;
+  inset: max(18px, env(safe-area-inset-top)) 50% auto auto;
+  display: grid;
+  width: min(430px, calc(100vw - 28px));
+  gap: 9px;
+  pointer-events: none;
+  transform: translateX(50%);
+}
+
+.app-alert {
+  display: grid;
+  min-height: 76px;
+  grid-template-columns: 38px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid #d7e0e3;
+  border-inline-start: 4px solid #1c6b50;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 22px 60px rgba(3, 18, 29, .24) !important;
+  color: #102638;
+  pointer-events: auto;
+  backdrop-filter: blur(18px);
+}
+
+.app-alert-error { border-inline-start-color: #b33d43; }
+.app-alert-warning { border-inline-start-color: #b88718; }
+.app-alert-success { border-inline-start-color: #087653; }
+.app-alert-info { border-inline-start-color: #24729a; }
+.app-alert-icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: #e8f3ef; color: #087653; }
+.app-alert-error .app-alert-icon { background: #fdebec; color: #b33d43; }
+.app-alert-warning .app-alert-icon { background: #fff3d8; color: #9b6d0a; }
+.app-alert-info .app-alert-icon { background: #e8f1f6; color: #24729a; }
+.app-alert-icon svg { width: 18px; height: 18px; }
+.app-alert-copy { display: grid; min-width: 0; gap: 3px; }
+.app-alert-copy strong { color: #102638; font-size: .76rem; }
+.app-alert-copy > span { color: #61727d; font-size: .68rem; line-height: 1.7; }
+.app-alert-close { display: grid; width: 30px; height: 30px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #f0f3f4; color: #5b6d78; font-size: 1.05rem; cursor: pointer; }
+.app-alert-close:hover { background: #e3e8ea; color: #102638; }
+
+@media (max-width: 520px) {
+  .app-alert-stack { inset-block-start: max(10px, env(safe-area-inset-top)); }
+  .app-alert { min-height: 68px; grid-template-columns: 34px minmax(0, 1fr) 28px; padding: 11px; }
+  .app-alert-icon { width: 32px; height: 32px; }
+}
+
 button,
 [role='button'],
 .button-primary,

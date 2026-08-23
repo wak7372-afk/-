@@ -7,6 +7,7 @@ import {
   buildInterventions,
   buildPeriodCards,
   buildTaskMetrics,
+  buildTodaySummary,
   performanceByStudent,
   studentTrend,
   taskState,
@@ -32,6 +33,12 @@ const state = {
   date: muscatDateKey(),
   consoleData: null,
   performance: null,
+  extensionQueue: [],
+  shiftQueue: [],
+  requestAccess: { extension: true, shift: true },
+  activeView: 'today',
+  selectedStudentId: null,
+  studentHistory: null,
   query: '',
   status: 'all',
   sort: 'priority',
@@ -55,6 +62,7 @@ async function initialize() {
 }
 
 function bindControls() {
+  document.querySelectorAll('[data-students-tab]').forEach(button => button.addEventListener('click', () => switchView(button.dataset.studentsTab)));
   document.getElementById('students-circle-select').addEventListener('change', async event => {
     state.circleId = event.target.value;
     syncUrl();
@@ -86,15 +94,40 @@ function bindControls() {
     renderStudents();
     document.getElementById('students-list-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  document.addEventListener('click', event => {
+    const details = event.target.closest('[data-student-details]');
+    if (details) openStudentDrawer(details.dataset.studentDetails);
+  });
+  document.getElementById('student-drawer-close').addEventListener('click', closeStudentDrawer);
+  document.getElementById('student-drawer-backdrop').addEventListener('click', closeStudentDrawer);
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && state.selectedStudentId) closeStudentDrawer();
+  });
+}
+
+function switchView(view) {
+  state.activeView = ['today', 'trends', 'requests'].includes(view) ? view : 'today';
+  document.querySelectorAll('[data-students-tab]').forEach(button => {
+    const active = button.dataset.studentsTab === state.activeView;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', String(active));
+  });
+  document.querySelectorAll('[data-students-view]').forEach(panel => {
+    panel.hidden = panel.dataset.studentsView !== state.activeView;
+  });
+  syncUrl();
+  refreshIcons();
 }
 
 function applyRequestedState() {
   const params = new URLSearchParams(window.location.search);
   const requestedDate = params.get('date');
+  state.activeView = ['today', 'trends', 'requests'].includes(params.get('view')) ? params.get('view') : 'today';
   if (/^\d{4}-\d{2}-\d{2}$/.test(requestedDate || '') && requestedDate <= muscatDateKey()) state.date = requestedDate;
   document.getElementById('students-date').value = state.date;
   document.getElementById('students-date').max = muscatDateKey();
   renderDate();
+  switchView(state.activeView);
 }
 
 async function loadCircles() {
@@ -144,14 +177,22 @@ async function loadDashboard() {
       const preview = buildPreviewDashboard(state.date);
       state.consoleData = preview.consoleData;
       state.performance = preview.performance;
+      state.extensionQueue = preview.extensionQueue;
+      state.shiftQueue = preview.shiftQueue;
+      state.requestAccess = { extension: true, shift: true };
     } else {
-      const [consoleResponse, performanceResponse] = await Promise.all([
+      const [consoleResponse, performanceResponse, extensionResponse, shiftResponse] = await Promise.all([
         supabase.rpc('get_quran_teacher_console', { p_circle_id: state.circleId, p_report_date: state.date }),
         supabase.rpc('get_quran_circle_performance', { p_circle_id: state.circleId, p_as_of: state.date }),
+        supabase.rpc('get_quran_extension_queue', { p_circle_id: state.circleId, p_status: 'pending' }),
+        supabase.rpc('get_quran_plan_shift_queue', { p_circle_id: state.circleId, p_status: 'pending' }),
       ]);
       if (consoleResponse.error) throw consoleResponse.error;
       state.consoleData = consoleResponse.data;
       state.performance = performanceResponse.error ? null : performanceResponse.data;
+      state.extensionQueue = extensionResponse.error ? [] : extensionResponse.data || [];
+      state.shiftQueue = shiftResponse.error ? [] : shiftResponse.data || [];
+      state.requestAccess = { extension: !extensionResponse.error, shift: !shiftResponse.error };
       if (performanceResponse.error) {
         console.warn('Unable to load extended performance:', performanceResponse.error);
         showToast('تم تحميل متابعة اليوم، لكن تعذر تحميل اتجاه الأداء.', 'info');
@@ -171,18 +212,21 @@ async function loadDashboard() {
 
 function renderDashboard() {
   renderPriorityCenter();
-  renderMetrics();
-  renderDonut();
+  renderTodaySummary();
   renderTrend();
   renderComparisons();
   renderTaskDistribution();
+  renderMomentum();
+  renderRequests();
   renderStudents();
   refreshIcons();
 }
 
 function renderPriorityCenter() {
   const container = document.getElementById('students-priority-list');
-  const interventions = buildInterventions(state.consoleData?.students || [], state.performance?.students || []);
+  const interventions = buildInterventions(state.consoleData?.students || [], state.performance?.students || [], {
+    now: state.consoleData?.server_now || Date.now(),
+  });
   const urgentCount = interventions.filter(item => item.overdue > 0 || item.daily_state === 'overdue').length;
   document.getElementById('students-action-title').textContent = interventions.length
     ? `${interventions.length} ${interventions.length === 1 ? 'حالة تحتاج' : 'حالات تحتاج'} تدخلك`
@@ -201,19 +245,18 @@ function renderPriorityCenter() {
 
 function priorityCard(student, index) {
   const primaryReason = student.reasons[0] || { label: 'يحتاج مراجعة', tone: 'is-neutral' };
-  const workspace = workspaceUrl(state.circleId, 'work');
   return `<article class="students-priority-card ${primaryReason.tone}">
     <div class="students-priority-rank" aria-label="الأولوية ${index + 1}">${index + 1}</div>
     <div class="students-priority-person"><span class="students-avatar">${escapeHtml(initials(student.full_name))}</span><div><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>@${escapeHtml(student.username || '')}</small></div></div>
     <div class="students-priority-reasons">${student.reasons.map(reason => `<span class="${reason.tone}">${escapeHtml(reason.label)}</span>`).join('')}</div>
     <div class="students-priority-rate"><span>التزام 7 أيام</span><strong>${formatPercent(student.completionRate)}%</strong><i><b style="width:${clamp(student.completionRate, 0, 100)}%"></b></i></div>
-    <a href="${escapeHtml(workspace)}"><span>فتح التقارير</span><i data-lucide="arrow-left"></i></a>
+    <button type="button" data-student-details="${escapeHtml(student.student_id)}"><span>عرض التفاصيل</span><i data-lucide="arrow-left"></i></button>
   </article>`;
 }
 
 function renderComparisons() {
   const container = document.getElementById('students-comparison-cards');
-  const cards = buildPeriodCards(state.performance?.comparisons || {});
+  const cards = buildPeriodCards(state.performance?.comparisons || {}).filter(card => card.key !== 'today');
   container.innerHTML = cards.map(card => {
     const deltaTone = card.completionDelta > 0 ? 'is-up' : card.completionDelta < 0 ? 'is-down' : 'is-steady';
     const deltaLabel = card.completionDelta === 0 ? 'مستقر' : `${card.completionDelta > 0 ? '+' : ''}${formatPercent(card.completionDelta)} نقطة`;
@@ -238,50 +281,78 @@ function renderTaskDistribution() {
   </article>`).join('');
 }
 
-function renderMetrics() {
-  const summary = state.consoleData?.summary || {};
-  const performanceStudents = state.performance?.students || [];
-  const overdueStudents = performanceStudents.length
-    ? performanceStudents.filter(student => Number(student.overdue_count || 0) > 0).length
-    : Number(summary.overdue_students || 0);
-  const week = state.performance?.comparisons?.week || {};
-  const weeklyRate = Number(week.current?.completion_rate || average(performanceStudents.map(student => student.completion_rate_7)) || 0);
-  const weeklyDelta = Number(week.completion_rate_delta || 0);
-
-  setText('metric-students', summary.student_count || 0);
-  setText('metric-completed', summary.completed_students || 0);
-  setText('metric-pending', summary.pending_students || 0);
-  setText('metric-overdue', overdueStudents);
-  setText('metric-weekly', `${formatPercent(weeklyRate)}%`);
-  setText('metric-completed-note', `${Number(summary.completed_on_time_students || 0)} في الوقت · ${Number(summary.completed_late_students || 0)} متأخر`);
-  setText('metric-weekly-note', weeklyDelta === 0 ? 'مستقر مقارنة بالأسبوع السابق' : `${weeklyDelta > 0 ? '+' : ''}${formatPercent(weeklyDelta)} نقطة عن الأسبوع السابق`);
+function renderMomentum() {
+  const container = document.getElementById('students-momentum-list');
+  if (!container) return;
+  const students = (state.performance?.students || []).map(student => ({ ...student, trend: studentTrend(student) }));
+  const changed = students.filter(student => Math.abs(student.trend.delta) >= 8)
+    .sort((a, b) => Math.abs(b.trend.delta) - Math.abs(a.trend.delta))
+    .slice(0, 6);
+  if (!changed.length) {
+    container.innerHTML = '<div class="students-chart-empty"><i data-lucide="minus"></i><p>لا توجد تغيرات واضحة في مستوى الطلاب خلال هذه الفترة.</p></div>';
+    return;
+  }
+  container.innerHTML = changed.map(student => `<button type="button" data-student-details="${escapeHtml(student.student_id)}" class="${student.trend.tone}">
+    <span class="students-avatar">${escapeHtml(initials(student.full_name))}</span>
+    <span><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>${student.trend.label} مقارنة بالأسبوع السابق</small></span>
+    <b>${student.trend.delta > 0 ? '+' : ''}${formatPercent(student.trend.delta)}</b>
+  </button>`).join('');
 }
 
-function renderDonut() {
-  const summary = state.consoleData?.summary || {};
-  const total = Number(summary.student_count || 0);
-  const segments = [
-    { label: 'منجز في الوقت', value: Number(summary.completed_on_time_students || 0), color: '#0b7654' },
-    { label: 'منجز بعد الموعد', value: Number(summary.completed_late_students || 0), color: '#d4ad43' },
-    { label: 'يحتاج متابعة', value: Number(summary.attention_students || 0), color: '#b53d45' },
-    { label: 'بلا تقرير أو معفى', value: Number(summary.no_report_students || 0) + Number(summary.exempted_students || 0), color: '#b8c5cb' },
-  ];
-  const donut = document.getElementById('students-status-donut');
-  donut.style.background = total ? conicGradient(segments, total) : '#e7ecee';
-  donut.setAttribute('aria-label', segments.map(item => `${item.label}: ${item.value}`).join('، '));
-  setText('students-status-total', total);
-  document.getElementById('students-status-legend').innerHTML = segments.map(item => `
-    <article style="--legend-color:${item.color}"><i aria-hidden="true"></i><span>${escapeHtml(item.label)}</span><strong>${item.value}</strong></article>`).join('');
+function renderRequests() {
+  const extensions = state.extensionQueue || [];
+  const shifts = state.shiftQueue || [];
+  const pendingCount = extensions.length + shifts.length;
+  const completedReports = (state.consoleData?.students || []).reduce((sum, student) => sum + Number(student.completed_count || 0), 0);
+  setText('requests-extension-count', extensions.length);
+  setText('requests-shift-count', shifts.length);
+  setText('requests-completed-count', completedReports);
+  const badge = document.getElementById('students-requests-badge');
+  badge.hidden = pendingCount === 0;
+  badge.textContent = String(pendingCount);
+  const container = document.getElementById('students-requests-list');
+  if (!container) return;
+
+  const items = [
+    ...extensions.map(request => ({
+      kind: 'extension', icon: 'timer-reset', label: 'طلب تمديد', studentId: request.student_id,
+      fullName: request.full_name, username: request.username,
+      reason: request.reason, detail: `${request.requested_minutes || 0} دقيقة · ${(request.items || []).length} تقرير`,
+      requestedAt: request.requested_at,
+    })),
+    ...shifts.map(request => ({
+      kind: 'shift', icon: 'calendar-arrow-down', label: 'طلب ترحيل', studentId: request.student_id,
+      fullName: request.full_name, username: request.username,
+      reason: request.reason, detail: `من ${formatDate(request.requested_from_date)} · ${request.pending_report_count || 0} تقرير`,
+      requestedAt: request.requested_at,
+    })),
+  ].sort((a, b) => String(a.requestedAt || '').localeCompare(String(b.requestedAt || '')));
+
+  if (!items.length) {
+    const restricted = !state.requestAccess.extension || !state.requestAccess.shift;
+    container.innerHTML = `<div class="students-requests-empty"><i data-lucide="${restricted ? 'shield-check' : 'inbox'}"></i><strong>${restricted ? 'لا توجد طلبات ضمن صلاحياتك' : 'لا توجد طلبات معلقة'}</strong><p>${restricted ? 'طلبات ترحيل الخطة تظهر للمعلم المسؤول والمدير فقط.' : 'ستظهر هنا طلبات التمديد والترحيل عند وصولها.'}</p></div>`;
+    return;
+  }
+  container.innerHTML = items.map(item => `<article class="students-request-item is-${item.kind}">
+    <span><i data-lucide="${item.icon}"></i></span>
+    <div><small>${item.label}</small><strong>${escapeHtml(item.fullName || 'طالب')}</strong><p>${escapeHtml(item.reason || 'لم يكتب سبباً')}</p><em>${escapeHtml(item.detail)}</em></div>
+    <button type="button" data-student-details="${escapeHtml(item.studentId)}"><span>مراجعة الطالب</span><i data-lucide="arrow-left"></i></button>
+  </article>`).join('');
 }
 
-function conicGradient(segments, total) {
-  let cursor = 0;
-  const stops = segments.map(segment => {
-    const start = cursor;
-    cursor += (segment.value / total) * 100;
-    return `${segment.color} ${start.toFixed(2)}% ${cursor.toFixed(2)}%`;
-  });
-  return `conic-gradient(${stops.join(',')})`;
+function renderTodaySummary() {
+  const summary = buildTodaySummary(state.consoleData?.summary || {}, state.consoleData?.students || []);
+  setText('metric-completion-rate', `${formatPercent(summary.completionRate)}%`);
+  setText('metric-completion-detail', `${summary.completedReports} من ${summary.assignedReports} تقرير`);
+  setText('metric-on-time', summary.completedOnTime);
+  setText('metric-late', summary.completedLate);
+  setText('metric-pending', summary.pendingStudents);
+  setText('metric-overdue-reports', summary.overdueReports);
+  setText('metric-overdue-students', `لدى ${summary.overdueStudents} طالب`);
+  const bar = document.getElementById('metric-completion-bar');
+  if (bar) bar.style.width = `${summary.completionRate}%`;
+  const nextDueDates = (state.consoleData?.students || []).map(student => student.next_due_at).filter(Boolean).sort();
+  setText('metric-deadline-note', nextDueDates.length ? `أقرب موعد اليوم ${formatTime(nextDueDates[0])}` : 'لا توجد مواعيد معلقة لهذا اليوم');
 }
 
 function renderTrend() {
@@ -392,22 +463,22 @@ function studentRow(student) {
   const trend = studentTrend(student.performance || {});
   const latest = latestProgress(student.performance?.latest_progress);
   const needsAttention = overdue > 0 || ['overdue', 'partial', 'pending'].includes(student.daily_state);
-  const workspace = workspaceUrl(state.circleId, 'work');
   const chat = `/teacher/chat.html?contact=${encodeURIComponent(student.student_id)}`;
   const nextDue = student.next_due_at ? formatTime(student.next_due_at) : 'لا يوجد';
+  const completed = Number(student.completed_count || 0);
+  const reportCount = Number(student.report_count || 0);
   const tasks = Object.entries(TASK_META).map(([taskType, taskMeta]) => {
     const task = taskState(student.assignments || [], taskType);
     return `<span class="students-task-pill is-${task.key}" title="${escapeHtml(`${taskMeta.label}: ${task.label}`)}"><b>${escapeHtml(taskMeta.shortLabel)}</b><i></i></span>`;
   }).join('');
   return `<article class="students-table-row ${needsAttention ? 'needs-attention' : ''}">
     <div class="students-person"><span class="students-avatar">${escapeHtml(initials(student.full_name))}</span><div><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>@${escapeHtml(student.username || '')}</small></div></div>
-    <span class="students-state ${meta.tone}" data-label="حالة اليوم">${escapeHtml(meta.label)}</span>
-    <span class="students-task-pills" data-label="مهام اليوم">${tasks}</span>
-    <strong class="students-overdue ${overdue ? 'has-overdue' : ''}" data-label="المهام المتأخرة">${overdue || '0'}</strong>
-    <span class="students-count-cell" data-label="الموعد القادم">${escapeHtml(nextDue)}<small>${student.has_extension ? 'موعد ممدد' : 'الموعد الفعلي'}</small></span>
+    <span class="students-daily-progress" data-label="تقرير اليوم"><strong>${completed}/${reportCount}</strong><span class="students-task-pills">${tasks}</span></span>
+    <span class="students-state-cell" data-label="الحالة والموعد"><b class="students-state ${meta.tone}">${escapeHtml(meta.label)}</b><small>${escapeHtml(nextDue)}${student.has_extension ? ' · ممدد' : ''}</small></span>
+    <span class="students-overdue-cell ${overdue ? 'has-overdue' : ''}" data-label="المتأخرات"><strong>${overdue || '0'}</strong><small>${overdue ? 'تقرير يحتاج معالجة' : 'لا يوجد تأخير'}</small></span>
     <span class="students-week-rate" data-label="الأداء الأسبوعي"><span class="students-week-value"><strong>${formatPercent(rate)}%</strong><em class="${trend.tone}">${escapeHtml(trend.label)}</em></span><span><i style="width:${rate}%"></i></span></span>
     <span class="students-progress" data-label="آخر تقدم"><strong>${escapeHtml(latest.content)}</strong><small>${escapeHtml(latest.detail)}</small></span>
-    <span class="students-row-actions"><a href="${escapeHtml(workspace)}" title="فتح مركز تقارير الحلقة"><i data-lucide="panel-left-open"></i><span>السجل</span></a><a href="${escapeHtml(chat)}" title="مراسلة الطالب"><i data-lucide="message-square"></i><span class="sr-only">مراسلة الطالب</span></a></span>
+    <span class="students-row-actions"><button type="button" data-student-details="${escapeHtml(student.student_id)}" title="فتح ملف الطالب"><i data-lucide="panel-left-open"></i><span>التفاصيل</span></button><a href="${escapeHtml(chat)}" title="مراسلة الطالب"><i data-lucide="message-square"></i><span class="sr-only">مراسلة الطالب</span></a></span>
   </article>`;
 }
 
@@ -418,6 +489,125 @@ function latestProgress(progress = {}) {
   return latest
     ? { content: latest.content || TASK_LABELS[latest.type] || 'تقرير منجز', detail: `${TASK_LABELS[latest.type] || latest.type} · ${formatDate(latest.report_date)}` }
     : { content: 'لا يوجد إنجاز مسجل', detail: 'سيظهر آخر تقدم هنا' };
+}
+
+async function openStudentDrawer(studentId) {
+  const student = (state.consoleData?.students || []).find(item => item.student_id === studentId);
+  if (!student) return;
+  state.selectedStudentId = studentId;
+  state.studentHistory = null;
+  const drawer = document.getElementById('student-drawer');
+  const backdrop = document.getElementById('student-drawer-backdrop');
+  drawer.hidden = false;
+  backdrop.hidden = false;
+  drawer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('has-student-drawer');
+  renderStudentDrawer(student, null, true);
+  refreshIcons();
+  document.getElementById('student-drawer-close').focus();
+
+  try {
+    if (isLocalPreviewMode()) {
+      state.studentHistory = buildPreviewHistory(student);
+    } else {
+      const { data, error } = await supabase.rpc('get_quran_student_history', {
+        p_circle_id: state.circleId,
+        p_student_id: studentId,
+        p_limit: 60,
+        p_offset: 0,
+      });
+      if (error) throw error;
+      state.studentHistory = data;
+    }
+    if (state.selectedStudentId === studentId) renderStudentDrawer(student, state.studentHistory, false);
+  } catch (error) {
+    console.error('Unable to load student history:', error);
+    if (state.selectedStudentId === studentId) renderStudentDrawer(student, null, false, friendlyError(error));
+  }
+}
+
+function closeStudentDrawer() {
+  state.selectedStudentId = null;
+  state.studentHistory = null;
+  const drawer = document.getElementById('student-drawer');
+  drawer.setAttribute('aria-hidden', 'true');
+  drawer.hidden = true;
+  document.getElementById('student-drawer-backdrop').hidden = true;
+  document.body.classList.remove('has-student-drawer');
+}
+
+function renderStudentDrawer(student, history, loading = false, errorMessage = '') {
+  const performance = performanceByStudent(state.performance).get(student.student_id) || {};
+  const period7 = history?.analytics?.periods?.['7'] || {};
+  const period30 = history?.analytics?.periods?.['30'] || {};
+  const assignments = history?.assignments || [];
+  const overdueAssignments = assignments.filter(item => item.is_overdue);
+  const oldestOverdue = overdueAssignments.slice().sort((a, b) => String(a.report_date).localeCompare(String(b.report_date)))[0];
+  const latest = latestProgress(history?.analytics?.latest_progress || performance.latest_progress);
+  const chat = `/teacher/chat.html?contact=${encodeURIComponent(student.student_id)}`;
+  const workspace = workspaceUrl(state.circleId, 'work');
+  setText('student-drawer-title', student.full_name || 'سجل الطالب');
+  const container = document.getElementById('student-drawer-content');
+  if (loading) {
+    container.innerHTML = '<div class="student-drawer-loading"><i data-lucide="loader-circle"></i><p>جاري تحميل سجل الطالب...</p></div>';
+    return;
+  }
+  if (errorMessage) {
+    container.innerHTML = `<div class="student-drawer-error"><i data-lucide="circle-alert"></i><p>${escapeHtml(errorMessage)}</p></div>`;
+    return;
+  }
+  container.innerHTML = `
+    <section class="student-drawer-identity"><span class="students-avatar">${escapeHtml(initials(student.full_name))}</span><div><strong>${escapeHtml(student.full_name || 'طالب')}</strong><small>@${escapeHtml(student.username || '')}</small></div></section>
+    <section class="student-drawer-metrics">
+      <article><small>إنجاز 7 أيام</small><strong>${formatPercent(period7.completion_rate ?? performance.completion_rate_7)}%</strong><span>${Number(period7.completed_count || 0)} تقريراً</span></article>
+      <article><small>في الوقت</small><strong>${formatPercent(period7.on_time_rate ?? performance.on_time_rate_7)}%</strong><span>آخر 7 أيام</span></article>
+      <article><small>إنجاز 30 يوماً</small><strong>${formatPercent(period30.completion_rate ?? performance.completion_rate_30)}%</strong><span>${Number(period30.completed_count || 0)} تقريراً</span></article>
+      <article class="${overdueAssignments.length ? 'is-alert' : ''}"><small>التقارير المتأخرة</small><strong>${overdueAssignments.length}</strong><span>${oldestOverdue ? `منذ ${formatDate(oldestOverdue.report_date)}` : 'لا يوجد تأخير'}</span></article>
+    </section>
+    <section class="student-drawer-section"><header><div><span>اليوم</span><h3>التقارير المطلوبة</h3></div></header><div class="student-drawer-tasks">${drawerTodayTasks(student.assignments || [])}</div></section>
+    <section class="student-drawer-section"><header><div><span>التقدم</span><h3>آخر موضع مسجل</h3></div></header><div class="student-drawer-latest"><i data-lucide="bookmark-check"></i><div><strong>${escapeHtml(latest.content)}</strong><small>${escapeHtml(latest.detail)}</small></div></div></section>
+    <section class="student-drawer-section"><header><div><span>السجل القريب</span><h3>آخر التقارير</h3></div></header><div class="student-drawer-history">${drawerHistory(assignments.slice(0, 8))}</div></section>
+    <footer class="student-drawer-actions"><a href="${escapeHtml(workspace)}"><i data-lucide="files"></i><span>إدارة التقارير</span></a><a href="${escapeHtml(chat)}"><i data-lucide="message-square"></i><span>مراسلة الطالب</span></a></footer>`;
+  refreshIcons();
+}
+
+function drawerTodayTasks(assignments) {
+  if (!assignments.length) return '<p class="student-drawer-empty">لا توجد تقارير مقررة لهذا اليوم.</p>';
+  return assignments.map(item => {
+    const task = taskState([item], item.task_type);
+    return `<article class="is-${task.key}"><span><i data-lucide="${task.key === 'completed' ? 'check' : task.key === 'overdue' ? 'triangle-alert' : 'clock-3'}"></i></span><div><strong>${escapeHtml(TASK_LABELS[item.task_type] || item.task_type)}</strong><small>${escapeHtml(item.content || task.label)}</small></div><b>${escapeHtml(task.label)}</b></article>`;
+  }).join('');
+}
+
+function drawerHistory(assignments) {
+  if (!assignments.length) return '<p class="student-drawer-empty">لا يوجد سجل تقارير بعد.</p>';
+  return assignments.map(item => {
+    const status = item.status === 'completed' ? (item.completion_band === 'late' ? 'منجز متأخراً' : 'منجز') : item.status === 'exempted' ? 'معفى' : item.is_overdue ? 'متأخر' : 'منتظر';
+    return `<article class="${item.is_overdue ? 'is-overdue' : ''}"><time>${escapeHtml(shortDate(item.report_date))}</time><div><strong>${escapeHtml(TASK_LABELS[item.task_type] || item.task_type)}</strong><small>${escapeHtml(item.content || '')}</small></div><span>${escapeHtml(status)}</span></article>`;
+  }).join('');
+}
+
+function buildPreviewHistory(student) {
+  const performance = performanceByStudent(state.performance).get(student.student_id) || {};
+  const assignments = Array.from({ length: 9 }, (_, index) => ({
+    id: `history-${student.student_id}-${index}`,
+    report_date: addDays(state.date, -index),
+    task_type: ['hifz', 'tathbit', 'murajaa'][index % 3],
+    content: index % 3 === 0 ? `سورة البقرة، الآيات ${index + 1}-${index + 5}` : index % 3 === 1 ? 'تثبيت محفوظ الأسبوع' : 'مراجعة الورد السابق',
+    status: index < Number(student.overdue_count || 0) ? 'pending' : 'completed',
+    is_overdue: index < Number(student.overdue_count || 0),
+    completion_band: index % 4 === 0 ? 'late' : 'early',
+  }));
+  return {
+    analytics: {
+      periods: {
+        '7': { completion_rate: performance.completion_rate_7, on_time_rate: performance.on_time_rate_7, completed_count: 6 },
+        '30': { completion_rate: performance.completion_rate_30, completed_count: 23 },
+      },
+      latest_progress: performance.latest_progress,
+    },
+    assignments,
+  };
 }
 
 function setFeedback(type, message) {
@@ -432,12 +622,15 @@ function setFeedback(type, message) {
 function renderEmptyPage(message, error = false) {
   state.consoleData = null;
   state.performance = null;
+  state.extensionQueue = [];
+  state.shiftQueue = [];
   renderPriorityCenter();
-  renderMetrics();
-  renderDonut();
+  renderTodaySummary();
   renderTrend();
   renderComparisons();
   renderTaskDistribution();
+  renderMomentum();
+  renderRequests();
   document.getElementById('students-table-wrap').hidden = true;
   setFeedback(error ? 'error' : 'empty', message);
 }
@@ -448,6 +641,7 @@ function renderDate() {
 
 function updateWorkspaceLinks() {
   document.getElementById('students-circle-workspace').href = state.circleId ? workspaceUrl(state.circleId, 'performance') : '/circles.html?type=quran';
+  document.getElementById('students-review-workspace').href = state.circleId ? workspaceUrl(state.circleId, 'work') : '/circles.html?type=quran';
 }
 
 function workspaceUrl(circleId, section) {
@@ -463,6 +657,7 @@ function syncUrl() {
   const params = new URLSearchParams(window.location.search);
   if (state.circleId) params.set('circle', state.circleId);
   params.set('date', state.date);
+  params.set('view', state.activeView);
   history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
 }
 
@@ -599,6 +794,16 @@ function buildPreviewDashboard(date) {
         murajaa: { assigned_count: 158, completed_count: 121, earned_points: 303 },
       },
     },
+    extensionQueue: [{
+      id: 'preview-extension', student_id: students[5].student_id, full_name: students[5].full_name,
+      username: students[5].username, requested_minutes: 90, reason: 'ارتباط عائلي طارئ وأحتاج وقتاً إضافياً.',
+      requested_at: `${date}T09:10:00+04:00`, items: students[5].assignments.slice(0, 2).map(item => ({ assignment_id: item.id })),
+    }],
+    shiftQueue: [{
+      id: 'preview-shift', student_id: students[3].student_id, full_name: students[3].full_name,
+      username: students[3].username, requested_from_date: addDays(date, -2), reason: 'تعذر علي إنجاز تقارير يومين بسبب المرض.',
+      requested_at: `${date}T08:20:00+04:00`, pending_report_count: 9, overdue_report_count: 3,
+    }],
   };
 }
 

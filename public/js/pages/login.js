@@ -1,4 +1,4 @@
-import { loginUser, routeExistingSession } from '../lib/auth.js';
+import { loginUser, routeExistingSession } from '../lib/auth.js?v=2';
 import { initI18n, setLanguage } from '../lib/i18n.js';
 import { registerServiceWorker } from '../lib/utils.js';
 
@@ -36,7 +36,15 @@ async function handlePasswordLogin(event) {
   try {
     await loginUser(elements.loginUsername.value, elements.loginPassword.value);
   } catch (error) {
-    showStatus(error.message || 'تعذر تسجيل الدخول.', 'error');
+    const rawMessage = error.message || '';
+    const message = /اسم المستخدم|كلمة المرور|بيانات الحساب/.test(rawMessage)
+      ? 'اسم المستخدم أو كلمة المرور غير صحيحة.'
+      : rawMessage || 'تعذر تسجيل الدخول.';
+    showStatus(message, 'error');
+    if (/اسم المستخدم|كلمة المرور/.test(message)) {
+      elements.loginPassword.value = '';
+      elements.loginPassword.focus();
+    }
     setButtonBusy(false);
   }
 }

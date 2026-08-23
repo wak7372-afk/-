@@ -609,6 +609,10 @@
 .quran-audience-segments label.is-active > svg,
 .quran-conflict-strategies label.is-active > svg { color: var(--circle-green); }
 .quran-conflict-strategies label.is-disabled { cursor: not-allowed; opacity: 0.52; }
+.quran-replaced-history-options { display: grid; gap: 7px; margin: 3px 0 0; padding: 10px; border: 1px solid #c8d6d1; border-radius: 7px; background: #fff; }
+.quran-replaced-history-options legend { padding: 0 5px; color: var(--circle-navy); font-size: .57rem; font-weight: 900; }
+.quran-replaced-history-options > label { min-height: 62px; grid-template-columns: 18px minmax(0,1fr); padding: 9px; }
+.quran-replaced-history-options input { position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--circle-green); }
 
 .quran-student-picker { margin-top: 13px; padding-top: 13px; border-top: 1px solid #e0e6e8; }
 .quran-student-picker-tools { display: flex; align-items: center; gap: 7px; }
@@ -938,6 +942,8 @@
 .quran-exempt-dialog label { display: grid; gap: 6px; }
 .quran-exempt-dialog label span { color: #3c4f5f; font-size: 0.59rem; font-weight: 900; }
 .quran-exempt-dialog textarea { width: 100%; resize: vertical; padding: 10px; border: 1px solid #d0dade; border-radius: 6px; font-size: 0.61rem; }
+.quran-exempt-dialog .quran-exempt-error { margin: 9px 0 0; padding: 9px 10px; border: 1px solid #edc0c2; border-radius: 6px; background: #fff2f2; box-shadow: none !important; color: var(--circle-red); font-size: .58rem; font-weight: 800; }
+.quran-exempt-dialog .quran-exempt-error[hidden] { display: none; }
 .quran-exempt-dialog footer { display: flex; justify-content: flex-end; gap: 7px; margin-top: 13px; }
 .quran-exempt-dialog footer button { min-height: 38px; padding: 6px 12px; border: 1px solid #d1dade; border-radius: 5px; background: #fff; color: #586977; font-size: 0.57rem; font-weight: 900; }
 .quran-exempt-dialog footer button[type="submit"] { border-color: var(--circle-red); background: var(--circle-red); color: #fff; }
@@ -1409,8 +1415,8 @@
 .quran-accounting-student > .quran-open-student-command { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 6px; padding: 6px 9px; border: 1px solid #b8cbd3; border-radius: 5px; background: #fff; color: var(--circle-navy); font-size: 0.55rem; font-weight: 900; }
 .quran-accounting-student > .quran-open-student-command:hover { border-color: var(--circle-green); background: #eef7f3; color: var(--circle-green); }
 
-.quran-history-backdrop { position: fixed; inset: 0; z-index: 89; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(3,18,29,0.56); cursor: default; }
-.quran-student-history { position: fixed; inset: 0 auto 0 0; z-index: 90; display: grid; width: min(720px, calc(100vw - 280px)); min-width: 580px; grid-template-rows: auto auto minmax(0, 1fr); margin: 0; padding: 0; overflow: hidden; border: 0; border-right: 1px solid #b9c8ce; border-radius: 0; background: #fff; box-shadow: 24px 0 70px rgba(3,18,29,0.3); }
+.quran-history-backdrop { position: fixed !important; z-index: 9998 !important; inset: 0 !important; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(3,18,29,0.56); cursor: default; }
+.quran-student-history { position: fixed !important; z-index: 9999 !important; inset: 0 auto 0 0 !important; display: grid; width: min(720px, calc(100vw - 280px)); min-width: 580px; grid-template-rows: auto auto minmax(0, 1fr); margin: 0; padding: 0; overflow: hidden; border: 0; border-right: 1px solid #b9c8ce; border-radius: 0; background: #fff; box-shadow: 24px 0 70px rgba(3,18,29,0.3); }
 .quran-history-heading { position: sticky; top: 0; display: flex; min-height: 88px; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #d9e2e5; background: var(--circle-navy); }
 .quran-history-person { display: flex; min-width: 0; align-items: center; gap: 10px; }
 .quran-history-person .person-avatar { width: 44px; height: 44px; flex: 0 0 auto; background: var(--circle-gold); color: var(--circle-navy); font-size: 1rem; }
@@ -1420,7 +1426,7 @@
 .quran-history-person p { overflow: hidden; margin: 1px 0 0; color: #bdcad1; font-size: 0.52rem; text-overflow: ellipsis; white-space: nowrap; }
 .quran-history-actions button { border-color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.08); color: #fff; }
 .quran-history-actions .plan-command { border-color: #d6b44f; background: #d6b44f; color: var(--circle-navy); }
-.quran-history-actions .close-command { width: 36px; }
+.quran-history-actions .close-command { position: relative; z-index: 2; width: 38px; height: 38px; flex: 0 0 38px; }
 .quran-history-sections { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid #d7e0e3; background: #f5f8f8; }
 .quran-history-sections button { position: relative; display: flex; min-height: 48px; align-items: center; justify-content: center; gap: 6px; border: 0; background: transparent; color: #657681; font-size: 0.57rem; font-weight: 900; }
 .quran-history-sections button + button { border-right: 1px solid #dce4e7; }

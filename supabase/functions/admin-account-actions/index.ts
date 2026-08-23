@@ -60,6 +60,15 @@ function isUuid(value: unknown) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value ?? ''));
 }
 
+function circleDeletionError(error: { message?: string; code?: string } | null) {
+  const message = String(error?.message ?? '');
+  if (/CIRCLE_NOT_FOUND/i.test(message)) return 'الحلقة غير موجودة أو حُذفت مسبقاً.';
+  if (/CONFIRMATION_MISMATCH/i.test(message)) return 'اسم الحلقة المكتوب غير مطابق.';
+  if (/ADMIN_REQUIRED|42501/i.test(message) || error?.code === '42501') return 'الحذف النهائي متاح لمدير المركز فقط.';
+  if (/foreign key|violates/i.test(message)) return 'توجد بيانات مرتبطة لم يتمكن النظام من تنظيفها. سُجلت المشكلة لإصلاحها.';
+  return 'تعذر حذف الحلقة نهائياً. أعد المحاولة، وإن استمرت المشكلة فأرسل وقت المحاولة لإدارة النظام.';
+}
+
 async function removeStoredFiles(admin: ReturnType<typeof createClient>, paths: unknown) {
   const cleanPaths = Array.isArray(paths)
     ? [...new Set(paths.map(path => String(path ?? '').trim()).filter(Boolean))]
@@ -73,7 +82,7 @@ async function removeStoredFiles(admin: ReturnType<typeof createClient>, paths: 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(request) });
   if (request.method !== 'POST') return response(request, { error: 'Method not allowed' }, 405);
-  if (!supabaseUrl || !publishableKey || !secretKey || !appOrigin) {
+  if (!supabaseUrl || !publishableKey || !secretKey) {
     return response(request, { error: 'Function configuration is incomplete' }, 500);
   }
 
@@ -118,7 +127,7 @@ Deno.serve(async (request) => {
       });
       if (prepareError || !prepared?.job_id) {
         console.error('Circle hard deletion preparation failed:', prepareError);
-        return response(request, { error: 'تعذر حذف الحلقة. تأكد من اسم الحلقة ثم أعد المحاولة.' }, 400);
+        return response(request, { error: circleDeletionError(prepareError) }, 400);
       }
       try {
         await removeStoredFiles(admin, prepared.storage_paths);

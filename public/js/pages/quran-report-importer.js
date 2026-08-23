@@ -1,5 +1,5 @@
 import { isLocalPreviewMode } from '../lib/auth.js';
-import { escapeHtml, showToast } from '../lib/utils.js';
+import { escapeHtml, showToast } from '../lib/utils.js?v=2';
 import { buildQuranReportTemplate, parseQuranWorkbook, toServerRows } from '../lib/quran-report-excel.js';
 
 const PAGE_SIZE = 18;
@@ -226,6 +226,7 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
         <div class="quran-conflict-strategies" role="radiogroup" aria-label="طريقة معالجة التعارض">
           <label class="${state.conflictStrategy === 'replace' ? 'is-active' : ''} ${nonReplaceable ? 'is-disabled' : ''}"><input type="radio" name="conflict-strategy" value="replace" ${state.conflictStrategy === 'replace' ? 'checked' : ''} ${nonReplaceable ? 'disabled' : ''}><i data-lucide="replace"></i><span><b>استبدال القديمة</b><small>يحفظ الإصدار السابق في السجل.</small></span></label>
           <label class="${state.conflictStrategy === 'skip' ? 'is-active' : ''}"><input type="radio" name="conflict-strategy" value="skip" ${state.conflictStrategy === 'skip' ? 'checked' : ''}><i data-lucide="list-minus"></i><span><b>تجاوز المتعارضة</b><small>ينشر بقية التقارير فقط.</small></span></label>
+          ${state.conflictStrategy === 'replace' ? `<fieldset class="quran-replaced-history-options"><legend>سجل المهام القديمة</legend><label><input type="radio" name="replaced-history-action" value="keep" ${state.replacedHistoryAction === 'keep' ? 'checked' : ''}><span><b>الاحتفاظ بالسجل</b><small>تبقى المهام بحالة مستبدلة ولا تُحسب كتأخير.</small></span></label><label><input type="radio" name="replaced-history-action" value="delete" ${state.replacedHistoryAction === 'delete' ? 'checked' : ''}><span><b>حذف المهام القديمة</b><small>يحذف المهام المعلقة المستبدلة من سجل الطالب، مع إبقاء أثر إداري للعملية.</small></span></label></fieldset>` : ''}
         </div>
       </div>`;
   }
@@ -239,6 +240,7 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
         <div class="quran-import-success-metrics">
           <span><b>${Number(result.replaced_count || 0)}</b><small>مستبدلة</small></span>
           <span><b>${Number(result.skipped_count || 0)}</b><small>متجاوزة</small></span>
+          ${Number(result.deleted_history_count || 0) ? `<span><b>${Number(result.deleted_history_count)}</b><small>سجل قديم محذوف</small></span>` : ''}
         </div>
         <button type="button" class="circle-primary-command" data-import-action="new"><i data-lucide="plus"></i><span>خطة جديدة</span></button>
       </section>`;
@@ -264,6 +266,12 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
     }
     if (event.target.name === 'conflict-strategy') {
       state.conflictStrategy = event.target.value;
+      if (state.conflictStrategy !== 'replace') state.replacedHistoryAction = 'keep';
+      render();
+      return;
+    }
+    if (event.target.name === 'replaced-history-action') {
+      state.replacedHistoryAction = event.target.value;
       render();
     }
   }
@@ -404,11 +412,13 @@ export function createQuranReportImporter({ container, supabase, getContext, ref
           assignments_count: Number(state.serverPreview.batch.valid_row_count || 0) * recipientCount,
           replaced_count: state.conflictStrategy === 'replace' ? Number(state.serverPreview.conflict_count || 0) : 0,
           skipped_count: state.conflictStrategy === 'skip' ? Number(state.serverPreview.conflict_count || 0) : 0,
+          deleted_history_count: state.conflictStrategy === 'replace' && state.replacedHistoryAction === 'delete' ? Number(state.serverPreview.conflict_count || 0) : 0,
         };
       } else {
-        const { data, error } = await supabase.rpc('approve_quran_report_import', {
+        const { data, error } = await supabase.rpc('approve_quran_report_import_with_history', {
           p_batch_id: state.batchId,
           p_conflict_strategy: state.conflictStrategy || 'reject',
+          p_replaced_history_action: state.replacedHistoryAction,
         });
         if (error) throw error;
         state.published = data;
@@ -553,6 +563,7 @@ function freshState() {
     archiveWarning: '',
     serverPreview: null,
     conflictStrategy: '',
+    replacedHistoryAction: 'keep',
     published: null,
     busy: false,
   };

@@ -55,7 +55,9 @@ export function studentTrend(student = {}) {
   return { key: 'stable', label: 'مستقر', delta, tone: 'is-steady' };
 }
 
-export function buildInterventions(consoleStudents = [], performanceStudents = []) {
+export function buildInterventions(consoleStudents = [], performanceStudents = [], options = {}) {
+  const now = new Date(options.now || Date.now());
+  const dueSoonMinutes = Number(options.dueSoonMinutes || 120);
   const performanceIndex = new Map(performanceStudents.map(student => [student.student_id, student]));
   return consoleStudents.map(student => {
     const performance = performanceIndex.get(student.student_id) || {};
@@ -63,38 +65,40 @@ export function buildInterventions(consoleStudents = [], performanceStudents = [
     const trend = studentTrend(performance);
     const completionRate = Number(performance.completion_rate_7 || 0);
     const onTimeRate = Number(performance.on_time_rate_7 || 0);
+    const remainingMinutes = minutesUntil(student.next_due_at, now);
+    const dueSoon = ['pending', 'partial'].includes(student.daily_state)
+      && remainingMinutes !== null
+      && remainingMinutes >= 0
+      && remainingMinutes <= dueSoonMinutes;
     const reasons = [];
     let score = 0;
+    let priority = 'watch';
 
     if (overdue > 0) {
       score += 90 + Math.min(overdue, 9) * 4;
       reasons.push({ label: `${overdue} تقرير متأخر`, tone: 'is-critical' });
+      priority = 'critical';
     }
     if (student.daily_state === 'overdue') {
       score += 70;
       reasons.push({ label: 'تجاوز موعد اليوم', tone: 'is-critical' });
-    } else if (student.daily_state === 'partial') {
-      score += 42;
-      reasons.push({ label: 'أنجز جزءاً من تقرير اليوم', tone: 'is-warning' });
-    } else if (student.daily_state === 'pending') {
-      score += 28;
-      reasons.push({ label: 'لم يكمل تقرير اليوم', tone: 'is-warning' });
+      priority = 'critical';
+    } else if (dueSoon) {
+      score += student.daily_state === 'partial' ? 58 : 48;
+      reasons.push({ label: `بقي ${formatDuration(remainingMinutes)}`, tone: 'is-warning' });
+      if (priority !== 'critical') priority = 'urgent';
     }
-    if (trend.key === 'declining') {
+    if (trend.key === 'declining' && Math.abs(trend.delta) >= 15) {
       score += 45 + Math.min(Math.abs(trend.delta), 30);
       reasons.push({ label: `تراجع ${formatNumber(Math.abs(trend.delta))} نقطة`, tone: 'is-warning' });
     }
-    if (completionRate > 0 && completionRate < 60) {
+    if ((completionRate > 0 || Number(performance.previous_completion_rate_7 || 0) > 0) && completionRate < 60) {
       score += 28;
       reasons.push({ label: `التزام أسبوعي ${formatNumber(completionRate)}%`, tone: 'is-warning' });
     }
-    if (onTimeRate > 0 && onTimeRate < 50 && completionRate >= 60) {
+    if (onTimeRate > 0 && onTimeRate < 50 && completionRate >= 60 && score > 0) {
       score += 18;
-      reasons.push({ label: 'يتكرر الإنجاز قرب الموعد', tone: 'is-neutral' });
-    }
-    if (student.daily_state === 'no_reports') {
-      score += 14;
-      reasons.push({ label: 'لا توجد له خطة اليوم', tone: 'is-neutral' });
+      reasons.push({ label: `الإنجاز في الوقت ${formatNumber(onTimeRate)}%`, tone: 'is-neutral' });
     }
 
     return {
@@ -104,11 +108,36 @@ export function buildInterventions(consoleStudents = [], performanceStudents = [
       overdue,
       completionRate,
       onTimeRate,
+      remainingMinutes,
+      dueSoon,
+      priority,
       score,
       reasons: uniqueReasons(reasons),
     };
   }).filter(student => student.score > 0)
     .sort((a, b) => b.score - a.score || String(a.full_name || '').localeCompare(String(b.full_name || ''), 'ar'));
+}
+
+export function buildTodaySummary(summary = {}, students = []) {
+  const totalStudents = Number(summary.student_count || students.length || 0);
+  const completedOnTime = Number(summary.completed_on_time_students || 0);
+  const completedLate = Number(summary.completed_late_students || 0);
+  const pendingStudents = Number(summary.pending_students || 0);
+  const overdueStudents = Number(summary.overdue_students || 0);
+  const overdueReports = students.reduce((sum, student) => sum + Number(student.overdue_count || 0), 0);
+  const assignedReports = students.reduce((sum, student) => sum + Number(student.report_count || 0), 0);
+  const completedReports = students.reduce((sum, student) => sum + Number(student.completed_count || 0), 0);
+  return {
+    totalStudents,
+    completedOnTime,
+    completedLate,
+    pendingStudents,
+    overdueStudents,
+    overdueReports,
+    assignedReports,
+    completedReports,
+    completionRate: assignedReports ? clamp((completedReports / assignedReports) * 100, 0, 100) : 0,
+  };
 }
 
 export function taskState(assignments = [], taskType) {
@@ -132,6 +161,20 @@ function uniqueReasons(reasons) {
 function formatNumber(value) {
   const number = Number(value || 0);
   return number.toFixed(number % 1 ? 1 : 0);
+}
+
+function minutesUntil(value, now) {
+  if (!value) return null;
+  const dueAt = new Date(value);
+  if (Number.isNaN(dueAt.getTime()) || Number.isNaN(now.getTime())) return null;
+  return Math.ceil((dueAt.getTime() - now.getTime()) / 60000);
+}
+
+function formatDuration(minutes) {
+  if (minutes < 60) return `${Math.max(0, minutes)} دقيقة`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours} س ${rest} د` : `${hours} ساعة`;
 }
 
 function clamp(value, min, max) {

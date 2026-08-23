@@ -48,7 +48,7 @@ function normalizeUsername(value: unknown) {
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders(request) });
   if (request.method !== 'POST') return response(request, { error: 'Method not allowed' }, 405);
-  if (!supabaseUrl || !publishableKey || !secretKey || !appOrigin) return response(request, { error: 'Function configuration is incomplete' }, 500);
+  if (!supabaseUrl || !publishableKey || !secretKey) return response(request, { error: 'Function configuration is incomplete' }, 500);
 
   try {
     const { username, password } = await request.json();

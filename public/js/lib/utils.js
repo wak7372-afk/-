@@ -46,27 +46,45 @@ export function getSafeExternalUrl(value) {
 export function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container') || createToastContainer();
   const toast = document.createElement('div');
+  const iconWrap = document.createElement('span');
+  const icon = document.createElement('i');
+  const copy = document.createElement('div');
+  const title = document.createElement('strong');
   const text = document.createElement('span');
   const closeButton = document.createElement('button');
-  const bgClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-emerald-700' : 'bg-amber-600';
+  const meta = {
+    error: { title: 'تعذر تنفيذ العملية', icon: 'circle-alert' },
+    warning: { title: 'تنبيه', icon: 'triangle-alert' },
+    success: { title: 'تمت العملية', icon: 'circle-check' },
+    info: { title: 'معلومة', icon: 'info' },
+  }[type] || { title: 'معلومة', icon: 'info' };
 
-  toast.className = `${bgClass} text-white px-5 py-3 rounded-lg shadow-xl mb-3 flex items-center justify-between text-sm font-medium animate-fade-in transition-all`;
+  toast.className = `app-alert app-alert-${type}`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  iconWrap.className = 'app-alert-icon';
+  icon.setAttribute('data-lucide', meta.icon);
+  title.textContent = meta.title;
   text.textContent = String(message);
+  copy.className = 'app-alert-copy';
   closeButton.type = 'button';
-  closeButton.className = 'mr-3 hover:opacity-80';
+  closeButton.className = 'app-alert-close';
   closeButton.setAttribute('aria-label', 'إغلاق الرسالة');
   closeButton.textContent = '×';
   closeButton.addEventListener('click', () => toast.remove());
-  toast.append(text, closeButton);
+  iconWrap.append(icon);
+  copy.append(title, text);
+  toast.append(iconWrap, copy, closeButton);
 
   container.appendChild(toast);
-  setTimeout(() => toast.remove(), 4000);
+  if (window.lucide?.createIcons) window.lucide.createIcons({ nodes: [toast] });
+  setTimeout(() => toast.remove(), type === 'error' ? 8000 : 5000);
 }
 
 function createToastContainer() {
   const div = document.createElement('div');
   div.id = 'toast-container';
-  div.className = 'fixed bottom-5 left-5 z-50 flex flex-col max-w-sm w-full';
+  div.className = 'app-alert-stack';
+  div.setAttribute('aria-live', 'polite');
   document.body.appendChild(div);
   return div;
 }

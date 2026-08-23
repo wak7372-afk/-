@@ -105,17 +105,21 @@ function installPreviewBanner(role) {
   document.body.classList.add('preview-mode-active');
 }
 
-function getAuthErrorMessage(error) {
+function getAuthErrorMessage(error, serverMessage = '') {
+  const normalizedServerMessage = String(serverMessage || '').toLowerCase();
+  if (normalizedServerMessage.includes('اسم المستخدم') || normalizedServerMessage.includes('بيانات الدخول')) {
+    return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+  }
   const status = error?.context?.status;
   if (status === 404) {
     return 'خدمة تسجيل الدخول المحلية غير منشورة في Supabase بعد. تواصل مع إدارة النظام لإكمال النشر.';
   }
   if (status === 401 || status === 403) {
-    return 'تعذر التحقق من بيانات الحساب. تأكد من اسم المستخدم وكلمة المرور.';
+    return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
   }
   const message = (error?.message || '').toLowerCase();
   if (error?.name === 'FunctionsHttpError' || message.includes('non-2xx status code')) {
-    return 'تعذر التحقق من بيانات الحساب. تأكد من اسم المستخدم وكلمة المرور.';
+    return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
   }
   if (message.includes('failed to send a request') || message.includes('failed to fetch') || message.includes('network')) {
     return 'تعذر الاتصال بخدمة تسجيل الدخول. تحقق من اتصالك ثم حاول مرة أخرى.';
@@ -145,7 +149,18 @@ export async function loginUser(username, password) {
   const { data, error } = await supabase.functions.invoke('login-with-username', {
     body: { username: cleanUsername, password },
   });
-  if (error || !data?.session) throw new Error(data?.error || getAuthErrorMessage(error));
+  if (error || !data?.session) {
+    let serverMessage = data?.error || '';
+    if (!serverMessage && error?.context) {
+      try {
+        const payload = await error.context.json();
+        serverMessage = payload?.error || '';
+      } catch {
+        // The status code still lets us show a precise authentication error.
+      }
+    }
+    throw new Error(getAuthErrorMessage(error, serverMessage));
+  }
 
   const { error: sessionError } = await supabase.auth.setSession({
     access_token: data.session.access_token,

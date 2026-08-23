@@ -1,6 +1,6 @@
 import { isLocalPreviewMode } from '../lib/auth.js';
-import { escapeHtml, showToast } from '../lib/utils.js';
-import { createQuranReportImporter } from './quran-report-importer.js';
+import { escapeHtml, showToast } from '../lib/utils.js?v=2';
+import { createQuranReportImporter } from './quran-report-importer.js?v=2';
 
 const TYPE_META = {
   hifz: { label: 'حفظ', icon: 'book-open-check' },
@@ -371,7 +371,7 @@ export function createQuranReportManager({ container, supabase, getContext, refr
   }
 
   function renderExemptDialog() {
-    return `<dialog id="quran-exempt-dialog" class="quran-exempt-dialog"><form method="dialog" data-exempt-form><div><span><i data-lucide="shield-minus"></i></span><div><small>قرار المعلم</small><h3>إعفاء الطالب من التقرير</h3></div></div><p>الإعفاء يزيل التقرير من قائمة التأخير ويفتح التقارير اللاحقة، ويُحفظ سببه في السجل.</p><label><span>سبب الإعفاء</span><textarea name="exemption-reason" rows="4" maxlength="2000" required></textarea></label><footer><button type="button" data-manager-action="cancel-exempt">إلغاء</button><button type="submit">اعتماد الإعفاء</button></footer></form></dialog>`;
+    return `<dialog id="quran-exempt-dialog" class="quran-exempt-dialog"><form method="dialog" data-exempt-form><div><span><i data-lucide="shield-minus"></i></span><div><small>قرار المعلم</small><h3>إعفاء الطالب من التقرير</h3></div></div><p>الإعفاء يزيل التقرير من قائمة التأخير ويفتح التقارير اللاحقة، ويُحفظ سببه في السجل.</p><label><span>سبب الإعفاء</span><textarea name="exemption-reason" rows="4" minlength="3" maxlength="2000" required placeholder="اكتب سبباً واضحاً من 3 أحرف على الأقل"></textarea></label><p class="quran-exempt-error" data-exempt-error role="alert" hidden></p><footer><button type="button" data-manager-action="cancel-exempt">إلغاء</button><button type="submit">اعتماد الإعفاء</button></footer></form></dialog>`;
   }
 
   function renderPlanDialog() {
@@ -502,7 +502,10 @@ export function createQuranReportManager({ container, supabase, getContext, refr
     const exemptButton = event.target.closest('[data-exempt-assignment]');
     if (exemptButton) {
       state.exemptAssignmentId = exemptButton.dataset.exemptAssignment;
-      container.querySelector('#quran-exempt-dialog')?.showModal();
+      const dialog = container.querySelector('#quran-exempt-dialog');
+      const inlineError = dialog?.querySelector('[data-exempt-error]');
+      if (inlineError) { inlineError.hidden = true; inlineError.textContent = ''; }
+      dialog?.showModal();
       return;
     }
     const manageReportButton = event.target.closest('[data-manage-report]');
@@ -1030,7 +1033,13 @@ export function createQuranReportManager({ container, supabase, getContext, refr
   async function exemptAssignment(form) {
     if (!state.exemptAssignmentId || state.busy) return;
     const reason = new FormData(form).get('exemption-reason')?.trim();
-    if (!reason || reason.length < 3) return showToast('اكتب سبب الإعفاء بوضوح.', 'error');
+    const inlineError = form.querySelector('[data-exempt-error]');
+    if (!reason || reason.length < 3) {
+      if (inlineError) { inlineError.textContent = 'اكتب سبباً واضحاً من 3 أحرف على الأقل.'; inlineError.hidden = false; }
+      form.querySelector('[name="exemption-reason"]')?.focus();
+      return showToast('اكتب سبب الإعفاء بوضوح.', 'error');
+    }
+    if (inlineError) { inlineError.hidden = true; inlineError.textContent = ''; }
     state.busy = true;
     try {
       if (isLocalPreviewMode()) {
@@ -1046,7 +1055,9 @@ export function createQuranReportManager({ container, supabase, getContext, refr
       showToast('تم إعفاء الطالب وفتح تقاريره اللاحقة.', 'success');
       render();
     } catch (error) {
-      showToast(friendlyManagerError(error, 'تعذر اعتماد الإعفاء.'), 'error');
+      const message = friendlyManagerError(error, 'تعذر اعتماد الإعفاء.');
+      if (inlineError) { inlineError.textContent = message; inlineError.hidden = false; }
+      showToast(message, 'error');
     } finally {
       state.busy = false;
     }

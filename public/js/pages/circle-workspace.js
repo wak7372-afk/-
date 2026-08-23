@@ -1,8 +1,8 @@
 import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
-import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js';
-import { createQuranReportManager } from './quran-report-manager.js?v=7';
+import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js?v=2';
+import { createQuranReportManager } from './quran-report-manager.js?v=8';
 import { mountTeacherShell } from '../lib/teacher-shell.js?v=3';
 
 const POST_TYPES = {

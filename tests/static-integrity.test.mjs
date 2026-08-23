@@ -112,11 +112,12 @@ test('Quran Excel importer uses the protected import contract and private bucket
     '0015_quran_reports_core.sql',
     '0016_quran_reports_security.sql',
     '0020_resilient_quran_report_import_archive.sql',
+    '0032_quran_replacement_history_controls.sql',
   ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
   const requiredRpcs = [
     'stage_quran_report_import',
     'get_quran_report_import_preview',
-    'approve_quran_report_import',
+    'approve_quran_report_import_with_history',
     'cancel_quran_report_import',
     'attach_quran_report_import_file',
   ];

@@ -4,6 +4,7 @@ import {
   buildInterventions,
   buildPeriodCards,
   buildTaskMetrics,
+  buildTodaySummary,
   studentTrend,
   taskState,
 } from '../public/js/lib/teacher-student-analytics.js';
@@ -25,6 +26,36 @@ test('teacher interventions prioritize overdue students over mild decline', () =
   assert.equal(interventions[0].reasons[0].tone, 'is-critical');
   assert.ok(interventions.some(item => item.student_id === 'declining'));
   assert.ok(!interventions.some(item => item.student_id === 'stable'));
+});
+
+test('teacher interventions do not flag an ordinary pending student far from the deadline', () => {
+  const students = [
+    { student_id: 'far', daily_state: 'pending', next_due_at: '2026-08-23T23:00:00+04:00' },
+    { student_id: 'soon', daily_state: 'partial', next_due_at: '2026-08-23T11:30:00+04:00' },
+  ];
+  const interventions = buildInterventions(students, [], {
+    now: '2026-08-23T10:00:00+04:00',
+    dueSoonMinutes: 120,
+  });
+  assert.deepEqual(interventions.map(item => item.student_id), ['soon']);
+  assert.equal(interventions[0].priority, 'urgent');
+  assert.match(interventions[0].reasons[0].label, /بقي/);
+});
+
+test('today summary distinguishes students from reports', () => {
+  const summary = buildTodaySummary({
+    student_count: 2,
+    completed_on_time_students: 1,
+    completed_late_students: 0,
+    pending_students: 1,
+    overdue_students: 1,
+  }, [
+    { report_count: 3, completed_count: 3, overdue_count: 0 },
+    { report_count: 3, completed_count: 1, overdue_count: 2 },
+  ]);
+  assert.equal(summary.overdueStudents, 1);
+  assert.equal(summary.overdueReports, 2);
+  assert.equal(summary.completionRate, 66.66666666666666);
 });
 
 test('period cards preserve equivalent-period comparisons', () => {

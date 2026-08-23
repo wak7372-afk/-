@@ -155,6 +155,32 @@ begin
 end;
 $$;
 
+insert into quran_reports_test_batches (name, batch_id)
+select 'replacement-purge', (public.stage_quran_report_import(
+  (select id from public.learning_circles where name = 'Quran Reports Flow Circle'),
+  'replacement-purge.xlsx', 8100, repeat('f', 64),
+  '[{"source_sheet":"ورقة1","source_row":3,"date":"2026-12-08","type":"hifz","content":"سورة النبأ الآيات 1-8","repetitions":4}]'::jsonb,
+  'selected',
+  array['91000000-0000-4000-8000-000000000004'::uuid]
+) ->> 'batch_id')::uuid;
+
+select public.approve_quran_report_import_with_history(
+  (select batch_id from quran_reports_test_batches where name = 'replacement-purge'),
+  'replace',
+  'delete'
+);
+
+do $$
+begin
+  if (select count(*) from public.quran_report_assignments where student_id = '91000000-0000-4000-8000-000000000004' and report_date = '2026-12-08' and task_type = 'hifz' and status = 'pending') <> 1 then
+    raise exception 'Replacement purge did not preserve the new active task';
+  end if;
+  if (select count(*) from public.quran_report_assignments where student_id = '91000000-0000-4000-8000-000000000004' and report_date = '2026-12-08' and task_type = 'hifz' and status = 'replaced') <> 0 then
+    raise exception 'Replacement purge retained obsolete assignment history';
+  end if;
+end;
+$$;
+
 select set_config('request.jwt.claim.sub', '91000000-0000-4000-8000-000000000003', true);
 do $$
 begin

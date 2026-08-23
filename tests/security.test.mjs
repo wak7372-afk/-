@@ -122,7 +122,7 @@ test('login hides raw edge function HTTP errors from users', () => {
 
   assert.match(auth, /FunctionsHttpError/);
   assert.match(auth, /non-2xx status code/);
-  assert.match(auth, /تعذر التحقق من بيانات الحساب/);
+  assert.match(auth, /اسم المستخدم أو كلمة المرور غير صحيحة/);
 });
 
 test('schedule analysis requires an authenticated owner of the halaqa', () => {
