@@ -1,7 +1,8 @@
-/* Zat Khail Calm UI: restrained, content-first visual layer. */
+/* Zat Khail Calm UI: quiet, responsive materials and motion. */
 :root {
   --calm-canvas: #f5f5f7;
-  --calm-surface: #ffffff;
+  --calm-surface: rgba(255, 255, 255, 0.92);
+  --calm-surface-solid: #ffffff;
   --calm-surface-muted: #f1f3f5;
   --calm-line: #e1e4e8;
   --calm-line-strong: #cfd5da;
@@ -16,17 +17,26 @@
   --calm-blue: #2d6f98;
   --calm-red: #b44348;
   --calm-radius: 8px;
-  --calm-shadow-1: 0 1px 2px rgba(7, 24, 39, 0.04), 0 5px 16px rgba(7, 24, 39, 0.035);
-  --calm-shadow-2: 0 10px 30px rgba(7, 24, 39, 0.08);
+  --calm-shadow-1: 0 1px 2px rgba(7, 24, 39, 0.035), 0 10px 28px rgba(7, 24, 39, 0.055);
+  --calm-shadow-2: 0 18px 48px rgba(7, 24, 39, 0.11);
+  --calm-shadow-hover: 0 20px 50px rgba(7, 24, 39, 0.12);
+  --calm-material-blur: 24px;
+  --calm-motion-fast: 120ms cubic-bezier(0.2, 0, 0, 1);
+  --calm-motion: 240ms cubic-bezier(0.2, 0, 0, 1);
+  --calm-motion-enter: 360ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html {
   background: var(--calm-canvas);
+  font-optical-sizing: auto;
 }
 
 body {
   background-color: var(--calm-canvas) !important;
   color: var(--calm-ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Keep accessible labels available to assistive technology without adding visual clutter. */
@@ -93,14 +103,24 @@ body {
   border-radius: var(--calm-radius) !important;
   background: var(--calm-surface) !important;
   box-shadow: var(--calm-shadow-1) !important;
+  backdrop-filter: blur(var(--calm-material-blur)) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(var(--calm-material-blur)) saturate(1.35) !important;
+  transition: border-color var(--calm-motion), box-shadow var(--calm-motion), transform var(--calm-motion) !important;
+}
+
+/* Nested surfaces stay solid so translucent materials never stack and lose legibility. */
+:where(.glass-card, .admin-panel, .workspace-panel, .task-editor, .auth-panel, .settings-panel)
+  :where(.glass-card, .admin-panel, .workspace-panel, .task-preview-panel, .task-recent-panel) {
+  background: var(--calm-surface-solid) !important;
   backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :where(.glass-card, .admin-panel, .admin-metric, .student-metric, .circle-card, .student-task, .workspace-post, .task-preview-panel, .task-recent-panel):hover {
-    border-color: var(--calm-line-strong) !important;
-    box-shadow: var(--calm-shadow-1) !important;
-    transform: none !important;
+  :where(.admin-metric, .student-metric, .circle-card, .student-task, .workspace-post, .task-preview-panel, .task-recent-panel):hover {
+    border-color: color-mix(in srgb, var(--calm-gold) 48%, var(--calm-line)) !important;
+    box-shadow: var(--calm-shadow-hover) !important;
+    transform: translateY(-2px) !important;
   }
 }
 
@@ -111,9 +131,11 @@ body {
 
 :where(.admin-sidebar, .teacher-sidebar) {
   border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background-color: var(--calm-navy) !important;
-  background-image: none !important;
-  box-shadow: none !important;
+  background-color: rgba(7, 26, 43, 0.96) !important;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 34%) !important;
+  box-shadow: -12px 0 34px rgba(7, 24, 39, 0.12) !important;
+  backdrop-filter: blur(22px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.2) !important;
 }
 
 :where(.admin-brand, .teacher-sidebar-brand) {
@@ -132,12 +154,13 @@ body {
   border: 0 !important;
   border-radius: 7px !important;
   color: #c5ced5 !important;
+  transition: color var(--calm-motion), background-color var(--calm-motion), box-shadow var(--calm-motion), transform var(--calm-motion) !important;
 }
 
 :where(.admin-nav-item, .teacher-sidebar-nav a):hover {
   background: rgba(255, 255, 255, 0.06) !important;
   color: #ffffff !important;
-  transform: none !important;
+  transform: translateX(-2px) !important;
 }
 
 :where(.admin-nav-item.is-active, .teacher-sidebar-nav a.is-active) {
@@ -148,10 +171,11 @@ body {
 
 :where(.admin-topbar, .teacher-unified-shell:not(.teacher-task-page) > header, .teacher-task-page .task-topbar) {
   border-bottom: 1px solid var(--calm-line) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
   background-image: none !important;
-  box-shadow: 0 1px 0 rgba(7, 24, 39, 0.03) !important;
-  backdrop-filter: blur(18px) saturate(1.1) !important;
+  box-shadow: 0 8px 28px rgba(7, 24, 39, 0.055) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
 }
 
 :where(.admin-topbar, .teacher-unified-shell:not(.teacher-task-page) > header, .teacher-task-page .task-topbar)::after {
@@ -181,7 +205,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: var(--calm-radius) !important;
   background-color: var(--calm-navy) !important;
-  background-image: none !important;
+  background-image: linear-gradient(120deg, rgba(11, 106, 77, 0.2), transparent 46%, rgba(197, 160, 73, 0.08)) !important;
   box-shadow: var(--calm-shadow-2) !important;
 }
 
@@ -213,9 +237,15 @@ body {
   min-height: 44px;
   border: 1px solid var(--calm-line-strong) !important;
   border-radius: 7px !important;
-  background: var(--calm-surface) !important;
-  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: inset 0 1px 2px rgba(7, 24, 39, 0.035) !important;
   color: var(--calm-ink) !important;
+  transition: border-color var(--calm-motion-fast), background-color var(--calm-motion-fast), box-shadow var(--calm-motion-fast) !important;
+}
+
+:where(input, select, textarea):not([type='checkbox']):not([type='radio']):hover {
+  border-color: #aeb8bf !important;
+  background: var(--calm-surface-solid) !important;
 }
 
 :where(input, select, textarea):not([type='checkbox']):not([type='radio']):focus {
@@ -228,33 +258,39 @@ body {
   border: 1px solid var(--calm-green) !important;
   border-radius: 7px !important;
   background: var(--calm-green) !important;
-  box-shadow: none !important;
+  box-shadow: 0 7px 18px rgba(11, 106, 77, 0.18) !important;
   color: #ffffff !important;
+  transition: color var(--calm-motion-fast), background-color var(--calm-motion-fast), border-color var(--calm-motion-fast), box-shadow var(--calm-motion-fast), transform var(--calm-motion-fast) !important;
 }
 
 :where(.btn-emerald, .admin-primary-button, .circle-primary-command, .task-button-dark, .teacher-unified-shell .btn-emerald):hover {
   border-color: var(--calm-green-hover) !important;
   background: var(--calm-green-hover) !important;
-  box-shadow: none !important;
-  transform: none !important;
+  box-shadow: 0 11px 24px rgba(11, 106, 77, 0.23) !important;
+  transform: translateY(-1px) !important;
 }
 
 :where(.btn-gold, .btn-figma-gold, .task-button-gold) {
   border-color: #ae8730 !important;
   background: var(--calm-gold) !important;
-  box-shadow: none !important;
+  box-shadow: 0 7px 18px rgba(174, 135, 48, 0.2) !important;
   color: var(--calm-navy) !important;
 }
 
 :where(.admin-secondary-button, .circle-secondary-command, .task-button-quiet) {
   border: 1px solid var(--calm-line-strong) !important;
-  background: var(--calm-surface) !important;
-  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 4px 12px rgba(7, 24, 39, 0.045) !important;
   color: var(--calm-ink) !important;
 }
 
-:where(button, [role='button'], a):active {
-  transform: scale(0.985);
+:where(button, [role='button'], a) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, [role='button'], a):active:not(:disabled):not([aria-disabled='true']) {
+  transform: translateY(1px) scale(0.975) !important;
+  transition-duration: 80ms !important;
 }
 
 /* Metrics and data-heavy areas */
@@ -370,19 +406,34 @@ table tbody tr:hover {
   border: 1px solid var(--calm-line) !important;
   border-radius: var(--calm-radius) !important;
   background: var(--calm-surface-muted) !important;
-  box-shadow: none !important;
+  box-shadow: inset 0 1px 2px rgba(7, 24, 39, 0.045) !important;
 }
 
 :where(.workspace-tabs, .quran-manager-tabs, .period-tabs, .admin-circle-tabs) button {
   border-color: transparent !important;
   background: transparent !important;
   color: #5c6872 !important;
+  transition: color var(--calm-motion), background-color var(--calm-motion), box-shadow var(--calm-motion), transform var(--calm-motion) !important;
 }
 
 :where(.workspace-tabs, .quran-manager-tabs, .period-tabs, .admin-circle-tabs) button:is(.is-active, .active, [aria-selected='true']) {
-  background: var(--calm-surface) !important;
-  box-shadow: 0 1px 4px rgba(7, 24, 39, 0.1) !important;
+  background: var(--calm-surface-solid) !important;
+  box-shadow: 0 5px 14px rgba(7, 24, 39, 0.1) !important;
   color: var(--calm-green) !important;
+}
+
+/* Menus and dialogs materialize from their source instead of appearing abruptly. */
+:where(dialog, [role='dialog'], [role='menu'], .notification-popover, .dropdown-menu) {
+  transform-origin: top right;
+}
+
+:where(dialog[open], [role='dialog']:not([hidden]), [role='menu']:not([hidden]), .notification-popover:not([hidden]), .dropdown-menu:not([hidden])) {
+  animation: calm-materialize var(--calm-motion-enter) both;
+}
+
+@keyframes calm-materialize {
+  from { opacity: 0; transform: translateY(-6px) scale(0.985); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 /* Entry screens */
@@ -409,9 +460,10 @@ table tbody tr:hover {
 @media (max-width: 860px) {
   :where(.student-mobile-nav, .teacher-sidebar, .circle-dashboard-theme .workspace-tabs) {
     border: 1px solid rgba(207, 213, 218, 0.9) !important;
-    background: rgba(255, 255, 255, 0.92) !important;
-    box-shadow: 0 10px 30px rgba(7, 24, 39, 0.14) !important;
-    backdrop-filter: blur(18px) saturate(1.1) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 16px 40px rgba(7, 24, 39, 0.16) !important;
+    backdrop-filter: blur(24px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
   }
 
   :where(.student-mobile-nav a, .student-mobile-nav button, .teacher-sidebar-nav a, .circle-dashboard-theme .workspace-tabs button) {
@@ -451,5 +503,62 @@ table tbody tr:hover {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  :where(dialog[open], [role='dialog']:not([hidden]), [role='menu']:not([hidden]), .notification-popover:not([hidden]), .dropdown-menu:not([hidden])) {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :where(
+    .glass-card,
+    .admin-panel,
+    .admin-filter-panel,
+    .admin-table-panel,
+    .admin-metric,
+    .student-metric,
+    .student-task-section,
+    .side-section,
+    .week-panel,
+    .quran-reports-panel,
+    .quran-extension-panel,
+    .workspace-panel,
+    .workspace-composer,
+    .workspace-file-uploader,
+    .workspace-settings-block,
+    .workspace-post,
+    .task-editor,
+    .task-preview-panel,
+    .task-recent-panel,
+    .import-results,
+    .auth-panel,
+    .settings-panel,
+    .admin-topbar,
+    .student-mobile-nav,
+    .teacher-sidebar
+  ) {
+    background: var(--calm-surface-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  :where(.admin-sidebar, .teacher-sidebar) {
+    background: var(--calm-navy) !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --calm-line: #9aa5ad;
+    --calm-line-strong: #65727c;
+    --calm-muted: #3f4b54;
+  }
+
+  :where(.glass-card, .admin-panel, .workspace-panel, .task-editor, .student-task, .circle-card) {
+    background: var(--calm-surface-solid) !important;
+    border-color: var(--calm-line-strong) !important;
   }
 }
