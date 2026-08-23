@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase-client.js';
 import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, showToast } from '../lib/utils.js';
-import { mountTeacherShell } from '../lib/teacher-shell.js?v=2';
+import { mountTeacherShell } from '../lib/teacher-shell.js?v=3';
 
 const ROLE_LABELS = {
   admin: 'إدارة جميع المساحات التعليمية',

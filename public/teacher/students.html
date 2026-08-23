@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#061421">
+  <title>مركز ذات خيل لتعليم القرآن الكريم وعلومه | طلابي</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css?v=34">
+  <link rel="stylesheet" href="/css/design-system.css?v=3">
+  <link rel="stylesheet" href="/css/teacher-workspace.css?v=36">
+  <link rel="stylesheet" href="/css/calm-ui.css?v=3">
+  <link rel="stylesheet" href="/css/teacher-students.css?v=5">
+</head>
+<body class="teacher-unified-shell teacher-students-page" data-teacher-section="students">
+  <header class="teacher-students-topbar">
+    <div class="teacher-students-topbar-inner">
+      <div class="teacher-students-title">
+        <span class="teacher-students-eyebrow">مركز المتابعة اليومية</span>
+        <h1>طلابي</h1>
+        <p>المعلم: <strong id="teacher-name">...</strong></p>
+      </div>
+      <div class="teacher-students-actions">
+        <a href="/circles.html?type=quran"><i data-lucide="file-spreadsheet"></i><span>تقارير القرآن</span></a>
+        <button id="logout-btn" type="button"><i data-lucide="log-out"></i><span>خروج</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="teacher-students-main">
+    <section class="students-welcome" aria-labelledby="students-welcome-title">
+      <div>
+        <span>نظرة تشغيلية مباشرة</span>
+        <h2 id="students-welcome-title">أهلاً وسهلاً، <strong id="students-greeting-name">معلمنا</strong></h2>
+        <p>تابع إنجاز طلاب الحلقة، واعرف من يحتاج إلى تدخل قبل أن تتراكم عليه التقارير.</p>
+      </div>
+      <div class="students-welcome-date">
+        <i data-lucide="calendar-days"></i>
+        <span>بيانات يوم</span>
+        <strong id="selected-date-label">...</strong>
+      </div>
+    </section>
+
+    <section class="students-toolbar" aria-label="اختيار نطاق المتابعة">
+      <label class="students-field students-circle-field">
+        <span>الحلقة القرآنية</span>
+        <span class="students-input-wrap"><i data-lucide="users-round"></i><select id="students-circle-select" aria-label="الحلقة القرآنية"><option value="">جاري تحميل الحلقات...</option></select></span>
+      </label>
+      <label class="students-field">
+        <span>تاريخ المتابعة</span>
+        <span class="students-input-wrap"><i data-lucide="calendar"></i><input id="students-date" type="date" aria-label="تاريخ المتابعة"></span>
+      </label>
+      <button id="students-refresh" class="students-refresh" type="button"><i data-lucide="refresh-cw"></i><span>تحديث البيانات</span></button>
+    </section>
+
+    <section class="students-metrics" aria-label="ملخص الطلاب">
+      <article class="student-metric is-navy"><span><i data-lucide="users"></i></span><div><small>إجمالي الطلاب</small><strong id="metric-students">0</strong><em>طالب نشط في الحلقة</em></div></article>
+      <article class="student-metric is-green"><span><i data-lucide="circle-check-big"></i></span><div><small>أنجزوا اليوم</small><strong id="metric-completed">0</strong><em id="metric-completed-note">حتى الآن</em></div></article>
+      <article class="student-metric is-blue"><span><i data-lucide="hourglass"></i></span><div><small>قيد الإنجاز</small><strong id="metric-pending">0</strong><em>يحتاجون متابعة اليوم</em></div></article>
+      <article class="student-metric is-red"><span><i data-lucide="triangle-alert"></i></span><div><small>تقارير متأخرة</small><strong id="metric-overdue">0</strong><em>طلاب لديهم تأخير نشط</em></div></article>
+      <article class="student-metric is-gold"><span><i data-lucide="chart-no-axes-combined"></i></span><div><small>إكمال آخر 7 أيام</small><strong id="metric-weekly">0%</strong><em id="metric-weekly-note">متوسط الحلقة</em></div></article>
+    </section>
+
+    <section class="students-insights" aria-label="تحليل حالة الحلقة">
+      <article class="students-panel students-status-panel">
+        <header><div><span>حالة اليوم</span><h3>توزيع الطلاب حسب الإنجاز</h3></div><i data-lucide="chart-pie"></i></header>
+        <div class="students-status-content">
+          <div id="students-status-donut" class="students-donut" role="img" aria-label="توزيع حالة الطلاب"><span><strong id="students-status-total">0</strong><small>طالب</small></span></div>
+          <div id="students-status-legend" class="students-status-legend"></div>
+        </div>
+      </article>
+      <article class="students-panel students-trend-panel">
+        <header><div><span>اتجاه الإنجاز</span><h3>آخر 14 يوماً</h3></div><i data-lucide="chart-column-big"></i></header>
+        <div id="students-trend-chart" class="students-trend-chart" aria-label="اتجاه إنجاز الحلقة"><p>جاري تحميل الاتجاه...</p></div>
+      </article>
+    </section>
+
+    <section class="students-list-panel" aria-labelledby="students-list-title">
+      <header class="students-list-heading">
+        <div><span>قائمة المتابعة</span><h2 id="students-list-title">طلاب الحلقة</h2><p id="students-results-label">جاري تحميل البيانات...</p></div>
+        <a id="students-circle-workspace" href="/circles.html?type=quran"><span>فتح مساحة الحلقة</span><i data-lucide="arrow-left"></i></a>
+      </header>
+
+      <div class="students-filters">
+        <label class="students-search"><i data-lucide="search"></i><input id="students-search" type="search" placeholder="ابحث باسم الطالب أو اسم المستخدم..."></label>
+        <label><span class="sr-only">حالة الطالب</span><select id="students-status-filter" aria-label="حالة الطالب"><option value="all">كل الحالات</option><option value="completed">المنجزون</option><option value="attention">يحتاجون متابعة</option><option value="overdue">لديهم تأخير</option><option value="no_reports">لا يوجد تقرير</option></select></label>
+        <label><span class="sr-only">ترتيب الطلاب</span><select id="students-sort" aria-label="ترتيب الطلاب"><option value="priority">الأولوية</option><option value="overdue">الأكثر تأخراً</option><option value="completion">الأعلى إنجازاً</option><option value="name">الاسم</option></select></label>
+      </div>
+
+      <div id="students-feedback" class="students-feedback" aria-live="polite">
+        <i data-lucide="loader-circle"></i><p>جاري جمع بيانات الطلاب...</p>
+      </div>
+
+      <div id="students-table-wrap" class="students-table-wrap" hidden>
+        <div class="students-table-head" aria-hidden="true"><span>الطالب</span><span>حالة اليوم</span><span>إنجاز التقارير</span><span>المتأخر</span><span>الموعد القادم</span><span>آخر 7 أيام</span><span>آخر تقدم</span><span></span></div>
+        <div id="students-table-body" class="students-table-body"></div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/js/pages/teacher-students.js?v=3"></script>
+</body>
+</html>

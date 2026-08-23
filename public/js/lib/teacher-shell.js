@@ -1,4 +1,5 @@
 const TEACHER_NAV_ITEMS = [
+  { key: 'students', href: '/teacher/students.html', icon: 'layout-dashboard', label: 'طلابي' },
   { key: 'circles', href: '/circles.html', icon: 'users-round', label: 'الحلقات' },
   { key: 'reports', href: '/circles.html?type=quran', icon: 'file-spreadsheet', label: 'تقارير القرآن' },
   { key: 'messages', href: '/teacher/chat.html', icon: 'messages-square', label: 'الرسائل' },

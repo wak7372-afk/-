@@ -1,8 +1,15 @@
-const CACHE_NAME = 'zat-khail-v34';
+const CACHE_NAME = 'zat-khail-v36';
 const ASSETS = [
   '/',
+  '/favicon.ico',
+  '/manifest.json',
   '/assets/brand/zat-khail-emblem.png',
   '/assets/brand/zat-khail-logo-banner.jpg',
+  '/assets/icons/favicon-32.png',
+  '/assets/icons/apple-touch-icon.png',
+  '/assets/icons/icon-192.png',
+  '/assets/icons/icon-512.png',
+  '/assets/icons/icon-maskable-512.png',
   '/index.html',
   '/register.html',
   '/pending-approval.html',
@@ -10,6 +17,7 @@ const ASSETS = [
   '/circle.html',
   '/admin/dashboard.html',
   '/teacher/tasks.html',
+  '/teacher/students.html',
   '/teacher/ai-assistant.html',
   '/student/dashboard.html',
   '/student/reports.html',
@@ -24,11 +32,13 @@ const ASSETS = [
   '/css/design-system.css',
   '/css/teacher-workspace.css',
   '/css/teacher-command-center.css',
+  '/css/teacher-students.css',
   '/js/lib/teacher-shell.js',
   '/js/lib/quran-report-excel.js',
   '/js/pages/quran-report-manager.js',
   '/js/pages/quran-report-importer.js',
   '/js/pages/student-reports.js',
+  '/js/pages/teacher-students.js',
   '/js/vendor/xlsx.full.min.js',
   '/locales/ar.json',
   '/locales/en.json'
@@ -74,8 +84,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/assets/brand/zat-khail-emblem.png',
-      badge: '/assets/brand/zat-khail-emblem.png'
+      icon: '/assets/icons/icon-192.png',
+      badge: '/assets/icons/favicon-32.png'
     })
   );
 });

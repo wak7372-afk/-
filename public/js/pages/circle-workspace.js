@@ -3,7 +3,7 @@ import { isLocalPreviewMode, logoutUser, requireAuth } from '../lib/auth.js';
 import { initI18n } from '../lib/i18n.js';
 import { escapeHtml, getSafeExternalUrl, showToast } from '../lib/utils.js';
 import { createQuranReportManager } from './quran-report-manager.js?v=7';
-import { mountTeacherShell } from '../lib/teacher-shell.js?v=2';
+import { mountTeacherShell } from '../lib/teacher-shell.js?v=3';
 
 const POST_TYPES = {
   announcement: { label: 'إعلان', icon: 'megaphone' },

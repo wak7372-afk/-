@@ -168,6 +168,30 @@ test('Quran student reports and teacher console use protected report operations'
   }
 });
 
+test('teacher student dashboard uses existing protected Quran analytics contracts', () => {
+  const html = fs.readFileSync(path.join(publicRoot, 'teacher/students.html'), 'utf8');
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/teacher-students.js'), 'utf8');
+  const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]));
+  const references = [...script.matchAll(/getElementById\('([^']+)'\)/g)].map(match => match[1]);
+  const missingElements = [...new Set(references.filter(id => !ids.has(id)))];
+  assert.deepEqual(missingElements, []);
+
+  const migrations = [
+    '0014_learning_circle_workspace.sql',
+    '0024_quran_student_accounting_analytics.sql',
+    '0029_quran_circle_performance.sql',
+  ].map(file => fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8')).join('\n');
+  const requiredRpcs = [
+    'list_my_learning_circles',
+    'get_quran_teacher_console',
+    'get_quran_circle_performance',
+  ];
+  for (const rpc of requiredRpcs) {
+    assert.match(script, new RegExp(`rpc\\('${rpc}'`));
+    assert.ok(migrations.includes(`function public.${rpc}`), `${rpc} must be deployed by an existing migration`);
+  }
+});
+
 test('student Quran reports expose an explicit confirmed submission flow and daily completion state', () => {
   const html = fs.readFileSync(path.join(publicRoot, 'student/reports.html'), 'utf8');
   const script = fs.readFileSync(path.join(publicRoot, 'js/pages/student-reports.js'), 'utf8');
@@ -229,6 +253,7 @@ test('required role entry pages exist', () => {
     'circle.html',
     'admin/dashboard.html',
     'teacher/halaqat.html',
+    'teacher/students.html',
     'teacher/tasks.html',
     'teacher/ai-assistant.html',
     'student/dashboard.html',
