@@ -29,7 +29,8 @@ async function initialize() {
   if (!authData) return;
   state.profile = authData.profile;
   state.preview = Boolean(authData.preview);
-  document.getElementById('student-name').textContent = state.profile.username || state.profile.full_name || 'طالبنا';
+  const studentFullName = String(state.profile.full_name || '').trim();
+  document.getElementById('student-name').textContent = studentFullName || 'طالبنا';
   document.getElementById('logout-btn').addEventListener('click', logoutUser);
   document.getElementById('previous-report-week').addEventListener('click', () => moveSelectedDate(-7));
   document.getElementById('next-report-week').addEventListener('click', () => moveSelectedDate(7));

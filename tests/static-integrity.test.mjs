@@ -204,6 +204,22 @@ test('student Quran reports expose an explicit confirmed submission flow and dai
   assert.match(script, /اللهم اجعله حافظاً متقناً لكتابك/);
 });
 
+test('student page headers greet students by their full name instead of username', () => {
+  const pages = [
+    ['student/dashboard.html', 'js/pages/student-dashboard.js'],
+    ['student/reports.html', 'js/pages/student-reports.js'],
+  ];
+
+  for (const [htmlPath, scriptPath] of pages) {
+    const html = fs.readFileSync(path.join(publicRoot, htmlPath), 'utf8');
+    const script = fs.readFileSync(path.join(publicRoot, scriptPath), 'utf8');
+    assert.match(html, /السلام عليكم ورحمة الله وبركاته/);
+    assert.match(html, /أيها البطل/);
+    assert.match(script, /state\.profile\.full_name/);
+    assert.doesNotMatch(script, /getElementById\('student-name'\)[^\n]*username/);
+  }
+});
+
 test('classroom workflow JavaScript references existing elements', () => {
   const pairs = [
     ['teacher/classroom-detail.html', 'js/pages/teacher-classroom-detail.js'],
