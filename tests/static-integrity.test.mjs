@@ -202,6 +202,8 @@ test('student Quran reports expose an explicit confirmed submission flow and dai
   assert.match(script, /تسليم التقرير/);
   assert.match(script, /لقد قمت بإنجاز جميع تقارير اليوم/);
   assert.match(script, /اللهم اجعله حافظاً متقناً لكتابك/);
+  assert.match(html, /<span>النقاط المكتسبة<\/span><strong id="quran-current-points">/);
+  assert.match(script, /getElementById\('quran-current-points'\)\.textContent = state\.earnedPoints\.toFixed\(2\)/);
 });
 
 test('student page headers greet students by their full name instead of username', () => {

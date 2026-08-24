@@ -186,10 +186,9 @@ function renderDateStrip() {
 function renderMetrics() {
   const reports = reportsForSelectedDate();
   const completed = reports.filter(item => item.status === 'completed').length;
-  const available = reports.reduce((sum, item) => sum + Number(item.status === 'completed' ? item.awarded_points : item.available_points || 0), 0);
   document.getElementById('quran-total-count').textContent = reports.length;
   document.getElementById('quran-completed-count').textContent = completed;
-  document.getElementById('quran-available-points').textContent = available.toFixed(2);
+  document.getElementById('quran-current-points').textContent = state.earnedPoints.toFixed(2);
   document.getElementById('quran-overdue-count').textContent = state.overdueCount;
   document.getElementById('quran-earned-points').textContent = state.earnedPoints.toFixed(2);
   document.getElementById('quran-day-message').textContent = dailyMessage(reports, completed);
