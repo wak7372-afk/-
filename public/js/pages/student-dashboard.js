@@ -13,6 +13,8 @@ const state = {
   quranOverview: null,
   notifications: [],
   notificationChannel: null,
+  confirmingQuranReportId: null,
+  busy: false,
 };
 
 document.addEventListener('DOMContentLoaded', initializeStudentDashboard);
@@ -31,6 +33,11 @@ async function initializeStudentDashboard() {
   document.getElementById('week-days').addEventListener('click', selectDay);
   document.querySelector('.period-tabs').addEventListener('click', selectPeriod);
   document.getElementById('student-task-list').addEventListener('click', handleTaskAction);
+  document.getElementById('dashboard-quran-complete-form').addEventListener('submit', submitDashboardQuranReport);
+  document.getElementById('cancel-dashboard-quran-complete').addEventListener('click', closeDashboardQuranDialog);
+  document.getElementById('dashboard-quran-complete-dialog').addEventListener('close', () => {
+    if (!state.busy) state.confirmingQuranReportId = null;
+  });
   document.getElementById('notifications-toggle').addEventListener('click', toggleNotifications);
   document.getElementById('read-all-notifications').addEventListener('click', markAllNotificationsRead);
   document.getElementById('notification-list').addEventListener('click', markNotificationRead);
@@ -244,6 +251,13 @@ function quranReportTask(assignment) {
     task_date: assignment.report_date,
     period: 'flexible',
     due_at: assignment.effective_due_at,
+    starts_at: assignment.starts_at,
+    max_points: Number(assignment.max_points || 0),
+    available_points: Number(assignment.available_points || 0),
+    blocked_by_overdue: Boolean(assignment.blocked_by_overdue),
+    report_status: assignment.status,
+    completed_at: assignment.completed_at,
+    completion_band: assignment.completion_band,
     estimated_minutes: 0,
     priority: assignment.is_overdue ? 3 : 2,
     status: assignment.status === 'completed' ? 'done' : assignment.is_overdue ? 'overdue' : assignment.status,
@@ -332,7 +346,7 @@ function renderTasks() {
     const overdue = task.status === 'overdue';
     const classroom = task.source === 'classroom';
     const quranReport = task.source === 'quran_report';
-    const statusLabel = done ? 'مكتملة' : overdue ? 'متأخرة' : 'قيد الإنجاز';
+    const statusLabel = done ? 'مكتملة' : task.report_status === 'exempted' ? 'معفى' : overdue ? 'متأخرة' : 'قيد الإنجاز';
     return `
       <article class="student-task ${done ? 'is-done' : ''} ${overdue ? 'is-overdue' : ''}">
         <div class="task-state-icon"><i data-lucide="${done ? 'circle-check-big' : classroom ? 'book-open-check' : task.category === 'murajaa' ? 'library-big' : task.category === 'tathbit' ? 'refresh-cw' : 'book-heart'}"></i></div>
@@ -353,7 +367,7 @@ function renderTasks() {
         </div>
         <div class="task-command">
           ${quranReport
-            ? `<a href="./reports.html?date=${encodeURIComponent(task.task_date)}">فتح التقرير <i data-lucide="arrow-left"></i></a>`
+            ? quranDashboardCommand(task, done)
             : done
               ? '<span class="done-mark"><i data-lucide="check"></i> تم الإنجاز</span>'
             : classroom
@@ -366,6 +380,16 @@ function renderTasks() {
 }
 
 async function handleTaskAction(event) {
+  const quranButton = event.target.closest('[data-submit-quran]');
+  if (quranButton) {
+    if (quranButton.disabled || state.busy) return;
+    const task = state.tasks.find(item => item.source === 'quran_report' && item.submission_id === quranButton.dataset.submitQuran);
+    if (!task) return;
+    state.confirmingQuranReportId = task.submission_id;
+    document.getElementById('dashboard-quran-complete-report').textContent = `${task.title}: ${task.content}`;
+    document.getElementById('dashboard-quran-complete-dialog').showModal();
+    return;
+  }
   const button = event.target.closest('[data-complete]');
   if (!button) return;
   const submissionId = button.dataset.complete;
@@ -391,6 +415,78 @@ async function handleTaskAction(event) {
     button.disabled = false;
     showToast('تعذر تسجيل الإتمام. حاول مرة أخرى.', 'error');
   }
+}
+
+function quranDashboardCommand(task, done) {
+  if (done) return '<span class="done-mark"><i data-lucide="check"></i> تم الإنجاز</span>';
+  if (task.report_status === 'exempted') return '<span class="done-mark"><i data-lucide="shield-check"></i> معفى من التقرير</span>';
+  const notStarted = Date.now() < new Date(task.starts_at).getTime();
+  const disabled = notStarted || task.blocked_by_overdue;
+  const label = task.blocked_by_overdue ? 'أكمل التقرير السابق' : notStarted ? 'لم يبدأ التقرير' : 'تسليم التقرير';
+  return `<button type="button" data-submit-quran="${escapeHtml(task.submission_id)}" ${disabled ? 'disabled' : ''}><i data-lucide="${disabled ? 'lock-keyhole' : 'send'}"></i>${escapeHtml(label)}</button>`;
+}
+
+function closeDashboardQuranDialog() {
+  if (state.busy) return;
+  state.confirmingQuranReportId = null;
+  document.getElementById('dashboard-quran-complete-dialog').close();
+}
+
+async function submitDashboardQuranReport(event) {
+  event.preventDefault();
+  if (state.busy || !state.confirmingQuranReportId) return;
+  const task = state.tasks.find(item => item.source === 'quran_report' && item.submission_id === state.confirmingQuranReportId);
+  if (!task) return closeDashboardQuranDialog();
+  state.busy = true;
+  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  try {
+    let result;
+    if (state.preview) {
+      result = {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        awarded_points: dashboardLiveQuranPoints(task),
+      };
+    } else {
+      const { data, error } = await supabase.rpc('complete_quran_report_assignment', { p_assignment_id: task.submission_id });
+      if (error) throw error;
+      result = data;
+    }
+    task.status = 'done';
+    task.report_status = 'completed';
+    task.completed_at = result.completed_at;
+    task.points = Number(result.awarded_points || 0);
+    state.confirmingQuranReportId = null;
+    document.getElementById('dashboard-quran-complete-dialog').close();
+    renderDashboard();
+    showToast(`تم تسليم التقرير وحصلت على ${task.points.toFixed(2)} نقطة.`, 'success');
+    if (!state.preview) await loadTaskFeed();
+  } catch (error) {
+    console.error('Completing Quran report from dashboard failed:', error);
+    showToast(dashboardQuranError(error), 'error');
+  } finally {
+    state.busy = false;
+    if (submitButton.isConnected) submitButton.disabled = false;
+  }
+}
+
+function dashboardLiveQuranPoints(task) {
+  const start = new Date(task.starts_at).getTime();
+  const due = new Date(task.due_at).getTime();
+  const now = Date.now();
+  if (!Number.isFinite(start) || !Number.isFinite(due) || due <= start || now >= due) return 0;
+  if (now <= start) return Number(task.max_points || 0);
+  return Math.round((Number(task.max_points || 0) * (due - now) / (due - start)) * 100) / 100;
+}
+
+function dashboardQuranError(error) {
+  const message = String(error?.message || '');
+  if (/has not started/i.test(message)) return 'لا يمكن تسليم التقرير قبل بداية وقته.';
+  if (/overdue Quran reports/i.test(message)) return 'أكمل التقرير المتأخر السابق أولاً.';
+  if (/does not belong|Only active students|permission|42501/i.test(message)) return 'لا تملك صلاحية تسليم هذا التقرير.';
+  if (/Only pending Quran reports/i.test(message)) return 'هذا التقرير مسلّم أو معفى مسبقاً.';
+  return 'تعذر تسليم التقرير. حدّث الصفحة وحاول مرة أخرى.';
 }
 
 async function loadJoinedLearningCircles() {
@@ -467,11 +563,11 @@ function buildPreviewTasks() {
   const yesterday = toDateKey(addDays(new Date(), -1));
   const tomorrow = toDateKey(addDays(new Date(), 1));
   return [
-    { source: 'quran', task_id: 'q0', submission_id: 'preview-q0', title: 'مراجعة المحفوظ', content: 'مراجعة الورد السابق', category: 'murajaa', task_date: yesterday, period: 'flexible', due_at: localIso(yesterday, '23:00'), estimated_minutes: 20, priority: 3, status: 'overdue', points: 0, context_name: 'حلقة الإتقان' },
-    { source: 'quran', task_id: 'q1', submission_id: 'preview-q1', title: 'الحفظ الجديد', content: 'سورة الملك من الآية 1 إلى الآية 8', category: 'hifz', task_date: today, period: 'morning', due_at: localIso(today, '11:30'), estimated_minutes: 35, priority: 3, status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
-    { source: 'quran', task_id: 'q2', submission_id: 'preview-q2', title: 'مراجعة المحفوظ', content: 'سورة القلم كاملة مع ضبط مواضع التشابه', category: 'murajaa', task_date: today, period: 'evening', due_at: localIso(today, '19:00'), estimated_minutes: 25, priority: 2, status: 'pending', points: 0, context_name: 'حلقة الإتقان', teacher_notes: 'ركّز على الآيات من 17 إلى 24.' },
+    { source: 'quran_report', task_id: 'q0', submission_id: 'preview-q0', title: 'مراجعة المحفوظ', content: 'مراجعة الورد السابق', category: 'murajaa', task_date: yesterday, period: 'flexible', starts_at: localIso(yesterday, '00:00'), due_at: localIso(yesterday, '23:00'), max_points: 3, estimated_minutes: 20, priority: 3, status: 'overdue', report_status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
+    { source: 'quran_report', task_id: 'q1', submission_id: 'preview-q1', title: 'الحفظ الجديد', content: 'سورة الملك من الآية 1 إلى الآية 8', category: 'hifz', task_date: today, period: 'morning', starts_at: localIso(today, '00:00'), due_at: localIso(today, '23:00'), max_points: 4, estimated_minutes: 35, priority: 3, status: 'pending', report_status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
+    { source: 'quran_report', task_id: 'q2', submission_id: 'preview-q2', title: 'مراجعة المحفوظ', content: 'سورة القلم كاملة مع ضبط مواضع التشابه', category: 'murajaa', task_date: today, period: 'evening', starts_at: localIso(today, '00:00'), due_at: localIso(today, '23:00'), max_points: 3, estimated_minutes: 25, priority: 2, status: 'pending', report_status: 'pending', points: 0, context_name: 'حلقة الإتقان', teacher_notes: 'ركّز على الآيات من 17 إلى 24.' },
     { source: 'classroom', task_id: 'c1', submission_id: 'preview-c1', title: 'تطبيق أحكام النون الساكنة', content: 'استخرج خمسة أمثلة من سورة الملك وحدد الحكم.', category: 'classroom', task_date: today, period: 'flexible', due_at: localIso(today, '20:00'), estimated_minutes: 20, priority: 2, status: 'done', points: 15, classroom_id: 'preview', context_name: 'التجويد التطبيقي' },
-    { source: 'quran', task_id: 'q3', submission_id: 'preview-q3', title: 'تثبيت الحفظ', content: 'تسميع سورة الملك من الآية 1 إلى الآية 15', category: 'hifz', task_date: tomorrow, period: 'morning', due_at: localIso(tomorrow, '11:30'), estimated_minutes: 40, priority: 2, status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
+    { source: 'quran_report', task_id: 'q3', submission_id: 'preview-q3', title: 'تثبيت الحفظ', content: 'تسميع سورة الملك من الآية 1 إلى الآية 15', category: 'hifz', task_date: tomorrow, period: 'morning', starts_at: localIso(tomorrow, '00:00'), due_at: localIso(tomorrow, '23:00'), max_points: 4, estimated_minutes: 40, priority: 2, status: 'pending', report_status: 'pending', points: 0, context_name: 'حلقة الإتقان' },
   ];
 }
 

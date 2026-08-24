@@ -222,6 +222,16 @@ test('student page headers greet students by their full name instead of username
   }
 });
 
+test('student dashboard completes Quran reports directly through the protected operation', () => {
+  const html = fs.readFileSync(path.join(publicRoot, 'student/dashboard.html'), 'utf8');
+  const script = fs.readFileSync(path.join(publicRoot, 'js/pages/student-dashboard.js'), 'utf8');
+  assert.match(html, /id="dashboard-quran-complete-dialog"/);
+  assert.match(html, /id="dashboard-quran-complete-form"/);
+  assert.match(script, /data-submit-quran/);
+  assert.match(script, /rpc\('complete_quran_report_assignment'/);
+  assert.match(script, /task\.status = 'done'/);
+});
+
 test('classroom workflow JavaScript references existing elements', () => {
   const pairs = [
     ['teacher/classroom-detail.html', 'js/pages/teacher-classroom-detail.js'],

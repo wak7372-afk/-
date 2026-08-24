@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zat-khail-v46';
+const CACHE_NAME = 'zat-khail-v47';
 const ASSETS = [
   '/',
   '/favicon.ico',

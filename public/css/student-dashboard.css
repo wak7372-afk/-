@@ -172,9 +172,25 @@
 .task-command { min-width: 116px; }
 .task-command button, .task-command a { display: inline-flex; width: 100%; min-height: 38px; align-items: center; justify-content: center; gap: 6px; padding: 8px 11px; border: 1px solid #0e7258; border-radius: 6px; color: #fff; background: var(--student-green); font-size: 8px; font-weight: 700; }
 .task-command button:hover, .task-command a:hover { background: #07533f; }
+.task-command button:disabled { cursor: not-allowed; opacity: .52; background: #667984; border-color: #667984; }
 .task-command svg { width: 14px; }
 .done-mark { display: inline-flex; align-items: center; gap: 6px; color: #0e7258; font-size: 9px; font-weight: 700; }
 .done-mark svg { width: 15px; }
+.student-complete-dialog { width: min(500px, calc(100% - 24px)); padding: 0; border: 1px solid #c9d5da; border-radius: 8px; color: var(--student-ink); background: #fff; box-shadow: 0 24px 80px rgba(4,19,31,.36); }
+.student-complete-dialog::backdrop { background: rgba(4,19,31,.64); }
+.student-complete-dialog form { display: grid; gap: 13px; padding: 22px; }
+.student-complete-dialog header { display: grid; grid-template-columns: 48px minmax(0,1fr); align-items: center; gap: 12px; }
+.student-complete-icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 50%; color: #087058; background: #e5f4ef; }
+.student-complete-icon svg { width: 22px; }
+.student-complete-dialog small { color: #987116; font-size: 8px; font-weight: 800; }
+.student-complete-dialog h2 { margin: 1px 0 0; font-family: Amiri, serif; font-size: 23px; }
+.student-complete-dialog p { margin: 0; color: #697984; font-size: 9px; line-height: 1.8; }
+.student-complete-dialog #dashboard-quran-complete-report { padding: 10px 12px; border-inline-start: 3px solid var(--student-gold); color: #17394b; background: #f7f9f9; font-weight: 700; }
+.student-complete-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 3px; }
+.student-complete-dialog footer button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 6px; padding: 8px 15px; border: 1px solid #d1dade; border-radius: 5px; color: #586977; background: #fff; font-size: 9px; font-weight: 800; }
+.student-complete-dialog footer .confirm { color: #fff; border-color: var(--student-green); background: var(--student-green); }
+.student-complete-dialog footer button:disabled { opacity: .55; }
+.student-complete-dialog footer svg { width: 15px; }
 .task-empty { padding: 48px 20px; color: #75838b; text-align: center; }
 .task-empty svg { width: 38px; height: 38px; margin: auto; color: #87a3a4; }
 .task-empty h3 { margin: 12px 0 4px; color: #263e4b; font-family: Amiri, serif; font-size: 21px; }
@@ -244,6 +260,7 @@
   .student-task { grid-template-columns: 36px minmax(0,1fr); gap: 11px; padding: 14px 11px; }.task-state-icon { width: 36px; height: 36px; }.task-state-icon svg { width: 18px; }
   .task-command { grid-column: 1 / -1; width: 100%; }.task-command button, .task-command a { width: 100%; }
   .student-side { grid-template-columns: 1fr; }
+  .student-complete-dialog footer { display: grid; grid-template-columns: 1fr; }
 }
 
 @media (max-width: 420px) {
