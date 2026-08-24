@@ -63,7 +63,7 @@
 .student-brand strong { display: block; color: #f3cf6b; font-family: Amiri, serif; font-size: 23px; line-height: 1.05; }
 .student-brand small { display: block; margin-top: 4px; color: #b9cbd5; font-size: 9px; }
 .student-welcome { text-align: center; }
-.student-welcome span { color: #a9c8bb; font-size: 10px; }
+.student-welcome p { margin: 0; color: #c6d9d0; font-size: 10px; }
 .student-welcome h1 { margin: 3px 0 0; font-family: Amiri, serif; font-size: 25px; font-weight: 400; }
 .student-welcome h1 strong { color: #f3cf6b; font-weight: 700; }
 .student-actions { display: flex; justify-self: end; gap: 8px; }
@@ -211,8 +211,12 @@
 .student-mobile-nav a.active { color: #071827; background: #dfb745; }.student-mobile-nav svg { width: 18px; height: 18px; }
 
 @media (max-width: 900px) {
-  .student-topbar-inner { grid-template-columns: 1fr auto; }
-  .student-welcome { display: none; }
+  .student-topbar-inner { min-height: 120px; grid-template-columns: 1fr auto; padding: 8px 0; }
+  .student-brand { grid-column: 1; grid-row: 1; }
+  .student-actions { grid-column: 2; grid-row: 1; }
+  .student-welcome { grid-column: 1 / -1; grid-row: 2; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.08); }
+  .student-welcome p { font-size: 9px; }
+  .student-welcome h1 { margin-top: 1px; font-size: 19px; }
   .student-workspace { grid-template-columns: 1fr; }
   .student-side { grid-template-columns: 1fr 1fr; }
   .student-metrics { grid-template-columns: repeat(2,1fr); }
@@ -221,8 +225,8 @@
 }
 
 @media (max-width: 680px) {
-  .student-topbar { min-height: 70px; }
-  .student-topbar-inner { width: calc(100% - 24px); min-height: 70px; }
+  .student-topbar { min-height: 112px; }
+  .student-topbar-inner { width: calc(100% - 24px); min-height: 112px; }
   .student-brand-mark { width: 38px; height: 38px; flex-basis: 38px; font-size: 24px; }
   .student-brand strong { font-size: 20px; }.student-brand small { display: none; }
   .student-actions { gap: 5px; }.icon-command { width: 34px; height: 34px; }.student-actions a[href="./chat.html"] { display: none; }
